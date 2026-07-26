@@ -46,9 +46,8 @@ Run a read-only plugin lint plus quality review across every local skill:
 ```
 
 By default this enforces `--threshold 90` in the `uinaf` workspace. Override with `TESSL_THRESHOLD=94`, `TESSL_WORKSPACE=<name>`, or pass `--threshold` / `--workspace` explicitly.
-The wrapper pins the Tessl CLI through `TESSL_CLI_VERSION`, defaulting to the
-version in the script. Bump it intentionally rather than relying on moving npm
-latest.
+The wrapper defaults to an exact Tessl CLI version so the same commit uses the
+same evaluator. Set `TESSL_CLI_VERSION=<version>` to test a deliberate upgrade.
 
 In CI, Tessl has two lanes:
 
@@ -63,9 +62,9 @@ set and `TESSL_TOKEN` is absent, the wrapper also falls back to lint mode.
 Useful direct invocations:
 
 ```bash
-npx tessl@0.90.0 review run --workspace uinaf skills/review-gang
-npx tessl@0.90.0 review run --json --workspace uinaf --threshold 90 skills/verify
-npx tessl@0.90.0 plugin lint skills/vite-plus
+npx tessl@0.92.0 review run --workspace uinaf skills/review-gang
+npx tessl@0.92.0 review run --json --workspace uinaf --threshold 90 skills/verify
+npx tessl@0.92.0 plugin lint skills/vite-plus
 ```
 
 Use per-skill `--json` output directly with Tessl rather than `skills/review.sh`, because the batch wrapper emits one review per skill.
@@ -98,7 +97,7 @@ Apply Tessl's optimizer to one skill at a time:
 Direct form:
 
 ```bash
-npx tessl@0.90.0 skill review --optimize --yes --max-iterations 1 skills/review-gang
+npx tessl@0.92.0 skill review --optimize --yes --max-iterations 1 skills/review-gang
 ```
 
 ## Suggested workflow

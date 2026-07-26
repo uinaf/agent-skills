@@ -10,7 +10,7 @@ For a formal single-skill audit or a repo without wrappers, use the same pin as 
 
 ```bash
 skill_dir="skills/<name>"
-tessl_version="${TESSL_CLI_VERSION:-0.90.0}"
+tessl_version="${TESSL_CLI_VERSION:-0.92.0}"
 npx "tessl@$tessl_version" plugin lint "$skill_dir"
 npx "tessl@$tessl_version" review run --workspace uinaf --threshold 0 --json "$skill_dir"
 ```
