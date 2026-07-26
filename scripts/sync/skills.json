@@ -105,6 +105,10 @@
       "source": "uinaf/uidotsh-skills"
     },
     {
+      "name": "uinaf-intake",
+      "source": "uinaf/intake"
+    },
+    {
       "name": "vercel-react-best-practices",
       "source": "vercel-labs/agent-skills"
     },
