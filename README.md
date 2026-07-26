@@ -2,6 +2,10 @@
 
 Reusable agent skills, global behavioral rules, and a small sync script for AI coding agents.
 
+This repository is standalone. It does not bootstrap machines or validate
+workspace repositories. `uinaf/dotfiles` and `uinaf/workspace-kit` are optional
+companion tools with independent installation, releases, and verification.
+
 ## Layout
 
 - `skills/` — local Tessl plugin packages with `SKILL.md`, `.tessl-plugin/plugin.json`, and optional `evals/`.
