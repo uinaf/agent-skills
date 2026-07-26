@@ -81,6 +81,7 @@ Hard defaults:
 - Default workflow permissions to read-only or `{}` and grant scopes per job.
 - Pin high-trust release, publish, upload, signing, and deploy actions to full commit SHAs with same-line version comments when the repo can maintain them.
 - Run `actionlint` for syntax and `zizmor` for GitHub Actions security before inventing bespoke validators.
+- Run repository-history secret detection in a dedicated GitHub Actions workflow.
 - Keep workflow YAML boring: prefer maintained actions and repo-owned commands over large inline shell/JavaScript blocks.
 - Keep untrusted PR caches separate from privileged push, release, deploy, signing, or publish caches.
 

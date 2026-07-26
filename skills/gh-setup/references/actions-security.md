@@ -55,6 +55,22 @@ Prefer scanner-backed gates before bespoke workflow validators:
 
 For repos without GitHub Advanced Security, configure zizmor for annotations and omit `security-events: write`.
 
+## Repository Secret Scanning
+
+Run repository-history secret detection in a dedicated `Secret scanning`
+workflow:
+
+- trigger on pull requests and default-branch pushes
+- add a weekly schedule and manual dispatch for recurring coverage
+- check out full history with persisted credentials disabled
+- run maintained scanners at explicit versions with redacted output
+- keep the repository's default local verification focused on its source,
+  build, documentation, and test contracts
+
+Use the repository's dependency updater for pinned Actions. Keep machine and
+host configuration audits in their owning operational tooling; they are a
+different surface from repository-history scanning.
+
 ## Inline Logic Budget
 
 Workflow YAML is orchestration, not an application runtime.
