@@ -10,15 +10,15 @@ Recommended model defaults:
 
 | Engine | Default model behavior | Source note |
 |--------|---------------|-------------|
-| **codex** (default) | Prefers `gpt-5.6-sol`, then `gpt-5.5` when the first model is unavailable; defaults to `high` reasoning | Local preferred review model list; `gpt-5.5` remains the public documented model |
-| **claude** | Prefers `claude-fable-5`, then `claude-opus-4-8` when the first model is unavailable | Local preferred review model list; Opus 4.8 full identifier follows [Claude Code model configuration](https://code.claude.com/docs/en/model-config) |
+| **codex** (default) | Uses `gpt-5.6-sol` with `high` reasoning | Local preferred review model |
+| **claude** | Uses `claude-opus-5` with `high` effort | Local preferred review model |
 
 CLI flags and environment variables override these defaults.
 
 | Engine | Model flag | Example model IDs | Thinking flag | Accepted levels |
 |--------|------------|-------------------|---------------|-----------------|
-| **codex** (default) | `codex --model X exec ...` | `gpt-5.6-sol`, `gpt-5.5` | `-c model_reasoning_effort=Y` | `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max` |
-| **claude** | `claude --model X` | `claude-fable-5`, `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5` | `--effort Y` | `low`, `medium`, `high`, `xhigh`, `max` |
+| **codex** (default) | `codex --model X exec ...` | `gpt-5.6-sol` | `-c model_reasoning_effort=Y` | `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max` |
+| **claude** | `claude --model X` | `claude-opus-5`, `claude-fable-5`, `claude-sonnet-4-6`, `claude-haiku-4-5` | `--effort Y` | `low`, `medium`, `high`, `xhigh`, `max` |
 
 ## Environment Defaults
 
@@ -30,7 +30,7 @@ CLI flags take precedence over environment variables.
 | `AUTOREVIEW_THINKING` | Default `--thinking` for all engines |
 | `AUTOREVIEW_<ENGINE>_MODEL` | Per-engine model override, for example `AUTOREVIEW_CODEX_MODEL=gpt-5.6-sol` |
 | `AUTOREVIEW_<ENGINE>_THINKING` | Per-engine thinking override |
-| `AUTOREVIEW_<ENGINE>_PREFERRED_MODELS` | Comma-separated preferred list used when no explicit model override is set, for example `AUTOREVIEW_CLAUDE_PREFERRED_MODELS=claude-fable-5,claude-opus-4-8` |
+| `AUTOREVIEW_<ENGINE>_PREFERRED_MODELS` | Comma-separated preferred list used when no explicit model override is set, for example `AUTOREVIEW_CLAUDE_PREFERRED_MODELS=claude-opus-5` |
 | `AUTOREVIEW_CODEX_CONFIG` | Semicolon-separated safe model/response tuning overrides; capability-, command-, and path-bearing keys are refused |
 | `AUTOREVIEW_CODEX_SPEED` | Codex service tier: `fast`, `flex`, or `default` |
 
@@ -51,10 +51,12 @@ Claude `--safe-mode` disables project hooks, skills, plugins, MCP servers, and C
 
 ## Bundle And Process Boundaries
 
-The helper rejects sensitive paths, binary and gitlink changes, unsafe links,
-non-UTF-8 input, secret-like patch content, incomplete evidence, and review
-bundles above the aggregate prompt limit before starting a reviewer. Oversized
-changes must be split into coherent targets so cross-file contracts stay in one
-review pass. Parallel tests run with a temporary home and a small environment
-allowlist, and a source-tree fingerprint invalidates review output when the
-checkout changes during the run.
+Before starting a reviewer, the helper requires TruffleHog and scans temporary
+snapshots of the exact added, modified, and deleted content under review with
+the scanner's `verified,unknown` policy. Sensitive paths are omitted from the
+bundle; binary and gitlink changes, unsafe links, non-UTF-8 input, unsafe
+secret-bearing content, incomplete evidence, and bundles above the aggregate
+prompt limit fail closed. Oversized changes must be split into coherent targets
+so cross-file contracts stay in one review pass. Parallel tests run with a
+temporary home and a small environment allowlist, and a source-tree fingerprint
+invalidates review output when the checkout changes during the run.

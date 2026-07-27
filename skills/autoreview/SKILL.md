@@ -26,7 +26,8 @@ Use when:
 - Keep review-triggered fixes inside the original task scope.
 - If a review-triggered fix changes code, rerun focused proof plus autoreview until the helper exits cleanly; stop there.
 - Honor the requested engine/model, do not invoke nested reviewers, and use review panels only when explicitly requested or risk justifies them.
-- Treat the validated bundle as the reviewer's only repository input. The helper must fail closed on sensitive, incomplete, binary, gitlink, or unsafe linked input rather than widening filesystem access.
+- Treat the validated bundle as the reviewer's only repository input. Before engine invocation, the helper requires TruffleHog and scans temporary snapshots of the exact added, modified, or deleted content under review using its `verified,unknown` policy. It never auto-installs the scanner.
+- Sensitive paths are omitted from the review bundle. Binary, gitlink, unsafe linked, incomplete, or unsafe secret-bearing input still fails closed rather than widening filesystem access.
 - Split oversized changes into coherent review targets when the helper refuses a bundle; independent chunks cannot safely prove cross-file or cross-chunk contracts.
 - If the source tree changes after bundle creation, discard the result and rerun against the updated tree.
 - Do not push just to review. Push only when the user requested push, ship, or PR update.
@@ -155,13 +156,13 @@ Run multiple reviewers against one frozen bundle:
 Set reviewer models and thinking/effort explicitly:
 
 ```bash
-"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.6-sol --thinking codex=high --model claude=claude-fable-5 --thinking claude=max
+"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.6-sol --thinking codex=high --model claude=claude-opus-5 --thinking claude=high
 ```
 
 Inline syntax is also supported for simple model IDs:
 
 ```bash
-"$AUTOREVIEW" --reviewers codex:gpt-5.6-sol:high,claude:claude-fable-5:max
+"$AUTOREVIEW" --reviewers codex:gpt-5.6-sol:high,claude:claude-opus-5:high
 ```
 
 Codex maps thinking to `model_reasoning_effort` and accepts `none`, `minimal`,
@@ -171,7 +172,7 @@ and accepts `low`, `medium`, `high`, `xhigh`, or `max`.
 For models with slashes or extra colons, prefer keyed form:
 
 ```bash
-"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.6-sol --model claude=claude-fable-5
+"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.6-sol --model claude=claude-opus-5
 ```
 
 ## Engine Details
