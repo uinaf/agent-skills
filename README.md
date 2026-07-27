@@ -57,7 +57,7 @@ ShellCheck on `PATH`; CI runs the same command.
 
 ```bash
 ./scripts/skills/review.sh
-./scripts/skills/optimize.sh review-gang
+./scripts/skills/optimize.sh verify
 ```
 
 The Tessl helper scripts pin the `tessl` CLI by default. Override with

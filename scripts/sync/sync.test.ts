@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   readlinkSync,
   rmSync,
   symlinkSync,
@@ -398,6 +400,43 @@ test("rejects an invalid manifest before changing generated or global rules", ()
   assert.equal(readlinkSync(join(home, ".claude", "CLAUDE.md")), finalRulesPath(repoDir));
   assert.equal(readlinkSync(join(home, ".codex", "AGENTS.md")), finalRulesPath(repoDir));
   assert.equal(installedSkillNames(runtime).length, 0);
+});
+
+test("keeps local skills aligned with the uinaf/agents sync manifest", () => {
+  const repoDir = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const manifest: unknown = JSON.parse(
+    readFileSync(join(repoDir, "scripts", "sync", "skills.json"), "utf8"),
+  );
+
+  assert.ok(
+    typeof manifest === "object" &&
+      manifest !== null &&
+      "skills" in manifest &&
+      Array.isArray(manifest.skills),
+  );
+
+  const manifestNames = manifest.skills
+    .flatMap((skill: unknown) => {
+      assert.ok(
+        typeof skill === "object" &&
+          skill !== null &&
+          "name" in skill &&
+          typeof skill.name === "string" &&
+          "source" in skill &&
+          typeof skill.source === "string",
+      );
+      return skill.source === "uinaf/agents" ? [skill.name] : [];
+    })
+    .sort();
+  const localSkillNames = readdirSync(join(repoDir, "skills"), { withFileTypes: true })
+    .filter(
+      (entry) =>
+        entry.isDirectory() && existsSync(join(repoDir, "skills", entry.name, "SKILL.md")),
+    )
+    .map((entry) => entry.name)
+    .sort();
+
+  assert.deepEqual(manifestNames, localSkillNames);
 });
 
 test("the shell compatibility entrypoint runs the typed CLI", () => {

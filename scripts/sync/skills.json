@@ -45,10 +45,6 @@
       "source": "millionco/react-doctor"
     },
     {
-      "name": "review-gang",
-      "source": "uinaf/agents"
-    },
-    {
       "name": "shadcn",
       "source": "shadcn/ui"
     },
