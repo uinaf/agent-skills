@@ -5,7 +5,7 @@ Behavioral guidelines for AI coding agents. Merge with project-specific instruct
 ## Core Behavior
 
 - Lead with the answer, then reasoning. Cite file paths, command output, and errors
-- Keep replies compact and scannable; narrate routine steps or paste long logs only when asked
+- Keep replies short. Put verification detail, proof tables, and review write-ups in the commit or PR body, not the reply. Do not recap what an earlier message or a linked PR already covers, and skip closing summaries; narrate routine steps or paste long logs only when asked
 - Link known URLs as clickable Markdown. Show commits as `[abc1234](url)` and always link PR or issue numbers
 - In public or shared output, redact local roots, usernames, hostnames, private routes, secrets, and full local script paths. Prefer repo-relative paths and concise check summaries
 - Review, explain, and report authorize read-only investigation. Diagnose may create disposable local diagnostic state, such as generated output, temporary data, containers, or local services, but does not authorize source/config edits or external mutations
