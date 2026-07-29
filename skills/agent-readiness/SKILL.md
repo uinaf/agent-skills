@@ -91,6 +91,7 @@ Tighten weak or flaky layers:
 - add real-surface proof alongside mock-only suites; preserve useful unit tests, but do not treat them as integration evidence
 - replace one-off checks with a canonical local gate, then reuse it from hooks and CI
 - add dead-code or unused-symbol enforcement where the stack supports it
+- move framework-specific diagnostics onto mechanical surfaces: the repo's existing linter, then the canonical local gate, then CI. An agent skill or instruction file is not enforcement — activation is contextual and cannot guard every contribution. Route the wiring to the skill that owns that surface rather than prescribing tools here.
 - add logs and health signals agents can query
 - make parallel work safe when agent collisions are real
 

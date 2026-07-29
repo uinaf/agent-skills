@@ -30,6 +30,24 @@ Set workflow permissions to `contents: read` or `{}` by default, then grant per 
 - `pull-requests: write` only when posting PR comments or checks that require it.
 - Monitoring, incident, or notification jobs stay read-only and receive no provider credentials.
 
+### Diagnostic Scanners
+
+Code-quality scanners that annotate pull requests are the common reason to grant
+write scopes on `pull_request`. Keep them narrow:
+
+- Grant only the scopes the enabled output needs: `pull-requests: write` for
+  review comments, `issues: write` for a summary comment, `statuses: write` for a
+  commit status. Disable an output rather than widening the token for it.
+- A log-only or gate-only scan stays read-only.
+- Stay on `pull_request`. A scanner never justifies `pull_request_target`.
+- Fork pull requests get no write token, so annotations silently disappear
+  there. Treat the job's exit status, not its comments, as the gate.
+- Most scanners default to advisory and never fail the build. Confirm the
+  blocking severity is set and the check is required in branch protection;
+  a red but optional check does not block a merge.
+- Scanners that diff against the merge base need full history, not a shallow
+  checkout.
+
 ## Action Pinning
 
 Pin high-trust release, publish, upload, signing, and deploy actions to full commit SHAs with a same-line version comment when the repo can maintain pin refreshes.

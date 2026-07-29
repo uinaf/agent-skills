@@ -17,6 +17,7 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 - scripts prefer `vp dev`, `vp test`, `vp test watch`, `vp test run --coverage`, `vp pack`, `vp build`, `vp preview`, and `vp run <script>` (or `vpr <script>`) over direct package-manager, raw Vitest, or tsdown wiring
 - hooks use `vp config`, `.vite-hooks`, and `vp staged` as the default hook stack
 - single-source config in `vite.config.ts`: no parallel `vitest.config.ts`, `.oxlintrc*`, `.oxfmtrc*`, or `tsdown.config.ts`
+- third-party oxlint plugins stay in that single source too: `lint` accepts the full `OxlintConfig`, so declare them under `lint.jsPlugins` in `vite.config.ts` rather than reintroducing an `.oxlintrc.json` the plugin's own docs may ask for
 - project agent guidance comes from Vite+ itself when possible: `vp migrate --agent <name>` writes the official short `AGENTS.md`/`CLAUDE.md` block, and installed projects may expose the same guidance at `node_modules/vite-plus/AGENTS.md`
 - contributor docs move to the new `vp` commands in the same change
 
@@ -64,12 +65,18 @@ import { defineConfig } from 'vite-plus'
 export default defineConfig({
   lint: {
     options: { typeAware: true, typeCheck: true },
+    // third-party oxlint plugins belong here, not in an .oxlintrc.json
+    jsPlugins: ["oxlint-plugin-example"],
+    rules: { "example/some-rule": "error" },
   },
   staged: {
     "*.{js,ts,tsx,vue,svelte}": "vp check --fix",
   },
 })
 ```
+
+A bare specifier keeps the plugin's own rule prefix; use `{ name, specifier }`
+to alias it when a built-in Rust plugin already claims that prefix.
 
 ```diff
  # package.json scripts
