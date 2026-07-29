@@ -9071,6 +9071,7 @@ def render_review_prompt(
         - The review sandbox is intentionally empty. The change bundle and explicit prompt or datasets are the only reviewed-repository source. Read-only tools cannot access unchanged repository files.
         - You may use read-only tools and web search to inspect external dependency contracts, upstream docs, current public behavior, and security implications.
         - Do not report a missing import, symbol, definition, call site, config entry, or other unchanged context solely because it is absent from the change bundle. Such a finding requires direct proof in the bundle or explicit datasets.
+        - Explicit task context, when provided, is authoritative for intended behavior. Verify that the change implements every stated objective and acceptance criterion and respects explicit non-goals. Report a concrete unmet or contradicted requirement as an actionable defect, but do not invent requirements absent from that context.
         - Shell commands, if available, must be read-only inspection commands. Do not run tests, formatters, package installs, generators, network mutation commands, git mutation commands, or commands that write files.
         - Report only actionable defects introduced or exposed by this change.
         - Prefer high-signal findings over style feedback.

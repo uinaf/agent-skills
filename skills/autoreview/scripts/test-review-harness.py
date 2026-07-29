@@ -152,6 +152,8 @@ def validate_prompt_policy(repo: Path, autoreview: Path) -> None:
     required = (
         "This helper is a closeout gate.",
         "Do not turn a narrow patch into a broad",
+        "Explicit task context, when provided, is authoritative",
+        "implements every stated objective and acceptance criterion",
         "If this is release-branch or release-process work",
         "Non-blocking design,",
     )
