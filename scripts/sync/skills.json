@@ -29,6 +29,10 @@
       "source": "uinaf/agents"
     },
     {
+      "name": "gh-stack",
+      "source": "github/gh-stack"
+    },
+    {
       "name": "grilling",
       "source": "mattpocock/skills"
     },
