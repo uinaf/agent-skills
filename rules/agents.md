@@ -4,8 +4,9 @@ Behavioral guidelines for AI coding agents. Merge with project-specific instruct
 
 ## Core Behavior
 
-- Lead with the answer, then reasoning. Cite file paths, command output, and errors
-- Keep replies short. Put verification detail, proof tables, and review write-ups in the commit or PR body, not the reply. Do not recap what an earlier message or a linked PR already covers, and skip closing summaries; narrate routine steps or paste long logs only when asked
+- Lead with the answer or completed outcome, then give only the reasoning needed to act. When the user must act next, lead with that concrete action. Cite file paths, command output, and errors. During ongoing work, state the current outcome and what remains without repeating the full plan; make completed behavior visible and describe failures as cause, evidence, and remedy
+- Keep replies short and easy to resume after an interruption. Put verification detail, proof tables, and review write-ups in the commit or PR body, not the reply. Skip preambles, routine narration, redundant recaps, closing pleasantries, and long logs unless the user asks for them. Suppress unrelated tangents and surface them separately after the requested work. Explanations, safety confirmations, required evidence, and harness instructions may be longer when the task demands it
+- For multi-step user work, use the fewest bounded numbered steps that remain actionable. Keep lists short; split longer inventories into ranked `now` and `later` groups. When completeness is requested, lead with a shortlist and preserve the remainder compactly. Give concrete time or effort estimates only when they help the user plan and have a defensible basis. If user action remains, end with one concrete next action; do not invent one after completed work
 - Link known URLs as clickable Markdown. Show commits as `[abc1234](url)` and always link PR or issue numbers
 - In public or shared output, redact local roots, usernames, hostnames, private routes, secrets, and full local script paths. Prefer repo-relative paths and concise check summaries
 - Review, explain, and report authorize read-only investigation. Diagnose may create disposable local diagnostic state, such as generated output, temporary data, containers, or local services, but does not authorize source/config edits or external mutations
@@ -84,6 +85,7 @@ Behavioral guidelines for AI coding agents. Merge with project-specific instruct
 - Benchmark hot paths and performance-sensitive changes with before/after numbers
 - Keep docs portable and reproducible: avoid volatile metrics, absolute paths, `file://`, and editor URIs
 - Follow the target repo's language and type conventions. Avoid weakening types or adding unchecked casts, ignores, non-null assertions, or similar escape hatches when an idiomatic validated option exists; do not globally ban established languages or syntax
+- Keep source comments compact and rare, normally one to three short sentences. Document only non-obvious intent, invariants, external constraints, safety concerns, or necessary workarounds. Do not narrate the code, preserve implementation history or agent reasoning, or put design essays inline; move substantial rationale to the owning documentation and leave a stable pointer when maintainers need it. Public API documentation may be longer when its contract requires it
 - Keep linters, type checks, tests, and hooks enabled; fix root causes
 - Handle failures at touched external boundaries; make errors contextful and recoverable where possible, and redact secrets before logging or surfacing them
 - Make schema and state changes forward-compatible with a rollback path; flag irreversible migrations before running them
@@ -98,6 +100,7 @@ Behavioral guidelines for AI coding agents. Merge with project-specific instruct
 - Use the repo PR template. Otherwise cover Summary, Changed, Review aids, Risks, Verification, and Complexity; keep verification concise and repo-relative
 - Use a Conventional Commit-style PR title when the repo has no stronger convention. Title multi-commit PRs for their net change
 - After addressing feedback on an already-pushed branch, prefer follow-up commits over amending and force-pushing
+- Keep each inline review comment to one actionable concern and normally one to three short sentences. Lead with the defect and consequence, cite the evidence, and state the required fix or acceptance condition. Put cross-cutting or architectural discussion in the review summary
 - Every non-trivial PR must include a `Review aids` section with the artifact that best explains the change: a focused Mermaid diagram for flows or architecture, labeled screenshots or an existing preview/artifact link for visible UI, or sanitized example input/output for behavior and contracts. Use before/after views when comparison matters; omit the aid only when none would help, and say why
 - Embed or link aids in the PR description and keep them current with the final diff. If the harness cannot upload media, state the limitation and use an available preview/artifact or a focused diagram plus compact before/after description; never commit binaries solely to satisfy review
 - Review aids supplement verification; they do not replace it. Redact secrets, private context, and local-machine details, and give images useful captions and alt text
