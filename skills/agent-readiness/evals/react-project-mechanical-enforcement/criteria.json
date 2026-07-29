@@ -30,12 +30,12 @@
     {
       "name": "Pull request CI exists",
       "max_score": 10,
-      "description": ".github/workflows/react-doctor.yml or the existing verify workflow runs React Doctor for pull requests using the repository's established action-pinning policy"
+      "description": ".github/workflows/react-doctor.yml exists and runs React Doctor for pull requests using the repository's established action-pinning policy"
     },
     {
       "name": "Full history is available",
       "max_score": 7,
-      "description": "The CI checkout uses fetch-depth: 0 so changed-PR scanning can derive the merge base"
+      "description": ".github/workflows/react-doctor.yml checks out the repository with fetch-depth: 0 so its changed-PR scan can derive the merge base"
     },
     {
       "name": "Initial rollout is advisory",
