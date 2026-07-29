@@ -4779,6 +4779,37 @@ class AutoreviewHardeningTests(unittest.TestCase):
                     "",
                 )
 
+    def test_review_prompt_uses_explicit_task_context_for_conformance(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            repo = init_repo(Path(tempdir))
+            task_context = (
+                "Objective: prevent duplicate payment submission. "
+                "Acceptance criterion: rapid repeated clicks enqueue one payment."
+            )
+
+            prompt = self.helper["build_prompt"](
+                repo,
+                "branch",
+                "origin/main",
+                "diff",
+                task_context,
+                "",
+            )
+
+            self.assertIn(task_context, prompt)
+            self.assertIn(
+                "Explicit task context, when provided, is authoritative",
+                prompt,
+            )
+            self.assertIn(
+                "implements every stated objective and acceptance criterion",
+                prompt,
+            )
+            self.assertIn(
+                "Report a concrete unmet or contradicted requirement",
+                prompt,
+            )
+
     def test_read_text_truncates_without_scanning_tail(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             path = Path(tempdir) / "large.txt"

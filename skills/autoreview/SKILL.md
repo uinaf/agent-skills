@@ -1,6 +1,6 @@
 ---
 name: autoreview
-description: "Run the bundled Codex/Claude autoreview helper as a structured second-model closeout for local changes, pull requests, branch diffs, or commits: choose the target, validate findings, rerun focused tests, and repeat until clean. Use when explicitly asked for autoreview, Codex/Claude review, or a tool-backed final review after implementation. Do not use for builder verification or an independent multi-agent ship decision."
+description: "Run the bundled Codex/Claude autoreview helper as a structured second-model closeout for local changes, pull requests, branch diffs, or commits: read the authoritative request, ticket, and spec; pass their acceptance criteria to the reviewer; validate findings; rerun focused tests; and repeat until clean. Use when explicitly asked for autoreview, Codex/Claude review, or a tool-backed final review after implementation. Do not use for builder verification or an independent multi-agent ship decision."
 ---
 
 # Auto Review
@@ -15,12 +15,14 @@ Use when:
 
 ## Boundaries
 
+- Require the authoritative task context before review: the current request plus any PR/MR description, linked ticket, referenced spec, or explicit non-goals.
 - Require completed builder guardrails and real-surface proof before starting; cite the existing evidence or report the missing prerequisite.
 - Report advisory findings and closeout cleanliness. Do not turn this pass into an independent ship decision or invoke additional reviewer workflows.
 
 ## Contract
 
 - Treat review output as advisory: verify every finding against real code, adjacent files, and dependency docs/types when relevant.
+- Require the reviewer to check implementation completeness against the supplied objective and acceptance criteria, not only code quality.
 - Reject speculative or over-broad findings; fix accepted issues with the smallest change at the right ownership boundary.
 - When a finding exposes a repeated bug class, inspect the current PR scope for sibling instances before fixing.
 - Keep review-triggered fixes inside the original task scope.
@@ -38,15 +40,29 @@ Use [references/troubleshooting.md](references/troubleshooting.md) for heartbeat
 
 Use [references/scope.md](references/scope.md) before accepting a fix that could expand the task, touch release process, or start a third review-triggered patch cycle.
 
+## Task Context Precondition
+
+Before invoking the helper:
+
+1. Read the current user request and the PR/MR title and description when one exists.
+2. Follow and read every referenced issue, ticket, spec, decision, or acceptance-criteria source. Prefer live source content over summaries copied into the branch.
+3. Distill a short task contract: objective, acceptance criteria, explicit non-goals, and source identifiers.
+4. Stop and report the blocker when a named source cannot be accessed or authoritative sources conflict. Do not silently infer the missing contract.
+5. Pass the task contract to every reviewer with `--prompt`, or include existing repo-relative source files with `--prompt-file` or `--dataset`. Do not create or commit a context file solely for review.
+
+If no external ticket or spec exists, use the current user request as the task contract and say that it is the only authoritative source. Never invent missing requirements.
+
 ## Core Workflow
 
-1. Set `AUTOREVIEW` and `AUTOREVIEW_HARNESS` once for the active skill location.
-2. Pick the real target: dirty local work, branch/PR base, or a single commit.
-3. Run the helper with Codex by default, or Claude when requested.
-4. Verify each finding against the code and reject weak findings explicitly.
-5. Fix accepted findings at the right ownership boundary.
-6. Rerun focused tests plus autoreview when fixes change code.
-7. Stop after the helper exits 0 with no accepted/actionable findings and report that exact clean run.
+1. Read and distill the authoritative task context.
+2. Confirm builder guardrails and real-surface proof exist.
+3. Set `AUTOREVIEW` and `AUTOREVIEW_HARNESS` once for the active skill location.
+4. Pick the real target: dirty local work, branch/PR base, or a single commit.
+5. Run the helper with the task contract and Codex by default, or Claude when requested.
+6. Verify each finding against the code and task contract; reject weak findings explicitly.
+7. Fix accepted findings at the right ownership boundary.
+8. Rerun focused tests plus autoreview with the same task contract when fixes change code.
+9. Stop after the helper exits 0 with no accepted/actionable findings and report that exact clean run.
 
 ## Skill Path (set once)
 
@@ -96,7 +112,14 @@ Branch/PR work:
 "$AUTOREVIEW" --mode branch --base origin/main
 ```
 
-Optional review context is first-class. Prompt files and datasets must be repo-relative so review bundles cannot pull arbitrary host files:
+Task context is required. Pass a concise contract gathered from external sources inline:
+
+```bash
+task_context='Objective: prevent duplicate payment submission. Acceptance criteria: rapid repeated clicks enqueue one payment. Non-goals: no payment architecture rewrite. Sources: current request; PR description; BILL-123.'
+"$AUTOREVIEW" --mode branch --base origin/main --prompt "$task_context"
+```
+
+Existing prompt files and datasets must be repo-relative so review bundles cannot pull arbitrary host files:
 
 ```bash
 "$AUTOREVIEW" --mode branch --base origin/main --prompt-file review-notes.md --dataset evidence.json
@@ -201,6 +224,7 @@ The smoke harness has thin shell wrappers over a shared Python implementation:
 
 Include:
 
+- task-context sources read and the acceptance criteria supplied to the reviewer
 - review command used
 - tests/proof run
 - findings accepted/rejected, briefly why
