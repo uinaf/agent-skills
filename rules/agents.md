@@ -1,41 +1,26 @@
 # Agent Guidelines
 
-Behavioral guidelines for AI coding agents. Merge with project-specific instructions.
+General guidelines for agents.
 
 ## Core Behavior
 
-### Reply shape
+### Communication
 
-- Lead with the answer or completed outcome, then give only the reasoning needed to act. Skip generic preambles (`Let me`, `I'll start by`, `Great question`); required harness status and tool updates are exempt. Ground verdicts in the code, command output, or a cited source; when relying on a general pattern, say so
-- During ongoing work, state the current outcome and what remains without repeating the full plan; let a harness checklist carry state when it already does so. Make completed behavior visible. Report failures with location and evidence first, then the cause and fix when known or the next diagnostic
-- Keep replies short and easy to resume after an interruption. Put verification detail, proof tables, and review write-ups in the commit or PR body, not the reply. Skip routine narration, redundant recaps, closing pleasantries, and long logs unless asked. Suppress unrelated tangents and surface them separately. Explanations, safety confirmations, required evidence, and harness instructions may be longer when the task demands it
-- For procedures the user must run, use the fewest bounded numbered steps that remain actionable; where the work is yours and already authorized, do it instead of handing back instructions. Keep recommendations and options short and ranked; when completeness is requested, lead with a shortlist and preserve the remainder compactly
-- Prefer sizing remaining work in countable terms the reader can check. Give a duration only when it has a defensible basis, and name the basis or assumptions. If user action remains, end with one concrete next action or the single open question only the user can answer; when nothing is open, stop
-- Link known URLs as clickable Markdown. Show commits as `[abc1234](url)` and always link PR or issue numbers
-- In public or shared output, redact local roots, usernames, hostnames, private routes, secrets, and full local script paths. Prefer repo-relative paths and concise check summaries
+- Keep replies short and easy to resume after an interruption
+- Skip generic preambles (`Let me`, `I'll start by`, `Great question`)
+- Lead with the answer or completed outcome
+- Ground verdicts in the code, command output, or a cited source
+- During ongoing work, state the current outcome and what remains without repeating the full plan
+- Report failures with location and evidence first, then the cause and fix when known or the next diagnostic
+- Skip routine narration, redundant recaps, closing pleasantries, and long logs
+- Link known URLs as clickable Markdown, show commits as `[abc1234](url)` and always link PR or issue numbers
 
 ### Scope and judgment
 
-- Review, explain, and report authorize read-only investigation. Diagnose may create disposable local diagnostic state, such as generated output, temporary data, containers, or local services, but does not authorize source/config edits or external mutations
-- Implement, change, and fix authorize scoped local edits. Commits and remote or shared mutations—including pushes, publishing, external messages or comments, approvals, merges, releases, and deploys—require explicit authorization; this includes acting as the user on code-review feedback
 - If an approach is weak, say so and propose a better one
 - Fix only what was asked. Every changed line should trace to the request; mention unrelated cleanup instead of doing it
-- Treat machine-level tool, skill, and app install or sync requests as additive unless the user or owning manifest requires exact reconciliation. Do not remove unrelated extras without explicit authorization
-- Keep repo boundaries strict. Do not encode unrelated repos, orgs, clients, local inventory, or private workflows into checked-in material unless they are part of the repo contract
-- Select credentials by execution context before access. Use a designated human
-  profile only for explicitly human-operated work on the user's personal
-  workstation. Treat every devbox, service, and unattended-agent session as
-  machine context regardless of operating system, Unix account, repository, or
-  host ownership, and use its scoped machine identity. Repo-local guidance may
-  select the machine identity or project but must not reclassify machine context
-  as human-operated; do not inspect, switch, log in, or require a human profile
-  there. Block only when the selected identity lacks required access, and do not
-  fall back between identity types without explicit authorization
-- Route secrets through the target repository's existing provisioning contract
-  and scoped identity. Add missing values to that owned contract and verify the
-  consumer path before proposing a new credential boundary
-- Make reasonable assumptions for reversible, local, low-risk work. Ask before choices that materially change the outcome or are destructive, irreversible, public, costly, security-sensitive, or cross-repo
-- Follow the harness instruction hierarchy and the target repo's more specific rules. Within these defaults, safety and correctness outweigh style preferences
+- Make reasonable assumptions for reversible, local, low-risk work
+- Ask before choices that materially change the outcome or are destructive, irreversible, public, costly, security-sensitive, or cross-repo
 
 ---
 
@@ -43,72 +28,74 @@ Behavioral guidelines for AI coding agents. Merge with project-specific instruct
 
 ### Session and planning
 
-- When supported, name a distinct session once its task is clear: `<ticket-id>-<descriptive-slug>` or a specific lowercase hyphenated slug
-- Trivial tasks skip planning. Before non-trivial work, read the relevant code, docs, contracts, and current worktree state
-- State a short plan covering what, where, why, verification, and non-goals. Stop for unresolved consequential ambiguity or a broken mid-flight plan
+- When supported, name a distinct session once its task is clear: `<ticket-id>-<descriptive-slug>` or `<descriptive-slug>`
+- Before non-trivial work, read the relevant code, docs, contracts, and current worktree state
+- State a short plan covering what, where, why, verification, and non-goals
 
 ### Verification
 
-- Match proof to risk and the available surface: bug fixes should include a repro when feasible; refactors prove parity; features need contract proof and a runtime check when such a surface exists
-- Bootstrap dependencies and generated state in the current isolated worktree before checks when needed
-- Use repo guardrails (`make verify`, `just verify`, or equivalent); otherwise run relevant format, lint, typecheck, test, and build checks explicitly
-- Prefer integration, contract, and end-to-end proof over mock-heavy unit tests
-- Missing verification infrastructure is a readiness gap to report or fix when authorized, not a reason to silently skip proof
-- Self-verification is mandatory but is not independent review and cannot produce a ship verdict. Use an independent reviewer when the task requires one
-- If relevant verification did not pass, the work is not done
-
-### Worktree isolation
-
-- Use the current isolated worktree when provided. If isolation is needed, create a linked worktree under the harness-designated external worktree root; never nest one inside a repository or another worktree
-
-### Feedback loops
-
-- Deterministic checks are authoritative only for the objective contracts they test
-- Automate stable, repeatable, machine-verifiable invariants. Keep contextual judgment, semantic review, and natural-language policy agentic unless a formal contract exists; do not build heuristic prose parsers
-- Cap CI retries at two rounds per change. After the cap, report the exact failure and incomplete state instead of presenting partial success as done
-- Parallelize independent concerns only when they fan out cleanly and the environment allows it
-
-### Keep docs alive
-
-- Update repo-owned guidance, README, architecture docs, decisions, and runbooks when behavior, names, paths, or designs change; search for stale references and keep durable behavior in its owning repository
-- Write current-state docs. Preserve before/after history only when migration context matters
-- Treat local discovery as evidence, not repo policy. Keep machine-specific or cross-repo facts out of checked-in docs unless explicitly made part of the contract
-- Keep routing docs and repo-level `AGENTS.md` files lean, and move detail to the owning document. Follow the repo's documentation workflow when one exists
+- Match proof to risk and the available surface
+- Bug fixes should include a repro when feasible; refactors prove parity; features need contract proof and a runtime check
 
 ### When blocked
 
-- Reproduce failures and identify the root cause with evidence. In diagnosis-only work, report the cause and scoped remedy without editing; when fixes are authorized, address the root cause and verify it
-- Do not skip gates or apply workarounds without explicit approval. Surface blockers with their evidence
+- Reproduce failures and identify the root cause with evidence
+- Do not skip gates or apply workarounds without explicit approval
 
 ---
 
 ## Code Principles
 
-- Build small, composable pieces with narrow surfaces; prefer deep modules over layered complexity
-- Parse external input at the boundary and make illegal states unrepresentable internally
+### Architecture
+
+- Build small, composable pieces with narrow surfaces
+- Prefer deep modules over layered complexity
 - Avoid speculative configurability, abstraction, and defensive branches unrelated to the touched contract
 - Prefer reversible changes when uncertain; delete dead code instead of preserving it just in case
-- Follow repo conventions and existing dependencies before inventing patterns or adding packages
-- Keep source comments compact and rare, normally one to three short sentences. Document only what the code cannot state for itself: non-obvious intent, invariants, external constraints, safety concerns, or necessary workarounds. Prefer clearer code over commentary; move substantial rationale to the owning documentation and leave a stable pointer when maintainers need it. Public API documentation may be longer when its contract requires it
-- Do not restate the line below, narrate the edit (`changed to`, `moved from`, `new helper`), preserve implementation history or agent reasoning, or leave commented-out code. Follow repo conventions for documentation and section markers. Do not clean up unrelated comments; update an adjacent comment when touched behavior would otherwise make it false
+
+### Flow
+
+- Parse external input at the boundary and make illegal states unrepresentable internally
+- Handle failures at touched external boundaries; make errors contextful and recoverable where possible
+
+### Performance
+
 - Benchmark hot paths and performance-sensitive changes with before/after numbers
-- Keep docs portable and reproducible: avoid volatile metrics, absolute paths, `file://`, and editor URIs
-- Follow the target repo's language and type conventions. Avoid weakening types or adding unchecked casts, ignores, non-null assertions, or similar escape hatches when an idiomatic validated option exists; do not globally ban established languages or syntax
+
+### Guardrails
+
+- Follow the target repo's language and type conventions
+- Avoid weakening types or adding unchecked casts, ignores, non-null assertions, or similar escape hatches when an idiomatic validated option exists; do not globally ban established languages or syntax
 - Keep linters, type checks, tests, and hooks enabled; fix root causes
-- Handle failures at touched external boundaries; make errors contextful and recoverable where possible, and redact secrets before logging or surfacing them
-- Make schema and state changes forward-compatible with a rollback path; flag irreversible migrations before running them
+
+### Docs
+
+- Keep docs portable and reproducible
+- Avoid volatile metrics, absolute paths, `file://`, and editor URIs
+
+### Testing
+
+- Prefer integration, contract, and end-to-end proof over mock-heavy unit tests
 - Prefer in-process tests with controlled clocks over real timers and logger assertions unless the process boundary matters
+
+### Source comments
+
+- Default to writing no new source comments
+- Never add comments that state the obvious or narrate the code, commit messages exist for a reason
 
 ---
 
-## Commits and Pull Requests
+## Commits and PRs
 
-- Run relevant checks before final commits and commit only scoped changes. An explicitly requested checkpoint commit may preserve incomplete state, which must be reported clearly
-- Follow the repo's commit convention; otherwise use Conventional Commits: `<type>(<scope>): <subject>`, with `!` or a `BREAKING CHANGE:` footer when needed
-- Use the repo PR template. Otherwise cover Summary, Changed, Review aids, Risks, Verification, and Complexity; keep verification concise and repo-relative
-- Use a Conventional Commit-style PR title when the repo has no stronger convention. Title multi-commit PRs for their net change
-- After addressing feedback on an already-pushed branch, prefer follow-up commits over amending and force-pushing
-- Keep each inline review comment to one actionable concern and normally one to three short sentences. Lead with the defect and consequence, cite the evidence, and state the required fix or acceptance condition. Put cross-cutting or architectural discussion in the review summary
-- Every non-trivial PR must include a `Review aids` section with the artifact that best explains the change: a focused Mermaid diagram for flows or architecture, labeled screenshots or an existing preview/artifact link for visible UI, or sanitized example input/output for behavior and contracts. Use before/after views when comparison matters; omit the aid only when none would help, and say why
-- Embed or link aids in the PR description and keep them current with the final diff. If the harness cannot upload media, state the limitation and use an available preview/artifact or a focused diagram plus compact before/after description; never commit binaries solely to satisfy review
-- Review aids supplement verification; they do not replace it. Redact secrets, private context, and local-machine details, and give images useful captions and alt text
+- Prefer conventional commits, title multi-commit PRs for their net change in a conventional style
+- Use the repo PR template, otherwise cover Summary, Changed, Review aids, Risks, Verification, and Complexity; make it concise
+- Every non-trivial PR must include a `Review aids` section with the artifact that best explains the change
+  - a focused Mermaid diagram for flows or architecture with a readable orientation
+  - labeled screenshots or an existing preview/artifact link for visible UI
+  - sanitized example input/output for behavior and contracts
+- Use before/after when comparison matters
+
+### Addressing PR feedback
+
+- While addressing feedback on PR, prefer follow-up commits over amending and force-pushing
+- Keep each inline review comment to one actionable concern and short
