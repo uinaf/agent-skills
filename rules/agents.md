@@ -36,6 +36,7 @@ General guidelines for agents.
 
 - Match proof to risk and the available surface
 - Bug fixes should include a repro when feasible; refactors prove parity; features need contract proof and a runtime check
+- Relevant verification must pass before work is called complete
 
 ### When blocked
 
@@ -82,6 +83,7 @@ General guidelines for agents.
 
 - Default to writing no new source comments
 - Never add comments that state the obvious or narrate the code, commit messages exist for a reason
+- Add comments only for essential invariants or external constraints the code cannot express
 
 ---
 
