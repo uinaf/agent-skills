@@ -40,7 +40,7 @@ Create a Tessl API key for the `uinaf` workspace, then add it to the `release` E
 You can create the key either from the Tessl web UI or with the CLI:
 
 ```bash
-npx tessl api-key create --workspace uinaf --name github-actions-publish --role publisher
+pnpm dlx tessl api-key create --workspace uinaf --name github-actions-publish --role publisher
 ```
 
 The workflows still reference the token as `${{ secrets.TESSL_TOKEN }}`; GitHub resolves that value from the `release` Environment only for jobs that declare `environment: release`. Pull-request jobs do not declare the environment and force lint mode instead.
@@ -48,6 +48,6 @@ The workflows still reference the token as `${{ secrets.TESSL_TOKEN }}`; GitHub 
 ## Local checks
 
 ```bash
-npx tessl@0.92.0 plugin lint skills/verify
-npx tessl@0.92.0 plugin publish --dry-run --workspace uinaf --bump patch skills/verify
+pnpm dlx tessl@0.92.0 plugin lint skills/verify
+pnpm dlx tessl@0.92.0 plugin publish --dry-run --workspace uinaf --bump patch skills/verify
 ```

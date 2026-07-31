@@ -32,7 +32,7 @@ for arg in "$@"; do
 done
 
 if [[ "$has_json" == true ]]; then
-  echo "batch review does not support --json; run npx tessl review run --json skills/<name> per skill"
+  echo "batch review does not support --json; run pnpm dlx tessl review run --json skills/<name> per skill"
   exit 1
 fi
 
@@ -55,13 +55,13 @@ fi
 for skill_dir in skills/*; do
   if [[ -d "$skill_dir" ]]; then
     echo "== tessl plugin lint: ${skill_dir#skills/} =="
-    npx "tessl@$tessl_version" plugin lint "$skill_dir"
+    pnpm dlx "tessl@$tessl_version" plugin lint "$skill_dir"
 
     if [[ "$use_lint" == true ]]; then
       continue
     else
       echo "== tessl review: ${skill_dir#skills/} =="
-      npx "tessl@$tessl_version" review run "${args[@]}" "$skill_dir"
+      pnpm dlx "tessl@$tessl_version" review run "${args[@]}" "$skill_dir"
     fi
   fi
 done

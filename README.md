@@ -45,8 +45,8 @@ installer.
 ## Verify
 
 ```bash
-npm ci
-npm run verify
+pnpm install --frozen-lockfile
+pnpm run verify
 ```
 
 The local gate typechecks and tests the sync CLI, runs the autoreview tests, and
