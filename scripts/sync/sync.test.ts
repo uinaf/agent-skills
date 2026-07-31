@@ -319,7 +319,10 @@ test("completes a successful sync and preserves rules links", () => {
 
   assert.equal(main([], runtime), 0);
   assert.match(runtime.stdout.value, /Done\./);
-  assert.equal(runtime.calls.find((call) => call.command === "pnpm")?.args[1], "skills@1.5.7");
+  assert.equal(
+    runtime.calls.find((call) => call.command === "pnpm" && call.args[0] === "dlx")?.args[1],
+    "skills@1.5.7",
+  );
   assert.equal(
     readFileSync(join(repoDir, "rules", "agents.final.md"), "utf8"),
     "# Agent Instructions\n\n" +
