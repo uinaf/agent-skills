@@ -55,8 +55,8 @@ for plugin_dir in "${plugin_dirs[@]}"; do
   fi
 
   echo "== tessl plugin lint: ${plugin_dir#skills/} =="
-  npx "tessl@$tessl_version" plugin lint "$plugin_dir"
+  pnpm dlx "tessl@$tessl_version" plugin lint "$plugin_dir"
 
   echo "== tessl plugin publish: ${plugin_dir#skills/} =="
-  npx "tessl@$tessl_version" plugin publish "${publish_args[@]}" "$plugin_dir"
+  pnpm dlx "tessl@$tessl_version" plugin publish "${publish_args[@]}" "$plugin_dir"
 done

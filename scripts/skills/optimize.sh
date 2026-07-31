@@ -20,4 +20,4 @@ if [[ ! -d "$skill_dir" ]]; then
   exit 1
 fi
 
-npx "tessl@$tessl_version" skill review --optimize --yes --max-iterations 1 "$skill_dir" "$@"
+pnpm dlx "tessl@$tessl_version" skill review --optimize --yes --max-iterations 1 "$skill_dir" "$@"

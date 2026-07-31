@@ -15,8 +15,8 @@ Run the canonical local gate without pulling repositories or changing globally
 installed skills:
 
 ```bash
-npm ci
-npm run verify
+pnpm install --frozen-lockfile
+pnpm run verify
 ```
 
 The gate expects ShellCheck on `PATH`; actionlint and the TypeScript toolchain
@@ -62,9 +62,9 @@ set and `TESSL_TOKEN` is absent, the wrapper also falls back to lint mode.
 Useful direct invocations:
 
 ```bash
-npx tessl@0.92.0 review run --workspace uinaf skills/autoreview
-npx tessl@0.92.0 review run --json --workspace uinaf --threshold 90 skills/verify
-npx tessl@0.92.0 plugin lint skills/vite-plus
+pnpm dlx tessl@0.92.0 review run --workspace uinaf skills/autoreview
+pnpm dlx tessl@0.92.0 review run --json --workspace uinaf --threshold 90 skills/verify
+pnpm dlx tessl@0.92.0 plugin lint skills/vite-plus
 ```
 
 Use per-skill `--json` output directly with Tessl rather than `skills/review.sh`, because the batch wrapper emits one review per skill.
@@ -97,7 +97,7 @@ Apply Tessl's optimizer to one skill at a time:
 Direct form:
 
 ```bash
-npx tessl@0.92.0 skill review --optimize --yes --max-iterations 1 skills/verify
+pnpm dlx tessl@0.92.0 skill review --optimize --yes --max-iterations 1 skills/verify
 ```
 
 ## Suggested workflow

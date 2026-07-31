@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=24.18.0"
   },
-  "packageManager": "npm@11.9.0",
+  "packageManager": "pnpm@12.0.0-beta.2",
   "scripts": {
     "lint:actions": "github-actionlint .github/workflows/*.yml",
     "lint:shell": "shellcheck scripts/skills/*.sh scripts/sync/*.sh",
@@ -13,7 +13,7 @@
     "test:autoreview": "python3 -m unittest discover -s skills/autoreview/tests -p 'test_*.py'",
     "test:sync": "node --test scripts/sync/sync.test.ts",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && npm run lint:shell && npm run lint:actions && npm run test:sync && npm run test:autoreview && npm run lint:skills"
+    "verify": "pnpm run typecheck && pnpm run lint:shell && pnpm run lint:actions && pnpm run test:sync && pnpm run test:autoreview && pnpm run lint:skills"
   },
   "devDependencies": {
     "@types/node": "24.13.3",

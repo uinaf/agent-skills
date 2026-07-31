@@ -112,7 +112,7 @@ class FixtureRuntime implements Runtime {
     if (command === "git" && args.includes("pull")) {
       return { status: 0, stdout: "", stderr: "" };
     }
-    if (command === "npx") {
+    if (command === "pnpm" && args[0] === "dlx") {
       const skillFlag = args.indexOf("-s");
       const skill = skillFlag >= 0 ? args[skillFlag + 1] : undefined;
       if (skill === undefined) {
@@ -174,7 +174,7 @@ function createFixture(): { repoDir: string; home: string } {
 
 function installedSkillNames(runtime: FixtureRuntime): string[] {
   return runtime.calls
-    .filter((call) => call.command === "npx")
+    .filter((call) => call.command === "pnpm" && call.args[0] === "dlx")
     .map((call) => {
       const skillFlag = call.args.indexOf("-s");
       const skill = skillFlag >= 0 ? call.args[skillFlag + 1] : undefined;
@@ -319,7 +319,10 @@ test("completes a successful sync and preserves rules links", () => {
 
   assert.equal(main([], runtime), 0);
   assert.match(runtime.stdout.value, /Done\./);
-  assert.equal(runtime.calls.find((call) => call.command === "npx")?.args[0], "skills@1.5.7");
+  assert.equal(
+    runtime.calls.find((call) => call.command === "pnpm" && call.args[0] === "dlx")?.args[1],
+    "skills@1.5.7",
+  );
   assert.equal(
     readFileSync(join(repoDir, "rules", "agents.final.md"), "utf8"),
     "# Agent Instructions\n\n" +

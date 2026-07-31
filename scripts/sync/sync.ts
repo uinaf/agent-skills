@@ -410,8 +410,9 @@ function installSkills(
   for (const skill of skills) {
     writeLine(runtime.stdout, `Installing skill: ${skill.name} from ${skill.source}`);
     const result = runtime.run(
-      "npx",
+      "pnpm",
       [
+        "dlx",
         `skills@${cliVersion}`,
         "add",
         skill.source,
