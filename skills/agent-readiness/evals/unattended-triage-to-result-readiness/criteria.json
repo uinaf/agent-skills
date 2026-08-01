@@ -20,7 +20,7 @@
     {
       "name": "Bootstrap validates the runner contract safely",
       "max_score": 8,
-      "description": "scripts/agent-bootstrap.sh uses strict mode, validates required task, attempt, Infisical, and runner inputs without echoing values, checks authentication noninteractively, installs from the owned lockfile contract, and emits actionable repository-versus-runner failure ownership"
+      "description": "scripts/agent-bootstrap.sh uses strict mode, validates required task, attempt, Infisical, and runner inputs without echoing values, checks authentication noninteractively, installs reproducibly through the repository-owned package-manager and dependency contract, and emits actionable repository-versus-runner failure ownership"
     },
     {
       "name": "Triage and result contract is explicit",
