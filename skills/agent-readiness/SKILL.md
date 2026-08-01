@@ -50,7 +50,9 @@ Do not collapse a missing runner prerequisite into repository setup debt.
 For unattended work, inspect the entire path even if the requested change
 touches only one part:
 
-**Triage → Dispatch → Provision → Execute → Prove → Submit → Reconcile → Recover**
+**Triage → Dispatch → Provision → Execute → Prove → Submit → Reconcile → Complete**
+
+**Any nonterminal stage → Recover → Retry, Escalate, or Fail**
 
 - **Triage** produces an owned, unambiguous task with acceptance criteria and risk
 - **Dispatch** selects a compatible runner and records task and attempt identity
@@ -59,7 +61,7 @@ touches only one part:
 - **Prove** grades final state and produces inspectable, attributable artifacts
 - **Submit** sends the required result: a change handoff, PR, QA report, artifact bundle, or provider update
 - **Reconcile** follows CI, review, acceptance, or provider state to the declared terminal condition
-- **Recover** detects stalls and failures, preserves evidence, retries safely, or escalates
+- **Recover** handles stalls or failures from any nonterminal stage, preserves evidence, retries safely, or escalates
 
 Treat no-diff tasks as first-class work. Their contract names the result type,
 evidence, target, terminal condition, and side effects; never invent a PR for QA.

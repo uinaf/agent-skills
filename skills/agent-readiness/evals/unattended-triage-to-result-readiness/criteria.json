@@ -45,7 +45,7 @@
     {
       "name": "Attempt state and cleanup are durable",
       "max_score": 8,
-      "description": "The contract records task and attempt state, commands and artifact locations needed for a fresh process to resume, and uses idempotent teardown on success, failure, cancellation, timeout, and retry"
+      "description": "scripts/agent-teardown.sh exists and is idempotent on success, failure, cancellation, timeout, and retry; the contract records task and attempt state, commands, and artifact locations needed for a fresh process to resume"
     },
     {
       "name": "Retries, stalls, and escalation are bounded",
