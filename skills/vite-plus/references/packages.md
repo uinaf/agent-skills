@@ -2,6 +2,8 @@
 
 Use this reference for standalone package repos adopting Vite+.
 
+Command examples below use the concise `vp` spelling appropriate inside package scripts. From an interactive shell, run the same built-ins as `pnpm exec vp ...` after installing the repository dependencies.
+
 ## Defaults
 
 - Prefer `vp pack` for libraries and standalone executables (`pack.exe = true` for native binaries).

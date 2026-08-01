@@ -4,18 +4,17 @@ Use this reference before changing command invocations, package-manager usage, o
 
 ## Defaults
 
-- Treat `vp` as the tool owner for runtime, package-manager, and frontend-tooling operations.
-- Use `vp install`, dependency subcommands, or `vp pm` when Vite+ is the tool owner.
-- Use the built-in `vp test`, `vp lint`, `vp fmt`, and `vp check` commands.
+- Do not require a machine-global `vp`. Install dependencies with the package manager pinned by `package.json#packageManager`, then invoke the repository-local CLI as `pnpm exec vp ...` interactively.
+- Keep bare `vp` inside `package.json` scripts: the package manager adds `node_modules/.bin` to the script environment. Bare `vp` is also correct in CI after `voidzero-dev/setup-vp`.
+- Use the built-in `pnpm exec vp test`, `pnpm exec vp lint`, `pnpm exec vp fmt`, and `pnpm exec vp check` commands interactively.
 - Built-in commands cannot be overridden by same-named scripts. `vp build` always runs the built-in Vite build; use `vp run build` (or `vpr build`) to execute a `package.json` `build` script.
 - `vpr` is a standalone shorthand for `vp run`. Use whichever spelling the repo already prefers in a given scripts block.
-- Distinguish global upgrades from repo-local upgrades: the global CLI moves through its installer or owning manager, while `vp migrate` updates the project-local Vite+ stack.
 
 ## Runtime and Package Manager
 
-- `vp env` owns Node.js version management. Use `vp env current` for verification, `vp env use` when a repo needs to set or switch Node versions, and `vp env doctor` when managed Node/npm/package-manager behavior looks inconsistent.
-- `vp install` owns install/bootstrap. It detects the package manager from the repo; add Corepack or direct package-manager setup only for a proven repo exception.
-- `vp rebuild` rebuilds native modules after Node.js changes. It is shorthand for `vp pm rebuild`.
+- Let the repo's runtime manager own Node and let Corepack honor `package.json#packageManager` for pnpm. Verify with `node --version`, `corepack --version`, and `pnpm --version`.
+- Bootstrap with `pnpm install --frozen-lockfile`; use `pnpm install --no-frozen-lockfile` only when the task intentionally changes manifests or the lockfile.
+- The standalone launcher's `vp env`, `vp install`, and self-upgrade surface are outside this workflow. Do not add a global launcher just to use them.
 
 ## Built-ins vs Scripts
 
@@ -44,13 +43,12 @@ Use this reference before changing command invocations, package-manager usage, o
 
 ## Upgrades
 
-- Identify the global CLI owner before upgrading it. Official installer builds expose `vp upgrade`; package-manager or tool-manager installs may omit self-upgrade and must move through their owner instead.
-- Do not use `vp update` as a self-upgrade fallback. It updates project or Vite+-managed global packages, not the `vp` CLI binary.
-- Use `vp migrate` from the project root to move the local `vite-plus` package forward in a repo. On projects already using Vite+, this defaults to a version-only upgrade and skips first-time setup unless `--full` is passed.
+- Do not install or upgrade a global CLI. Use `pnpm exec vp migrate` from the project root to move the local `vite-plus` package forward. On projects already using Vite+, this defaults to a version-only upgrade and skips first-time setup unless `--full` is passed.
+- If the repository does not yet contain `vite-plus`, use `pnpm dlx vite-plus migrate` for the initial migration, then use the installed CLI for every subsequent command.
 - Keep the package-manager `vite` alias mapped to the matching `npm:@voidzero-dev/vite-plus-core@<version>`. `vp migrate` should re-pin it; verify the manifest, catalog or override, and lockfile importer before calling the upgrade done.
 - For Vite+ 0.2.x and newer, remove the old `@voidzero-dev/vite-plus-test` alias/wrapper instead of updating it. `vp test` uses upstream Vitest through `vite-plus`; direct `vitest` and `@vitest/*` packages are only for repos that use upstream Vitest APIs, coverage/UI packages, or browser providers directly.
-- Use `vp outdated` to confirm whether any Vite+ packages remain behind the intended release.
+- Use `pnpm exec vp outdated` to confirm whether any Vite+ packages remain behind the intended release.
 
 ## Validation Path
 
-- Prefer the standard migration validation sequence: `vp env current`, `vp install`, `vp check`, `vp test`, then `vp build` or `vp pack` as appropriate.
+- Prefer the standard migration validation sequence: `pnpm install --frozen-lockfile`, `pnpm exec vp check`, `pnpm exec vp test`, then `pnpm exec vp build` or `pnpm exec vp pack` as appropriate.

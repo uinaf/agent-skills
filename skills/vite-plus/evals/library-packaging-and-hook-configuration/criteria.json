@@ -45,7 +45,7 @@
     {
       "name": "Docs updated with new commands",
       "max_score": 10,
-      "description": "The README or CONTRIBUTING file is updated to reflect the new install and build commands (references `vp install` or `vp pack` instead of `pnpm install` / old build command)"
+      "description": "The README or CONTRIBUTING file uses `pnpm install --frozen-lockfile` for bootstrap and the repository-local Vite+ CLI (`pnpm exec vp pack`) for interactive build instructions"
     }
   ]
 }

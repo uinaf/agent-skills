@@ -2,6 +2,8 @@
 
 Use this reference when migrating tests to Vite+ native usage.
 
+Command examples below describe Vite+ built-ins. Invoke them interactively through the repository-local CLI as `pnpm exec vp ...`; keep bare `vp` inside package scripts.
+
 ## Defaults
 
 - Import from `vite-plus/test` when migrating to Vite+.
