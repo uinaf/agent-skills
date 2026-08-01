@@ -66,39 +66,39 @@
     },
     {
       "name": "ui-add-dark-mode",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-brand-kit",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-canonicalize-tailwind",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-componentize",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-dark-mode-image",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-design",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-ideas",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-make-responsive",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "ui-markup-from-image",
-      "source": "uinaf/uidotsh-skills"
+      "source": "zebroid-skate/uidotsh-skills"
     },
     {
       "name": "vercel-react-best-practices",
