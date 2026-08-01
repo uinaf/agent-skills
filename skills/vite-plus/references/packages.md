@@ -48,5 +48,6 @@ Use this reference for standalone package repos adopting Vite+.
 ## Notes
 
 - `vp pack --watch` is the watch-mode equivalent for libraries; pair it with `vp run -r --parallel dev` in monorepos that consume the library via `dist/`.
+- Multi-config and workspace pack builds run in parallel by default. Use `vp pack --concurrency <count>` when CI or local resource limits require a bounded number of Rolldown builds; leave it unset when full parallelism is appropriate.
 - Keep SDK, codegen, or bootstrap steps that Vite+ does not replace.
 - Update docs when install, test, or packaging commands change.

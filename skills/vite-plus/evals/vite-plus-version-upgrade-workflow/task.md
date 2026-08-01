@@ -6,7 +6,7 @@ The Nexus UI team maintains a widely-used TypeScript component library that was 
 
 The team's senior engineer is on leave, and the remaining engineers are unsure of the correct upgrade procedure. A previous attempt by a well-meaning team member ran `pnpm update vite-plus` directly, which updated the `package.json` entry for `vite-plus` but left the project in a broken state — `vp check` was reporting errors that hadn't existed before and `vp test` was running the wrong Vitest version. It took an hour of debugging to realize the issue: the Vite+ core alias, Vitest pin, and removed 0.1.x test wrapper were not handled together.
 
-The team needs a clear, correct upgrade runbook they can follow now and reuse for future upgrades. They also want a shell script (`upgrade-vite-plus.sh`) that automates the steps so that future upgrades are one-command operations. The script should handle both the local tooling on the developer's machine and the project-level dependencies, in the right order, and include verification steps so the engineer knows the upgrade succeeded before they push.
+The team needs a clear, correct upgrade runbook they can follow now and reuse for future upgrades. Developers have a mix of global CLI installations: some used Vite+'s official installer, while others manage `npm:vite-plus` through mise, whose package-managed `vp` does not expose `vp upgrade`. They also want a shell script (`upgrade-vite-plus.sh`) that automates the steps so that future upgrades are one-command operations. The script should handle both supported global CLI ownership shapes and the project-level dependencies, in the right order, and include verification steps so the engineer knows the upgrade succeeded before they push.
 
 ## Output Specification
 
@@ -15,7 +15,7 @@ Produce the following files:
 - `upgrade-vite-plus.sh` — a shell script that performs the complete upgrade procedure in the correct order, including verification
 - `UPGRADE.md` — a human-readable runbook explaining each step, why it is needed, and what to do if a step fails
 
-Both files should document all necessary steps a developer would need to run to fully upgrade Vite+. Use the current Vite+ upgrade path (`vp upgrade` for the global CLI, then `vp migrate` for the project-local stack) instead of hand-editing package versions. The script should be executable as-is (no placeholder TODOs).
+Both files should document all necessary steps a developer would need to run to fully upgrade Vite+. Official-installer CLIs should use `vp upgrade`; manager-owned CLIs should be upgraded through their detected owner instead, never through `vp update`. After the global CLI is current, use `vp migrate` for the project-local stack instead of hand-editing package versions. The script should be executable as-is (no placeholder TODOs).
 
 ## Input Files
 

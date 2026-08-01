@@ -1,8 +1,10 @@
 # CI/CD
 
-Use this reference before changing GitHub Actions or release automation.
+Use this reference before changing GitHub Actions, GitLab CI/CD, or release automation.
 
-Prefer the documented Vite+ setup:
+## GitHub Actions
+
+Prefer the documented Vite+ action:
 
 ```yaml
 - uses: voidzero-dev/setup-vp@<full-sha> # v1.x.y
@@ -46,9 +48,31 @@ Prefer the documented Vite+ setup:
 - When CI behavior must stay aligned with a repo's chosen Vite+ release, pin the `setup-vp` action's `version` input explicitly. Treat the local `vite-plus` dependency version in `package.json` as separate from the action's runtime version.
 - For private registries, prefer the action's `NODE_AUTH_TOKEN` handling with repo `.npmrc` registry declarations. Use `registry-url` / `scope` when bypassing repo-level registry detection is intentional.
 
+## GitLab CI/CD
+
+Use the reusable `setup-vp` template instead of rebuilding its bootstrap in each job:
+
+```yaml
+include:
+  - remote: "https://raw.githubusercontent.com/voidzero-dev/setup-vp/v1/gitlab/setup-vp.yml"
+
+test:
+  extends: .setup-vp
+  image: node:24
+  script:
+    - vp check
+    - vp test
+    - vp build
+```
+
+- The template installs Vite+ and, by default, runs `vp install`; it does not install Node.js or configure GitLab caches. Provide Node through the job image or runner and configure cache policy in the job.
+- The runner must be Unix-like with Bash and either `curl` or `wget`.
+- For reproducible CI, pin the remote template and its `setup-ref` input to the same release or commit instead of mixing refs.
+- Keep registry authentication and secret-bearing release behavior scoped to the job. The GitLab template supports the same `registry-url`, `scope`, and `run-install` responsibilities, but it does not replace project-specific publish or deploy steps.
+
 ## Guardrails
 
 - Prefer `vp run <script>` (or `vpr <script>`) when CI needs a repo-specific script that Vite+ does not replace.
 - Preserve release-only steps while making the surrounding workflow more stock.
 - Keep packaging and publish steps that Vite+ does not own.
-- For non-GitHub container CI, the official `ghcr.io/voidzero-dev/vite-plus` image is the stock toolchain image. Pin an exact tag or digest when reproducibility matters, and keep production runtime images separate.
+- For container CI without a native `setup-vp` integration, the official `ghcr.io/voidzero-dev/vite-plus` image is the stock toolchain image. Pin an exact tag or digest when reproducibility matters, and keep production runtime images separate.

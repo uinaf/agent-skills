@@ -4,7 +4,7 @@
 
 The platform team at Acme is creating a new shared TypeScript library, `@acme/config`, that will be published to the internal npm registry and consumed by multiple frontend applications. The library has no build setup yet — just source files and a bare package.json. The team uses pnpm as their package manager across all repos, and they've standardized on Vite+ as their frontend toolchain.
 
-Before the library can be published and used downstream, it needs a complete build setup: packaging configuration, a pre-commit hook that enforces linting on staged files, and updated contributor documentation so other developers know how to work with the repo. The team wants everything set up consistently with how their other Vite+ repos are configured, and they don't want to introduce extra config files that will need to be kept in sync over time.
+Before the library can be published and used downstream, it needs a complete build setup: packaging configuration, a pre-commit hook that enforces linting on staged files, and updated contributor documentation so other developers know how to work with the repo. Its ESM, CJS, and declaration builds run on memory-constrained CI workers, so packaging must limit Rolldown to two concurrent builds. The team wants everything set up consistently with how their other Vite+ repos are configured, and they don't want to introduce extra config files that will need to be kept in sync over time.
 
 ## Output Specification
 

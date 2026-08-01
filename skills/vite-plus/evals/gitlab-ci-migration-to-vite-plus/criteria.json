@@ -1,0 +1,51 @@
+{
+  "context": "Tests whether the agent correctly migrates GitLab CI/CD to the official setup-vp template while preserving job-owned Node and cache responsibilities and avoiding duplicate installation.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Includes setup-vp template",
+      "max_score": 15,
+      "description": "The GitLab config includes the official `voidzero-dev/setup-vp` remote template from `gitlab/setup-vp.yml`"
+    },
+    {
+      "name": "Extends setup-vp job",
+      "max_score": 10,
+      "description": "The verify job extends `.setup-vp` instead of recreating its Vite+ bootstrap in `before_script`"
+    },
+    {
+      "name": "Node remains job-owned",
+      "max_score": 10,
+      "description": "The verify job still provides Node 24 through its image or runner because the GitLab template does not install Node.js"
+    },
+    {
+      "name": "GitLab cache retained",
+      "max_score": 10,
+      "description": "The existing GitLab cache key and path policy remain configured on the job because the template does not configure GitLab caches"
+    },
+    {
+      "name": "No manual package-manager bootstrap",
+      "max_score": 10,
+      "description": "The migrated job removes direct Corepack and pnpm setup commands from `before_script`"
+    },
+    {
+      "name": "No duplicate install",
+      "max_score": 10,
+      "description": "The job relies on the template's default `run-install: true` behavior and does not also run `vp install`, `pnpm install`, `npm install`, or `yarn install`"
+    },
+    {
+      "name": "Uses stock verify commands",
+      "max_score": 15,
+      "description": "The library verify job runs `vp check`, `vp test`, and `vp pack` instead of direct lint, typecheck, Vitest, or package-manager scripts"
+    },
+    {
+      "name": "Template refs aligned",
+      "max_score": 10,
+      "description": "The remote template ref and `setup-ref` input are the same release or commit, including when both use the template's `v1` default"
+    },
+    {
+      "name": "Responsibility boundary documented",
+      "max_score": 10,
+      "description": "Migration notes explain that setup-vp owns Vite+ and dependency installation while the GitLab job owns Node and cache configuration"
+    }
+  ]
+}

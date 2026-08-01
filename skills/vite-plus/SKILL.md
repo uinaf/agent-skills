@@ -11,7 +11,7 @@ Move a frontend repo closer to the stock Vite+ toolchain while preserving repo-s
 
 Default to this destination unless a repo-specific boundary clearly blocks it. If you keep an old command shape, document the reason.
 
-- CI uses `voidzero-dev/setup-vp`; the action owns Node and package-manager bootstrap. Let its default `run-install: true` run `vp install`, then run `vp check`, `vp test`, and `vp build`; set `run-install: false` only when the workflow needs an explicit install step. In repos that pin GitHub Actions, pin `setup-vp` to a full commit SHA with a same-line exact version comment and let Dependabot maintain it
+- CI uses `voidzero-dev/setup-vp` on GitHub and GitLab. The GitHub Action owns Node and package-manager bootstrap; the GitLab template uses the job-provided Node runtime. Both install dependencies by default. Disable `run-install` only for an intentional explicit install step. Pin GitHub Actions to full commit SHAs when the repo requires it
 - Tooling versions have one checked-in source of truth. Node comes from `.node-version`; package-manager versions come from `package.json#packageManager`; Vite+ comes from the repo's `vite-plus` dependency or workspace catalog. Do not repeat Node, pnpm, or Vite+ literals in workflows when a source file can be read
 - test files use `vite-plus/test` (and `vite-plus/test/browser/context` for browser mode); Vite+ 0.2.x runs upstream Vitest directly and no longer uses `@voidzero-dev/vite-plus-test`
 - scripts prefer `vp dev`, `vp test`, `vp test watch`, `vp test run --coverage`, `vp pack`, `vp build`, `vp preview`, and `vp run <script>` (or `vpr <script>`) over direct package-manager, raw Vitest, or tsdown wiring
@@ -31,7 +31,7 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 7. Update tests and coverage per [references/testing.md](references/testing.md).
 8. Check [references/commands.md](references/commands.md) before changing command invocations. Load [references/known-issues.md](references/known-issues.md) only on unexpected behavior or when upgrading Vite+.
 9. Keep repo-specific release, binary, or packaging steps Vite+ does not replace. Verify jobs may use Vite+ dependency caches; secret-bearing release, publish, signing, and deploy jobs disable dependency caches and run fresh installs.
-10. To adopt a newer Vite+ release: `vp upgrade` updates the global CLI; then run `vp migrate` in the project. On an existing Vite+ project it defaults to a version-only upgrade: it re-pins `vite-plus`, the required `vite` -> `@voidzero-dev/vite-plus-core` alias, and Vitest-related pins across workspace packages. Use `vp migrate --full` only when you also want the first-time setup bucket (hooks, editor files, agent files, lint migration). Confirm with `vp --version`, lockfile inspection, and `vp outdated`.
+10. To adopt a newer Vite+ release, update the global CLI through its owner and then run `vp migrate`; follow [references/commands.md#upgrades](references/commands.md#upgrades) for the exact branch. Use `vp migrate --full` only when first-time setup should run again. Confirm with `vp --version`, lockfile inspection, and `vp outdated`.
 11. End-to-end validation: `vp install && vp check && vp test`, then verify `vp build` or `vp pack` artifacts, `vp preview` where applicable, `vp test run --coverage`, and `vp staged` on a staged change.
 
 ## Tooling Source Of Truth

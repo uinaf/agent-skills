@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$repo_root"
 
-tessl_version="${TESSL_CLI_VERSION:-0.92.0}"
+tessl_version="${TESSL_CLI_VERSION:-0.94.0}"
 workspace="${TESSL_WORKSPACE:-uinaf}"
 bump="${TESSL_PUBLISH_BUMP:-patch}"
 publish_all="${TESSL_PUBLISH_ALL:-false}"

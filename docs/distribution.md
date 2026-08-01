@@ -48,6 +48,6 @@ The workflows still reference the token as `${{ secrets.TESSL_TOKEN }}`; GitHub 
 ## Local checks
 
 ```bash
-pnpm dlx tessl@0.92.0 plugin lint skills/verify
-pnpm dlx tessl@0.92.0 plugin publish --dry-run --workspace uinaf --bump patch skills/verify
+pnpm dlx tessl@0.94.0 plugin lint skills/verify
+pnpm dlx tessl@0.94.0 plugin publish --dry-run --workspace uinaf --bump patch skills/verify
 ```
