@@ -28,7 +28,7 @@ General guidelines for agents.
 
 ### Session and planning
 
-- When supported, name a distinct session once its task is clear: `<ticket-id>-<descriptive-slug>` or `<descriptive-slug>`
+- When supported, rename the current session once its task is clear, whether the session was just created or already existed: `<ticket-id>-<descriptive-slug>` or `<descriptive-slug>`
 - Before non-trivial work, read the relevant code, docs, contracts, and current worktree state
 - State a short plan covering what, where, why, verification, and non-goals
 
