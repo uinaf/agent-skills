@@ -10,9 +10,10 @@ toward the requested target; default to B and treat C only as a checkpoint.
 
 ## Boundaries
 
-- Source diff or PR review is out of scope; preparing repeatable application QA is in scope.
-- Build execution, proof, and result contracts without making ship decisions or
-  authorizing public, destructive, or cross-system actions.
+- Source diff or PR review is out of scope; repeatable application QA is in
+  scope, and its evidence stands on its own without an artificial PR.
+- Prepare a stable repository-runner contract without inventing an orchestrator,
+  making ship decisions, or authorizing public, destructive, or cross-system actions.
 - Grade platform-owned tools, network access, and machine authentication as
   runner capabilities, not automatically as repository debt.
 - Count guidance and product or architecture contracts only when agents need
@@ -43,7 +44,6 @@ Report three different things rather than hiding them in one letter:
 - **evidence level**: how strongly the claim has been exercised
 
 The lowest applicable capability sets each grade; never average away a blocker.
-Do not collapse a missing runner prerequisite into repository setup debt.
 
 ## Automation Path
 
@@ -64,11 +64,7 @@ touches only one part:
 - **Recover** handles stalls or failures from any nonterminal stage, preserves evidence, retries safely, or escalates
 
 Treat no-diff tasks as first-class work. Their contract names the result type,
-evidence, target, terminal condition, and side effects; never invent a PR for QA.
-
-Do not invent an orchestrator when the task only asks to prepare a repository.
-Instead, define the stable repository-runner contract the future orchestrator
-can call.
+evidence, target, terminal condition, and side effects.
 
 ## Workflow
 
@@ -80,7 +76,8 @@ Then:
 1. Read the repository-owned entrypoint and follow its links to relevant contracts.
 2. Run the cold-start, boot, smoke, interaction, verification, and teardown paths
    that exist; static file presence alone is weak evidence.
-3. Grade every applicable capability from F through A with evidence, gap, and owner.
+3. Fill the [Required Output](references/grading.md#required-output) profile; for
+   every applicable capability record its grade, evidence, gap, and owner.
 4. Walk the automation path and record missing transitions, inputs, outputs, and terminal states.
 5. Assign an evidence level using [references/autonomy-evidence.md](references/autonomy-evidence.md).
 
@@ -105,23 +102,26 @@ Prioritize work in this order:
 
 **Legibility → Runner contract → Cold start → Real-surface feedback → Enforcement → Isolation → Recovery and result submission → Repeated trials**
 
-Prefer three stable repository entrypoints when the capability is in scope:
+Prefer three stable repository entrypoints when the capability is in scope.
+Their minimum lifecycle is executable and always tears down:
 
 ```bash
+set -euo pipefail
+trap './scripts/agent-teardown.sh' EXIT
 ./scripts/agent-bootstrap.sh
 ./scripts/agent-verify.sh
-./scripts/agent-teardown.sh
 ```
 
 Bootstrap validates prerequisites and becomes ready; verification is canonical
 and reused by CI; teardown handles success, failure, timeout, and cancellation.
 Automation artifacts are keyed by task and attempt.
 
-Keep deterministic operations deterministic: workspace creation, tool install,
-secret injection, test invocation, artifact manifests, allowed-target checks,
-branch setup, submission mechanics, and cleanup should not depend on model
-judgment. Let agents reason about implementation, QA exploration, diagnosis,
-review feedback, and recovery within enforced boundaries.
+Keep the execution boundary explicit:
+
+| Enforce mechanically | Leave to agent judgment |
+| --- | --- |
+| workspace and branch setup, allowed targets, tool install, secret injection | task interpretation and implementation |
+| boot, test, teardown, artifact manifests, upload and push mechanics | exploratory QA, diagnosis, evidence selection, and recovery strategy |
 
 When readiness work includes agent entrypoints, keep `AGENTS.md` as the canonical
 authored guide and place `CLAUDE.md` beside it as a symlink to `AGENTS.md`.
@@ -132,12 +132,19 @@ proof artifacts, and result contracts.
 
 ### 3. Prove outcomes, not recipes
 
-- Exercise at least one success path and one actionable failure path.
+- Run the stable lifecycle once on the happy path and once with a safe failure,
+  such as a missing required runner input; preserve both statuses and artifacts.
+- Record each trial in a machine-readable form such as:
+
+```json
+{"task_class":"qa","scenario":"missing-runner-identity","result":"expected_failure","human_interventions":0,"duration_seconds":12,"retries":0,"failure_class":"runner/missing_identity","artifacts":"artifacts/task-123/attempt-1/"}
+```
+
 - Grade final environment or repository state, not the agent's completion claim.
 - Accept equivalent implementations that satisfy the contract; do not require a
   particular tool, hook, port algorithm, or retry count without an external reason.
-- Use multiple trials for B or A autonomy claims and record success, human
-  interventions, duration, cost or resource class, retries, and failure class.
+- For B or A claims, repeat representative trials and aggregate their records
+  into success, intervention, duration, retry, resource, and failure metrics.
 - Test parallel isolation and crash or stall recovery when claiming unattended
   or orchestrated readiness.
 - Inspect transcripts and artifacts for false success, grader defects, secret
