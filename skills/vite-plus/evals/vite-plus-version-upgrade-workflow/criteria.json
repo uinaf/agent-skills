@@ -1,21 +1,21 @@
 {
-  "context": "Tests whether the agent correctly handles a Vite+ version upgrade by respecting global CLI ownership, distinguishing it from the project-local migration surface, using current vp migrate behavior, removing the obsolete test wrapper, classifying direct Vitest usage, and performing the correct end-to-end validation sequence.",
+  "context": "Tests whether the agent correctly handles a repository-local Vite+ version upgrade without a global CLI, using current vp migrate behavior, removing the obsolete test wrapper, classifying direct Vitest usage, and performing the correct end-to-end validation sequence.",
   "type": "weighted_checklist",
   "checklist": [
     {
-      "name": "Global CLI owner respected",
+      "name": "No global CLI dependency",
       "max_score": 12,
-      "description": "The upgrade procedure uses `vp upgrade` for an official-installer CLI and upgrades `npm:vite-plus` through mise when mise owns the global CLI; it does not use `vp update` as a CLI self-upgrade fallback"
+      "description": "The upgrade procedure does not install, inspect, or upgrade a global `vp`; every Vite+ operation resolves the repository-local CLI through `pnpm exec vp`"
     },
     {
-      "name": "Global before local",
+      "name": "Pinned package manager bootstrap",
       "max_score": 8,
-      "description": "The applicable global CLI upgrade step appears before (or is documented as separate from) the project-local `vp migrate` step — the two surfaces are not conflated into a single operation"
+      "description": "The procedure starts by honoring package.json#packageManager and installing the current lockfile with `pnpm install --frozen-lockfile` before invoking Vite+"
     },
     {
       "name": "vp migrate for local stack",
       "max_score": 10,
-      "description": "The project-local upgrade uses `vp migrate` from the project root so Vite+ updates the local `vite-plus` package and related toolchain pins together"
+      "description": "The project-local upgrade uses `pnpm exec vp migrate` from the project root so Vite+ updates the local `vite-plus` package and related toolchain pins together"
     },
     {
       "name": "Core alias verified",
@@ -38,14 +38,14 @@
       "description": "The upgrade distinguishes node-mode-only projects from projects that directly use `vitest`, `@vitest/*`, coverage/UI packages, or browser providers, and only keeps direct upstream Vitest dependencies for the latter"
     },
     {
-      "name": "vp env current in validation",
+      "name": "Local CLI version in validation",
       "max_score": 6,
-      "description": "The end-to-end validation sequence includes `vp env current` as the first check"
+      "description": "The end-to-end validation sequence verifies the repository-local CLI with `pnpm exec vp --version` and does not use the standalone-only `vp env` surface"
     },
     {
       "name": "Full validation sequence",
       "max_score": 9,
-      "description": "The validation sequence includes all of: `vp install`, `vp check`, and `vp test` (in addition to `vp env current`)"
+      "description": "The validation sequence includes all of: `pnpm install --frozen-lockfile`, `pnpm exec vp check`, and `pnpm exec vp test`"
     },
     {
       "name": "Build validation included",
@@ -55,7 +55,7 @@
     {
       "name": "No direct package manager for local Vite+ stack",
       "max_score": 3,
-      "description": "The project-local upgrade does NOT use `npm install`, `pnpm update`, `yarn upgrade`, or other direct package-manager commands for the Vite+ packages — the local Vite+ stack moves through `vp migrate`; an owning manager may still update the separate global CLI"
+      "description": "The project-local upgrade does NOT use `npm install`, `pnpm update`, `yarn upgrade`, or other direct package-manager commands to select Vite+ package versions; the local Vite+ stack moves through `pnpm exec vp migrate`"
     }
   ]
 }

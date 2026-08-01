@@ -5,7 +5,7 @@ description: "Migrate or align frontend package and monorepo repositories to Vit
 
 # Vite+
 
-Move a frontend repo closer to the stock Vite+ toolchain while preserving repo-specific release and runtime logic. Vite+ is in beta, but still pre-1.0: verify behavior against installed `vp --version`, packaged docs under `node_modules/vite-plus/docs/`, and the latest [release notes](https://github.com/voidzero-dev/vite-plus/releases) instead of relying on memorized command shapes.
+Move a frontend repo closer to the stock Vite+ toolchain while preserving repo-specific release and runtime logic. Vite+ is in beta, but still pre-1.0: install the repository dependencies first, verify behavior against `pnpm exec vp --version`, inspect packaged docs under `node_modules/vite-plus/docs/`, and check the latest [release notes](https://github.com/voidzero-dev/vite-plus/releases) instead of relying on memorized command shapes.
 
 ## Migration Targets
 
@@ -19,6 +19,7 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 - single-source config in `vite.config.ts`: no parallel `vitest.config.ts`, `.oxlintrc*`, `.oxfmtrc*`, or `tsdown.config.ts`
 - project agent guidance comes from Vite+ itself when possible: `vp migrate --agent <name>` writes the official short `AGENTS.md`/`CLAUDE.md` block, and installed projects may expose the same guidance at `node_modules/vite-plus/AGENTS.md`
 - contributor docs move to the new `vp` commands in the same change
+- interactive repository commands use `pnpm exec vp ...` after `pnpm install --frozen-lockfile`; bare `vp` remains correct inside package scripts and in CI after `voidzero-dev/setup-vp`
 
 ## Workflow
 
@@ -26,13 +27,13 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 2. Audit current scripts, workflows, Vite config, test imports, release flow, package manager, and packaging.
 3. Read [references/bootstrap.md](references/bootstrap.md) for entrypoints (`vp create`, `vp migrate`), editor/agent config, local guidance-file discovery, and validation path.
 4. Pick the shape and load only that reference: [references/packages.md](references/packages.md) for standalone packages, or [references/monorepos.md](references/monorepos.md) for workspaces.
-5. Migrate scripts, `vite.config.ts`, test imports, hooks, and packaging together. Verify with `vp check && vp test` before moving on.
+5. Migrate scripts, `vite.config.ts`, test imports, hooks, and packaging together. Verify interactively with `pnpm exec vp check && pnpm exec vp test` before moving on.
 6. Update CI per [references/ci-cd.md](references/ci-cd.md).
 7. Update tests and coverage per [references/testing.md](references/testing.md).
 8. Check [references/commands.md](references/commands.md) before changing command invocations. Load [references/known-issues.md](references/known-issues.md) only on unexpected behavior or when upgrading Vite+.
 9. Keep repo-specific release, binary, or packaging steps Vite+ does not replace. Verify jobs may use Vite+ dependency caches; secret-bearing release, publish, signing, and deploy jobs disable dependency caches and run fresh installs.
-10. To adopt a newer Vite+ release, update the global CLI through its owner and then run `vp migrate`; follow [references/commands.md#upgrades](references/commands.md#upgrades) for the exact branch. Use `vp migrate --full` only when first-time setup should run again. Confirm with `vp --version`, lockfile inspection, and `vp outdated`.
-11. End-to-end validation: `vp install && vp check && vp test`, then verify `vp build` or `vp pack` artifacts, `vp preview` where applicable, `vp test run --coverage`, and `vp staged` on a staged change.
+10. To adopt a newer Vite+ release, use the repository-local CLI: install the current lockfile, run `pnpm exec vp migrate`, then reinstall if migration changed manifests. Follow [references/commands.md#upgrades](references/commands.md#upgrades). Use `--full` only when first-time setup should run again. Confirm with `pnpm exec vp --version`, lockfile inspection, and `pnpm exec vp outdated`.
+11. End-to-end validation: `pnpm install --frozen-lockfile`, then `pnpm exec vp check` and `pnpm exec vp test`; verify `pnpm exec vp build` or `pnpm exec vp pack` artifacts, `pnpm exec vp preview` where applicable, `pnpm exec vp test run --coverage`, and `pnpm exec vp staged` on a staged change.
 
 ## Tooling Source Of Truth
 
@@ -81,7 +82,7 @@ export default defineConfig({
 
 ## Guardrails
 
-- Prefer `vp create` / `vp migrate --agent <name> --editor <name>` over hand-rolling agent or editor config.
+- Prefer `pnpm dlx vite-plus create` for an uninitialized repository and `pnpm exec vp migrate --agent <name> --editor <name>` once Vite+ is a local dependency, rather than hand-rolling agent or editor config.
 - Preserve working release workflows, binary packaging, and publish steps while migrating the surrounding Vite+ flow.
 - After editing workflows, grep for duplicated tooling literals such as `node-version:`, `pnpm@`, `corepack prepare`, and inline `version: "0.`. Keep action pins separate: GitHub Action SHAs and their same-line version comments are allowed because they identify the action, not the project toolchain.
 - For cacheable `vp run` tasks, rely on automatic file tracking first. A standard `vp build` task now reports Vite inputs, outputs, and relevant env metadata to Vite Task, so do not add manual `input`, `output`, or `env` config unless the project has behavior Vite cannot report.

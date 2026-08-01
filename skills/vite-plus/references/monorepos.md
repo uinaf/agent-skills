@@ -2,6 +2,8 @@
 
 Use this reference for workspace repos adopting Vite+.
 
+Command examples below use the concise `vp` spelling appropriate inside package scripts. From an interactive shell, run the same built-ins as `pnpm exec vp ...` after installing the repository dependencies.
+
 ## Defaults
 
 - Move workspace scripts, test surface, and CI together.
