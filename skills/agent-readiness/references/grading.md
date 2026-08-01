@@ -8,7 +8,7 @@ A single letter cannot honestly describe all three.
 ```text
 repository: B
 runner: B
-evidence: E3
+evidence: E4
 task classes: implementation B, scripted QA B, exploratory QA C
 profile: legibility B, executability B, feedback B, safety A, durability B, scale C
 first gap: scale — concurrent result reconciliation has not been exercised
