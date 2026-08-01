@@ -160,7 +160,7 @@ Keep the handoff compact:
 ```
 
 Name exact commands only for failures, reproduction, or when asked. Do not
-repeat dimension evidence in the footer when it already appears in an audit table.
+repeat capability evidence in the footer when it already appears in an audit table.
 
 ## References
 

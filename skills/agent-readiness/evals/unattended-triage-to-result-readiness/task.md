@@ -42,8 +42,8 @@ Produce:
    installs dependencies reproducibly, and fails with actionable ownership.
 4. `scripts/agent-verify.sh` — The canonical bounded verification entrypoint. It
    records inspectable outcome evidence and a machine-readable artifact manifest
-   under a task-and-attempt-specific directory, and returns a meaningful non-zero
-   failure. QA evidence must identify the tested revision, build, environment,
+   under a task-and-attempt-specific directory, and exits non-zero with a useful
+   diagnostic when verification fails. QA evidence must identify the tested revision, build, environment,
    scenario, producer, capture time, format, and redaction status.
 5. `scripts/agent-teardown.sh` — Idempotent cleanup suitable for success,
    failure, cancellation, timeout, and retry.

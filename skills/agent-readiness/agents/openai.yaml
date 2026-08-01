@@ -2,4 +2,13 @@ interface:
   display_name: "Agent-Readiness"
   short_description: "Audit repo and runner readiness for autonomous work"
   default_prompt: |
-    Use $agent-readiness to audit and improve the repository and its declared runner for autonomous work. Grade repository capability, runner capability, and evidence strength separately across legibility, executability, feedback, safety, durability, and scale; for unattended work, trace triage through dispatch, scoped machine identity, isolated execution, outcome proof, result submission, reconciliation, and recovery. Support both implementation results such as reviewed PRs and QA results such as reports with screenshots, recordings, logs, or JSON evidence. Treat Infisical or other platform-owned machine identities as positive runner infrastructure when agents can consume them noninteractively without exposing secrets. Follow the requested target, default to at least B, report the path to A, and never stop merely because the repo reaches C. Do not make ship decisions or perform submission actions beyond the user's authority.
+    Use $agent-readiness to audit and improve the repository and its declared runner for autonomous work.
+    Grade repository capability, runner capability, and evidence strength separately across legibility,
+    executability, feedback, safety, durability, and scale. For unattended work, trace triage through
+    dispatch, scoped machine identity, isolated execution, outcome proof, result submission,
+    reconciliation, and recovery. Support both implementation results such as reviewed PRs and QA
+    results such as reports with screenshots, recordings, logs, or JSON evidence. Treat Infisical or
+    other platform-owned machine identities as positive runner infrastructure when agents can consume
+    them noninteractively without exposing secrets. Follow the requested target, default to at least B,
+    report the path to A, and never stop merely because the repo reaches C. Do not make ship decisions
+    or perform submission actions beyond the user's authority.
