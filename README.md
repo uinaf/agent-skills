@@ -45,6 +45,7 @@ installer.
 ## Verify
 
 ```bash
+corepack enable pnpm
 pnpm install --frozen-lockfile
 pnpm run verify
 ```
