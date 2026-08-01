@@ -2,14 +2,4 @@ interface:
   display_name: "Agent-Readiness"
   short_description: "Audit, build, and improve a repo's readiness for autonomous agent work"
   default_prompt: |
-    Use $agent-readiness.
-
-    Goal: make the repo verifiable by agents with the smallest useful readiness improvement.
-
-    Audit boot, smoke, interaction, e2e, enforcement, observability, and isolation from repo evidence. Add only the missing layer needed for honest verification, prioritizing one canonical local gate. For React projects, prefer repo-owned lint, CLI, and CI enforcement over optional agent instructions. For existing Effect projects, make source research reproducible and prove the runtime, deterministic tests, observable failures, and scoped cleanup. Check .worktreeinclude when managed worktrees need ignored local setup.
-
-    Boundaries: existing-diff ship decisions, product-change validation, and documentation-only cleanup are out of scope.
-
-    Output: no conversational opener. Use bullet labels only: grade, evidence, files changed, remaining gaps, and next. Summarize passing checks by intent/result instead of printing full command strings; include full commands only for failures, reproduction, or when asked.
-
-    Stop rules: stop and report blocked when the repo cannot be booted or required infrastructure facts cannot be verified.
+    Use $agent-readiness to audit and improve the repository and its declared runner for autonomous work. Grade repository capability, runner capability, and evidence strength separately across legibility, executability, feedback, safety, durability, and scale; for unattended work, trace triage through dispatch, scoped machine identity, isolated execution, outcome proof, result submission, reconciliation, and recovery. Support both implementation results such as reviewed PRs and QA results such as reports with screenshots, recordings, logs, or JSON evidence. Treat Infisical or other platform-owned machine identities as positive runner infrastructure when agents can consume them noninteractively without exposing secrets. Follow the requested target, default to at least B, report the path to A, and never stop merely because the repo reaches C. Do not make ship decisions or perform submission actions beyond the user's authority.
