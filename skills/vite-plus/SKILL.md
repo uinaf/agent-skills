@@ -1,6 +1,7 @@
 ---
 name: vite-plus
 description: "Migrate or align frontend package and monorepo repositories to Vite+. Use when the user asks to migrate to Vite+, standardize on `vp`, clean up a Vite+ setup, or move CI, tests, packaging, and hooks onto the stock Vite+ workflow. Prefer Vite+ commands over direct package-manager and Vitest wiring unless the repo has a proven exception."
+disable-model-invocation: true
 ---
 
 # Vite+

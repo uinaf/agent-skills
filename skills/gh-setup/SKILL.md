@@ -1,6 +1,7 @@
 ---
 name: gh-setup
 description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch/ruleset policy, PR and security templates, Actions hardening, GitHub Environments, release workflows, and deploy workflows. Use when standardizing GitHub setup for repos, CI/CD, publishing versioned packages, or deploying running apps; route app deploy details to deploy references and package publish details to release references."
+disable-model-invocation: true
 ---
 
 # GitHub Setup

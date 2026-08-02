@@ -13,3 +13,6 @@ interface:
     Output: no conversational opener. Use bullet labels only: files changed, settings, environments, release/deploy target, evidence, risks, and next. Say when live GitHub settings were not checked.
 
     Stop rules: block when credentials, target environment, ruleset policy, or trusted delivery refs cannot be confirmed safely.
+
+policy:
+  allow_implicit_invocation: false
