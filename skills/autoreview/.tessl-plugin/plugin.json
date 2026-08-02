@@ -1,6 +1,6 @@
 {
   "name": "uinaf/autoreview",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "description": "Run the bundled Codex/Claude autoreview helper as a structured second-model closeout. Use for explicit autoreview or tool-backed final-review requests after task, ticket, spec, and builder proof are available; it checks implementation conformance, validates findings, and reruns focused tests but does not issue a ship decision.",
   "private": false,
   "skills": [
