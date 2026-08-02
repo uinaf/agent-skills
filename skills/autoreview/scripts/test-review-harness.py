@@ -13,7 +13,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 
-ENGINES = ("codex", "claude")
+ENGINES = ("codex", "claude", "cursor")
 DEFAULT_ENGINES = ("codex", "claude")
 
 MALICIOUS_INITIAL = """export function uploadPath(name) {

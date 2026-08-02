@@ -1,6 +1,6 @@
 ---
 name: autoreview
-description: "Run the bundled Codex/Claude autoreview helper as a structured second-model closeout for local changes, pull requests, branch diffs, or commits: read the authoritative request, ticket, and spec; pass their acceptance criteria to the reviewer; validate findings; rerun focused tests; and repeat until clean. Use when explicitly asked for autoreview, Codex/Claude review, or a tool-backed final review after implementation. Do not use for builder verification or an independent multi-agent ship decision."
+description: "Run the bundled Codex, Claude, or Cursor autoreview helper as a structured second-model closeout for local changes, pull requests, branch diffs, or commits: read the authoritative request, ticket, and spec; pass their acceptance criteria to the reviewer; validate findings; rerun focused tests; and repeat until clean. Use when explicitly asked for autoreview, Codex/Claude/Cursor review, or a tool-backed final review after implementation. Do not use for builder verification or an independent multi-agent ship decision."
 ---
 
 # Auto Review
@@ -9,7 +9,7 @@ Run the bundled structured review helper as a closeout check. This is code revie
 
 Use when:
 
-- user asks for Codex review / Claude review / autoreview / second-model review
+- user asks for Codex review / Claude review / Cursor review / autoreview / second-model review
 - after non-trivial code edits and builder verification, when a tool-backed second-model closeout is wanted
 - reviewing a local branch or PR branch after fixes
 
@@ -58,7 +58,7 @@ If no external ticket or spec exists, use the current user request as the task c
 2. Confirm builder guardrails and real-surface proof exist.
 3. Set `AUTOREVIEW` and `AUTOREVIEW_HARNESS` once for the active skill location.
 4. Pick the real target: dirty local work, branch/PR base, or a single commit.
-5. Run the helper with the task contract and Codex by default, or Claude when requested.
+5. Run the helper with the task contract and Codex by default, or Claude/Cursor when requested.
 6. Verify each finding against the code and task contract; reject weak findings explicitly.
 7. Fix accepted findings at the right ownership boundary.
 8. Rerun focused tests plus autoreview with the same task contract when fixes change code.
@@ -167,7 +167,7 @@ invalidate the result instead of silently producing a stale clean verdict.
 Run multiple reviewers against one frozen bundle:
 
 ```bash
-"$AUTOREVIEW" --reviewers codex,claude
+"$AUTOREVIEW" --reviewers codex,claude,cursor
 ```
 
 `--panel` is shorthand for Codex plus Claude unless `--engine` changes the first reviewer:
@@ -179,7 +179,7 @@ Run multiple reviewers against one frozen bundle:
 Set reviewer models and thinking/effort explicitly:
 
 ```bash
-"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.6-sol --thinking codex=high --model claude=claude-opus-5 --thinking claude=high
+"$AUTOREVIEW" --reviewers codex,claude,cursor --model codex=gpt-5.6-sol --thinking codex=high --model claude=claude-opus-5 --thinking claude=high --model cursor=cursor-grok-4.5-high-fast
 ```
 
 Inline syntax is also supported for simple model IDs:
@@ -190,17 +190,24 @@ Inline syntax is also supported for simple model IDs:
 
 Codex maps thinking to `model_reasoning_effort` and accepts `none`, `minimal`,
 `low`, `medium`, `high`, `xhigh`, or `max`. Claude maps thinking to `--effort`
-and accepts `low`, `medium`, `high`, `xhigh`, or `max`.
+and accepts `low`, `medium`, `high`, `xhigh`, or `max`. Cursor encodes effort
+in its model ID and does not accept `--thinking`.
 
 For models with slashes or extra colons, prefer keyed form:
 
 ```bash
-"$AUTOREVIEW" --reviewers codex,claude --model codex=gpt-5.6-sol --model claude=claude-opus-5
+"$AUTOREVIEW" --reviewers codex,claude,cursor --model codex=gpt-5.6-sol --model claude=claude-opus-5 --model cursor=cursor-grok-4.5-high-fast
+```
+
+Cursor Agent can also run alone; `cursor-agent` is accepted as an engine alias:
+
+```bash
+"$AUTOREVIEW" --mode branch --base origin/main --engine cursor-agent
 ```
 
 ## Engine Details
 
-Use [references/engine-details.md](references/engine-details.md) for model defaults, preferred model lists, environment overrides, and Codex/Claude isolation details.
+Use [references/engine-details.md](references/engine-details.md) for model defaults, preferred model lists, environment overrides, and engine isolation details.
 
 ## Context Efficiency
 

@@ -81,9 +81,12 @@ class AutoreviewHardeningTests(unittest.TestCase):
     def setUp(self) -> None:
         self.helper = load_helper()
 
-    def test_local_engine_contract_is_codex_and_claude_only(self) -> None:
-        self.assertEqual(self.helper["ENGINES"], ("codex", "claude"))
-        self.assertEqual(self.helper["ALL_REVIEWERS"], ("codex", "claude"))
+    def test_local_engine_contract_includes_cursor(self) -> None:
+        self.assertEqual(self.helper["ENGINES"], ("codex", "claude", "cursor"))
+        self.assertEqual(
+            self.helper["ALL_REVIEWERS"],
+            ("codex", "claude", "cursor"),
+        )
 
         with mock.patch.object(
             sys,
@@ -99,18 +102,162 @@ class AutoreviewHardeningTests(unittest.TestCase):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        self.assertIn("{codex,claude}", help_result.stdout)
+        self.assertIn("{codex,claude,cursor,cursor-agent}", help_result.stdout)
+        self.assertIn("--cursor-bin", help_result.stdout)
+        self.assertIn("--cursor-agent-bin", help_result.stdout)
         for unsupported in (
             "--droid-bin",
             "--copilot-bin",
             "--pi-bin",
             "--opencode-bin",
-            "--cursor-bin",
             "--fallback-model",
             "powershell",
             "pwsh",
         ):
             self.assertNotIn(unsupported, help_result.stdout)
+
+    def test_cursor_agent_alias_and_default_model(self) -> None:
+        with mock.patch.object(
+            sys,
+            "argv",
+            ["autoreview", "--engine", "cursor-agent"],
+        ):
+            parsed = self.helper["parse_args"]()
+        self.assertEqual(parsed.engine, "cursor")
+
+        cursor = self.helper["reviewer_args"](
+            self.helper["reviewer_test_args"](engine="cursor")
+        )[0]
+        self.assertEqual(cursor.model_candidates, ["cursor-grok-4.5-high-fast"])
+        self.assertEqual(cursor.model, "cursor-grok-4.5-high-fast")
+        self.assertIsNone(cursor.thinking)
+
+        with self.assertRaisesRegex(SystemExit, "invalid thinking level for cursor"):
+            self.helper["reviewer_args"](
+                self.helper["reviewer_test_args"](
+                    engine="cursor",
+                    thinking=["high"],
+                )
+            )
+
+    def test_cursor_runs_bundle_only_in_isolated_ask_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            repo = init_repo(root)
+            cursor_bin = root / "bin" / "cursor-agent"
+            cursor_bin.parent.mkdir()
+            self.helper["write_executable"](
+                cursor_bin,
+                "#!/bin/sh\nexit 0\n",
+            )
+            source_home = root / "source-home"
+            source_config = source_home / ".cursor" / "cli-config.json"
+            source_config.parent.mkdir(parents=True)
+            source_config.write_text(
+                json.dumps(
+                    {
+                        "authInfo": {"type": "fake-auth"},
+                        "enabledPlugins": {"hostile": True},
+                        "permissions": {"allow": ["Shell(*)"]},
+                    }
+                )
+            )
+            report = {
+                "findings": [],
+                "overall_correctness": "patch is correct",
+                "overall_explanation": "cursor clean",
+                "overall_confidence": 0.99,
+            }
+            record: dict[str, object] = {}
+
+            def fake_run_with_heartbeat(
+                cmd: list[str],
+                cwd: Path,
+                **kwargs: object,
+            ) -> subprocess.CompletedProcess[str]:
+                record.update(
+                    {
+                        "cmd": cmd,
+                        "cwd": cwd,
+                        "input_text": kwargs["input_text"],
+                        "env": kwargs["env"],
+                    }
+                )
+                env = kwargs["env"]
+                assert isinstance(env, dict)
+                config = Path(env["CURSOR_CONFIG_DIR"]) / "cli-config.json"
+                record["config"] = json.loads(config.read_text())
+                return subprocess.CompletedProcess(
+                    cmd,
+                    0,
+                    json.dumps(
+                        {
+                            "type": "result",
+                            "result": json.dumps(report),
+                            "session_id": "session",
+                            "request_id": "request",
+                        }
+                    ),
+                    "",
+                )
+
+            args = self.helper["reviewer_args"](
+                self.helper["reviewer_test_args"](
+                    engine="cursor",
+                    cursor_bin=str(cursor_bin),
+                    stream_engine_output=False,
+                    web_search=True,
+                )
+            )[0]
+            globals_dict = self.helper["run_cursor"].__globals__
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "HOME": str(source_home),
+                    "USERPROFILE": str(source_home),
+                    "CURSOR_CONFIG_DIR": "",
+                },
+            ), mock.patch.dict(
+                globals_dict,
+                {
+                    "ensure_cursor_supported": lambda *_args: None,
+                    "run_with_heartbeat": fake_run_with_heartbeat,
+                },
+            ):
+                output = self.helper["run_cursor"](
+                    args,
+                    repo,
+                    "review the validated bundle",
+                )
+
+            cmd = record["cmd"]
+            cwd = record["cwd"]
+            env = record["env"]
+            assert isinstance(cmd, list)
+            assert isinstance(cwd, Path)
+            assert isinstance(env, dict)
+            self.assertEqual(record["input_text"], "review the validated bundle")
+            self.assertNotIn("review the validated bundle", cmd)
+            self.assertEqual(cmd[cmd.index("--mode") + 1], "ask")
+            self.assertEqual(cmd[cmd.index("--sandbox") + 1], "enabled")
+            self.assertEqual(Path(cmd[cmd.index("--workspace") + 1]), cwd)
+            self.assertIn("--trust", cmd)
+            self.assertFalse(cwd.is_relative_to(repo.resolve()))
+            self.assertFalse(Path(env["HOME"]).is_relative_to(repo.resolve()))
+            self.assertEqual(
+                record["config"]["permissions"]["deny"],
+                [
+                    "Shell(*)",
+                    "Read(**)",
+                    "Read(/**)",
+                    "Write(**)",
+                    "Write(/**)",
+                ],
+            )
+            self.assertEqual(record["config"]["authInfo"], {"type": "fake-auth"})
+            self.assertNotIn("enabledPlugins", record["config"])
+            self.assertEqual(args.actual_model, "cursor-grok-4.5-high-fast")
+            self.assertEqual(self.helper["extract_json"](output), report)
 
     def test_local_models_and_claude_effort_defaults(self) -> None:
         codex = self.helper["reviewer_args"](
