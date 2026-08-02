@@ -10,10 +10,13 @@
     "lint:actions": "github-actionlint .github/workflows/*.yml",
     "lint:shell": "shellcheck scripts/skills/*.sh scripts/sync/*.sh",
     "lint:skills": "TESSL_REVIEW_MODE=lint ./scripts/skills/review.sh",
+    "review:skills": "./scripts/skills/review.sh",
     "test:autoreview": "python3 -m unittest discover -s skills/autoreview/tests -p 'test_*.py'",
+    "test:skills": "node --test scripts/skills/review.test.ts",
     "test:sync": "node --test scripts/sync/sync.test.ts",
     "typecheck": "tsc --noEmit",
-    "verify": "pnpm run typecheck && pnpm run lint:shell && pnpm run lint:actions && pnpm run test:sync && pnpm run test:autoreview && pnpm run lint:skills"
+    "verify": "pnpm run typecheck && pnpm run lint:shell && pnpm run lint:actions && pnpm run test:sync && pnpm run test:skills && pnpm run test:autoreview && pnpm run lint:skills",
+    "verify:skills": "pnpm run verify && pnpm run review:skills"
   },
   "devDependencies": {
     "@types/node": "24.13.3",

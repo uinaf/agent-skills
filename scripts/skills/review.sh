@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$repo_root"
 
-threshold="${TESSL_THRESHOLD:-90}"
+threshold="${TESSL_THRESHOLD:-100}"
 tessl_version="${TESSL_CLI_VERSION:-0.94.0}"
 workspace="${TESSL_WORKSPACE:-uinaf}"
 args=()

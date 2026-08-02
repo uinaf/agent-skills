@@ -58,10 +58,19 @@ The local gate typechecks and tests the sync CLI, runs the autoreview tests, and
 lints shell scripts, GitHub Actions workflows, and every local skill. It expects
 ShellCheck on `PATH`; CI runs the same command.
 
+For any skill change, run the canonical release gate too:
+
+```bash
+pnpm run verify:skills
+```
+
+The trusted publish workflow runs that exact command and requires every
+repo-owned skill to score 100 before publication.
+
 ## Evaluate
 
 ```bash
-./scripts/skills/review.sh
+pnpm run review:skills
 ./scripts/skills/optimize.sh verify
 ```
 

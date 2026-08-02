@@ -45,16 +45,19 @@ Run a read-only plugin lint plus quality review across every local skill:
 ./scripts/skills/review.sh
 ```
 
-By default this enforces `--threshold 90` in the `uinaf` workspace. Override with `TESSL_THRESHOLD=94`, `TESSL_WORKSPACE=<name>`, or pass `--threshold` / `--workspace` explicitly.
+By default this enforces `--threshold 100` in the `uinaf` workspace. Override
+the workspace or CLI version only for deliberate diagnostics; the canonical
+authoring and publication gate remains 100.
 The wrapper defaults to an exact Tessl CLI version so the same commit uses the
 same evaluator. Set `TESSL_CLI_VERSION=<version>` to test a deliberate upgrade.
 
-In CI, Tessl has two lanes:
+CI has two trust-aware lanes:
 
-- Pull requests run with `TESSL_REVIEW_MODE=lint` and no `TESSL_TOKEN`, so
-  untrusted PR code only gets deterministic plugin structure validation.
-- Trusted `main` review runs through the GitHub `release` environment with
-  `TESSL_TOKEN` and executes authenticated `tessl review run`.
+- Pull requests run `pnpm run verify` without `TESSL_TOKEN`, so untrusted code
+  gets the same deterministic local checks and plugin structure validation.
+- The trusted publish workflow runs `pnpm run verify:skills` through the GitHub
+  `release` environment. This is the exact local release command and performs
+  one authenticated 100-point portfolio review before publishing.
 
 Set `TESSL_REVIEW_MODE=lint` to force the pull-request lane locally. If `CI` is
 set and `TESSL_TOKEN` is absent, the wrapper also falls back to lint mode.
@@ -62,8 +65,8 @@ set and `TESSL_TOKEN` is absent, the wrapper also falls back to lint mode.
 Useful direct invocations:
 
 ```bash
-pnpm dlx tessl@0.94.0 review run --workspace uinaf skills/autoreview
-pnpm dlx tessl@0.94.0 review run --json --workspace uinaf --threshold 90 skills/verify
+pnpm dlx tessl@0.94.0 review run --workspace uinaf --threshold 100 skills/autoreview
+pnpm dlx tessl@0.94.0 review run --json --workspace uinaf --threshold 100 skills/verify
 pnpm dlx tessl@0.94.0 plugin lint skills/vite-plus
 ```
 
@@ -103,15 +106,16 @@ pnpm dlx tessl@0.94.0 skill review --optimize --yes --max-iterations 1 skills/ve
 ## Suggested workflow
 
 1. Edit the skill
-2. Run `./scripts/skills/review.sh`
+2. Run `pnpm run verify:skills`
 3. If the score or suggestions are weak, run Tessl optimize on a single skill or apply the feedback manually
 4. Re-run review and inspect the diff before keeping any optimizer changes
 
 ## Notes
 
-- `skills/review.sh` is the batch entrypoint for local skill review
-- `skills/optimize.sh` applies mutations, so run it intentionally and inspect the resulting diff
+- `pnpm run verify:skills` is the canonical local and trusted-remote skill gate
+- `scripts/skills/review.sh` is the scored portfolio-review component of that gate
+- `scripts/skills/optimize.sh` applies mutations, so run it intentionally and inspect the resulting diff
 - Prefer optimizing one skill at a time rather than churning the whole repo at once
-- CI runs lint-only `./scripts/skills/review.sh` on pull requests and
-  authenticated review on `main` through the `release` environment
+- PR CI runs the deterministic `pnpm run verify` subset without secrets; the
+  trusted publish workflow runs the complete `pnpm run verify:skills` command
 - Skill packages use `.tessl-plugin/plugin.json`; do not reintroduce `tile.json`
