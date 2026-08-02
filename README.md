@@ -31,6 +31,10 @@ Skill installation is additive and manifest-driven. Sync installs every skill
 listed in `scripts/sync/skills.json` for the supported agents on the machine and
 does not remove globally installed skills outside the manifest.
 
+Manifest sources may be Git repositories or Agent Skills well-known HTTPS
+endpoints. Licensed ui.sh artifacts are published by `uinaf/cdn-uinaf-dev` and
+enter global sync only through their declared CDN source in the manifest.
+
 Run sync only from the primary checkout on `main`. Before changing global agent
 state, it requires a clean tracked checkout, fast-forwards, and confirms local
 `main` exactly matches its upstream. Ignored `rules/agents.local.md` and the
