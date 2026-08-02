@@ -9,24 +9,23 @@ Run the bundled structured review helper as a closeout check. This is code revie
 
 ## Rules
 
-- Require the authoritative task context plus completed builder guardrails and
+- Start only with authoritative task context, completed builder guardrails, and
   real-surface proof; cite the evidence or report the missing prerequisite.
-- Treat findings as advisory and keep fixes inside the original task scope. Do
-  not make a ship decision or invoke additional reviewer workflows.
+- Findings are advisory. Verify before fixing, stay inside the task scope, and
+  do not make a ship decision or invoke additional reviewer workflows.
 - Honor the requested engine and model. Use panels only when explicitly
   requested or justified by risk.
 - Treat the validated bundle as the reviewer's only repository input. Never bypass
   its required secret scan, sensitive-path omissions, or fail-closed input guards.
-- Split refused oversized bundles into coherent targets; independent chunks
-  cannot prove cross-file contracts.
+- Split refused oversized bundles into dependency-connected targets, verify
+  cross-target contracts directly, and never claim whole-change cleanliness
+  from independent chunk reviews.
 - If the source tree changes after bundle creation, discard the result and rerun against the updated tree.
 - Do not push just to review. Push only when the user requested push, ship, or PR update.
 
-Use [references/troubleshooting.md](references/troubleshooting.md) for heartbeat patience, Gitcrawl repair, regression provenance, security-suppression, and conscious-rejection rules.
-
-## Scope And Release Guardrails
-
-Use [references/scope.md](references/scope.md) before accepting a fix that could expand the task, touch release process, or start a third review-triggered patch cycle.
+Use [references/troubleshooting.md](references/troubleshooting.md) for operational
+edge cases. Consult [references/scope.md](references/scope.md) before expanding
+scope, touching release process, or starting a third review-triggered patch cycle.
 
 ## Task Context Precondition
 
@@ -42,31 +41,44 @@ If no external ticket or spec exists, use the current user request as the task c
 
 ## Core Workflow
 
-1. Read and distill the authoritative task context.
-2. Confirm builder guardrails and real-surface proof exist.
-3. Set `AUTOREVIEW` and `AUTOREVIEW_HARNESS` once for the active skill location.
-4. Pick the real target: dirty local work, branch/PR base, or a single commit.
-5. Run the helper with the task contract and Codex by default, or Claude/Cursor when requested.
-6. Verify each finding against the code and task contract; reject weak findings
+1. Confirm the precondition above, including builder guardrails and real-surface proof.
+2. Set `AUTOREVIEW` and `AUTOREVIEW_HARNESS` once for the active skill location.
+3. Pick the real target: dirty local work, branch/PR base, or a single commit.
+4. Run the helper with the task contract and Codex by default, or Claude/Cursor when requested.
+5. Verify each finding against the code and task contract; reject weak findings
    and inspect same-scope sibling instances of repeated bug classes.
-7. Fix accepted findings with the smallest change at the right ownership boundary.
-8. Rerun focused tests plus autoreview with the same task contract when fixes change code.
-9. Stop after the helper exits 0 with no accepted/actionable findings and report that exact clean run.
+6. Fix accepted findings with the smallest change at the right ownership boundary.
+7. Rerun focused tests plus autoreview with the same task contract when fixes change code.
+8. Stop after the helper exits 0 with no accepted/actionable findings and report that exact clean run.
 
 ## Skill Path (set once)
 
-Set `skill_root` to the project-local, source-checkout, or global skill directory,
-then reuse the exported commands below. For Claude Code globals, use
-`$HOME/.claude/skills/autoreview`.
+Set `skill_root` to the active project-local, source-checkout, or global skill
+directory, then reuse the exported commands below.
 
 ```bash
-skill_root="${skill_root:-${AGENTS_HOME:-$HOME/.agents}/skills/autoreview}"
+if test -z "${skill_root:-}"; then
+  for candidate in \
+    .agents/skills/autoreview \
+    .claude/skills/autoreview \
+    skills/autoreview \
+    "${AGENTS_HOME:-$HOME/.agents}/skills/autoreview"; do
+    if test -x "$candidate/scripts/autoreview"; then
+      skill_root="$candidate"
+      break
+    fi
+  done
+fi
+test -x "${skill_root:-}/scripts/autoreview" || {
+  printf '%s\n' "autoreview skill not found" >&2
+  exit 1
+}
 export AUTOREVIEW="$skill_root/scripts/autoreview"
 export AUTOREVIEW_HARNESS="$skill_root/scripts/test-review-harness"
 ```
 
-Project-local roots are `.agents/skills/autoreview` or
-`.claude/skills/autoreview`; this source checkout uses `skills/autoreview`.
+For Claude Code globals, set `skill_root="$HOME/.claude/skills/autoreview"`
+before running the snippet.
 
 ## Pick Target
 
@@ -152,8 +164,6 @@ Inline syntax is also supported for simple model IDs:
 "$AUTOREVIEW" --reviewers codex:gpt-5.6-sol:high,claude:claude-opus-5:high
 ```
 
-Engine-specific thinking levels and Cursor effort behavior are documented below.
-
 For models with slashes or extra colons, prefer keyed form:
 
 ```bash
@@ -184,6 +194,8 @@ The smoke harness has thin shell wrappers over a shared Python implementation:
 "$AUTOREVIEW_HARNESS" --fixture benign --engine codex
 ```
 
+Use [references/upstream.md](references/upstream.md) for packaging provenance.
+
 ## Final Report
 
 Include:
@@ -195,10 +207,3 @@ Include:
 - the clean review result from the final helper/review run, or why a remaining finding was consciously rejected
 
 Do not rerun solely to improve report wording.
-
-## References
-
-- [references/troubleshooting.md](references/troubleshooting.md) - security-audit suppression and other edge-case closeout notes
-- [references/scope.md](references/scope.md) - scope governor and release-branch freeze rules
-- [references/engine-details.md](references/engine-details.md) - model defaults, preferred model lists, environment overrides, and engine isolation details
-- [references/upstream.md](references/upstream.md) - OpenClaw upstream provenance and local packaging notes
