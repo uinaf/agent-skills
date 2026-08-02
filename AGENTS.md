@@ -3,7 +3,9 @@
 Repo-local contributor guidance. Global agent behavior lives in [`rules/agents.md`](rules/agents.md).
 
 - Keep top-level docs short. Put skill depth in `skills/<name>/references/` only when it earns its keep.
-- Skill frontmatter has `name` and `description` only.
+- Skill frontmatter has `name` and `description` only unless a supported
+  invocation-control field is required to keep a manual workflow user-invoked.
+  Keep Codex-only invocation policy in `agents/openai.yaml`.
 - Descriptions should self-activate: what it does, when to use it, and the main boundary.
 - Put shared repo-wide guidance here; keep package-specific guidance inside its owning skill.
 - Keep every skill package standalone. Do not identify, invoke, import, route to, require, or sequence against a sibling package as a skill in frontmatter, picker metadata, bodies, references, scripts, or evals. State prerequisites, boundaries, and next steps as capabilities and evidence instead of skill identities. Ordinary package, tool, and technology references remain valid.
