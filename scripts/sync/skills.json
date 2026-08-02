@@ -17,10 +17,6 @@
       "source": "uinaf/agents"
     },
     {
-      "name": "effect-ts",
-      "source": "Effect-TS/skills"
-    },
-    {
       "name": "i-have-adhd",
       "source": "ayghri/i-have-adhd"
     },

@@ -31,6 +31,11 @@ Skill installation is additive and manifest-driven. Sync installs every skill
 listed in `scripts/sync/skills.json` for the supported agents on the machine and
 does not remove globally installed skills outside the manifest.
 
+Framework-specific guidance can stay with the repositories that need it. An
+existing Effect repository should install the upstream `effect-ts` skill
+locally; `agent-readiness` treats that repository-owned guidance as readiness
+evidence instead of relying on a machine-global copy.
+
 Manifest sources may be Git repositories or Agent Skills well-known HTTPS
 endpoints. Licensed ui.sh artifacts are published by `uinaf/cdn-uinaf-dev` and
 enter global sync only through their declared CDN source in the manifest.
