@@ -10,13 +10,9 @@ one skill without adopting this repository's tooling or another skill package.
 List or install packages with the Agent Skills CLI:
 
 ```bash
-pnpm dlx skills@1.5.7 add uinaf/skills --list
-pnpm dlx skills@1.5.7 add uinaf/skills -g -y -a codex -a claude-code -s verify
+pnpm dlx skills add uinaf/skills --list
+pnpm dlx skills add uinaf/skills -g -y -a codex -a claude-code -s verify
 ```
-
-Machine-global selection, instructions, and additive synchronization belong to
-[`uinaf/dotfiles`](https://github.com/uinaf/dotfiles). Repository-local skills
-remain owned by their consumer repository.
 
 ## Layout
 
