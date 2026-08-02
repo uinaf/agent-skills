@@ -8,8 +8,8 @@ on:
       - "skills/**"
       - "package.json"
       - "pnpm-lock.yaml"
-      - "scripts/skills/review.sh"
-      - "scripts/skills/publish.sh"
+      - "scripts/review.sh"
+      - "scripts/publish.sh"
       - ".github/workflows/publish-skills.yml"
       - ".github/workflows/review-skills.yml"
   workflow_dispatch:
@@ -91,7 +91,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           TESSL_WORKSPACE: uinaf
           TESSL_PUBLISH_ALL: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
-        run: ./scripts/skills/publish.sh
+        run: ./scripts/publish.sh
 
       - name: Commit published plugin versions
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

@@ -18,7 +18,7 @@ jq -r '.name' skills/*/.tessl-plugin/plugin.json
 - `.github/workflows/publish-skills.yml` runs the canonical repository verification gate first, including secretless skill lint, then runs authenticated Tessl review and publish through the `release` Environment for secret scoping
 - Pushes to `main` publish only the plugins that changed
 - Manual workflow runs publish all plugins only when the run ref is `main`; non-`main` manual runs can lint, but authenticated review and publish are skipped
-- The publish job runs `scripts/skills/publish.sh`, which detects changed plugin directories, runs `tessl plugin lint`, and publishes with `tessl plugin publish`
+- The publish job runs `scripts/publish.sh`, which detects changed plugin directories, runs `tessl plugin lint`, and publishes with `tessl plugin publish`
 - The script defaults to `--bump patch`; set `TESSL_PUBLISH_BUMP=minor` or `major` only for intentional release version changes
 - After a successful publish, the workflow commits the resulting `.tessl-plugin/plugin.json` version bumps back to `main` as `github-actions[bot]` with the workflow `GITHUB_TOKEN` and a skip-CI commit message
 - Both review and publish jobs skip `[skip ci]` commits, and the publish job uses non-cancellable concurrency so version probing and writeback cannot race another publish

@@ -3,7 +3,7 @@
 Use the repo wrappers when present; they own the audited Tessl pin and batch behavior.
 
 ```bash
-./scripts/skills/review.sh
+./scripts/review.sh
 ```
 
 For a formal single-skill audit or a repo without wrappers, use the same pin as the repo's review scripts:
@@ -20,7 +20,7 @@ Capture the score, summary, and concrete suggestions before proposing edits. Pre
 Use optimization only when explicitly requested:
 
 ```bash
-./scripts/skills/optimize.sh <name>
+./scripts/optimize.sh <name>
 ```
 
 If the repo has no optimizer wrapper, reuse the audited `tessl_version` from the formal audit block:

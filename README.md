@@ -17,7 +17,7 @@ pnpm dlx skills add uinaf/skills -g -y -a codex -a claude-code -s verify
 ## Layout
 
 - `skills/` contains the independent skill packages.
-- `scripts/skills/` contains Tessl review, optimization, and publishing helpers.
+- `scripts/` contains Tessl review, optimization, and publishing helpers.
 - `docs/distribution.md` documents the publication contract.
 
 ## Verify

@@ -19,7 +19,7 @@ autoreview, and Tessl plugin checks used by CI.
 Run a read-only plugin lint plus quality review across every local skill:
 
 ```bash
-./scripts/skills/review.sh
+./scripts/review.sh
 ```
 
 By default this enforces `--threshold 100` in the `uinaf` workspace. Override
@@ -47,7 +47,7 @@ pnpm dlx tessl@0.94.0 review run --json --workspace uinaf --threshold 100 skills
 pnpm dlx tessl@0.94.0 plugin lint skills/vite-plus
 ```
 
-Use per-skill `--json` output directly with Tessl rather than `skills/review.sh`, because the batch wrapper emits one review per skill.
+Use per-skill `--json` output directly with Tessl rather than `scripts/review.sh`, because the batch wrapper emits one review per skill.
 
 ## Impact evals
 
@@ -64,14 +64,14 @@ Run plugin impact evals from a skill directory when validating score-impact chan
 tessl eval run --quality-check skills/<skill-name>
 ```
 
-`scripts/skills/publish.sh` publishes with `tessl plugin publish --bump patch` by default. Set `TESSL_SCENARIO_QUALITY_CHECK=true` only when Tessl's scenario-quality workflow is healthy enough to be a publish gate.
+`scripts/publish.sh` publishes with `tessl plugin publish --bump patch` by default. Set `TESSL_SCENARIO_QUALITY_CHECK=true` only when Tessl's scenario-quality workflow is healthy enough to be a publish gate.
 
 ## Optimize
 
 Apply Tessl's optimizer to one skill at a time:
 
 ```bash
-./scripts/skills/optimize.sh verify
+./scripts/optimize.sh verify
 ```
 
 Direct form:
@@ -90,8 +90,8 @@ pnpm dlx tessl@0.94.0 skill review --optimize --yes --max-iterations 1 skills/ve
 ## Notes
 
 - `pnpm run verify:skills` is the canonical local and trusted-remote skill gate
-- `scripts/skills/review.sh` is the scored portfolio-review component of that gate
-- `scripts/skills/optimize.sh` applies mutations, so run it intentionally and inspect the resulting diff
+- `scripts/review.sh` is the scored portfolio-review component of that gate
+- `scripts/optimize.sh` applies mutations, so run it intentionally and inspect the resulting diff
 - Prefer optimizing one skill at a time rather than churning the whole repo at once
 - PR CI runs the deterministic `pnpm run verify` subset without secrets; the
   trusted publish workflow runs the complete `pnpm run verify:skills` command
