@@ -1,4 +1,4 @@
-# uinaf skills
+# uinaf/skills
 
 A small catalog of standalone skills for coding agents. Install only what you
 need; each skill works independently of this repository's development tooling
