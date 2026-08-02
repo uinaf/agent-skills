@@ -60,7 +60,7 @@ then reuse the exported commands below. For Claude Code globals, use
 `$HOME/.claude/skills/autoreview`.
 
 ```bash
-skill_root="${AGENTS_HOME:-$HOME/.agents}/skills/autoreview"
+skill_root="${skill_root:-${AGENTS_HOME:-$HOME/.agents}/skills/autoreview}"
 export AUTOREVIEW="$skill_root/scripts/autoreview"
 export AUTOREVIEW_HARNESS="$skill_root/scripts/test-review-harness"
 ```

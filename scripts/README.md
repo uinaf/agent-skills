@@ -113,8 +113,8 @@ pnpm dlx tessl@0.94.0 skill review --optimize --yes --max-iterations 1 skills/ve
 ## Notes
 
 - `pnpm run verify:skills` is the canonical local and trusted-remote skill gate
-- `skills/review.sh` is the scored portfolio-review component of that gate
-- `skills/optimize.sh` applies mutations, so run it intentionally and inspect the resulting diff
+- `scripts/skills/review.sh` is the scored portfolio-review component of that gate
+- `scripts/skills/optimize.sh` applies mutations, so run it intentionally and inspect the resulting diff
 - Prefer optimizing one skill at a time rather than churning the whole repo at once
 - PR CI runs the deterministic `pnpm run verify` subset without secrets; the
   trusted publish workflow runs the complete `pnpm run verify:skills` command
