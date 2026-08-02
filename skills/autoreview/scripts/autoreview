@@ -9755,7 +9755,7 @@ def print_cursor_metadata(text: str) -> None:
     if event is None:
         return
     parts = [
-        f"{key}={value}"
+        f"{key}={display_escape(value, 500)}"
         for key in ("session_id", "request_id")
         if isinstance((value := event.get(key)), str) and value
     ]
@@ -9780,7 +9780,14 @@ def ensure_cursor_supported(
             env=engine_env,
         )
     help_text = result.stdout + result.stderr
-    required = ("--print", "--output-format", "--mode", "--sandbox", "--workspace")
+    required = (
+        "--print",
+        "--output-format",
+        "--mode",
+        "--sandbox",
+        "--trust",
+        "--workspace",
+    )
     if args.model:
         required += ("--model",)
     missing = [flag for flag in required if flag not in help_text]
@@ -9909,6 +9916,7 @@ def run_cursor(args: argparse.Namespace, repo: Path, prompt: str) -> str:
                     "Read(/**)",
                     "Write(**)",
                     "Write(/**)",
+                    "Mcp(*)",
                 ],
             },
         }
@@ -9953,9 +9961,14 @@ def run_cursor(args: argparse.Namespace, repo: Path, prompt: str) -> str:
             resolve_root=repo,
         )
     if result.returncode != 0:
+        detail = display_escape(
+            result.stderr or result.stdout,
+            4000,
+            multiline=True,
+        )
         raise SystemExit(
             f"cursor engine failed ({result.returncode})\n"
-            f"{result.stderr or result.stdout}"
+            f"{detail}"
         )
     args.actual_model = args.model
     print_cursor_metadata(result.stdout)
@@ -10124,9 +10137,12 @@ class CursorStreamDisplay:
         message = event.get("message")
         if not isinstance(message, dict):
             return self.hidden_activity()
+        content = message.get("content")
+        if not isinstance(content, list):
+            return self.hidden_activity()
         chunks = [
             item["text"].rstrip()
-            for item in message.get("content", [])
+            for item in content
             if isinstance(item, dict)
             and item.get("type") == "text"
             and isinstance(item.get("text"), str)
