@@ -216,6 +216,7 @@ class AutoreviewHardeningTests(unittest.TestCase):
                     "HOME": str(source_home),
                     "USERPROFILE": str(source_home),
                     "CURSOR_CONFIG_DIR": "",
+                    "CURSOR_API_KEY": "",
                 },
             ), mock.patch.dict(
                 globals_dict,
@@ -252,12 +253,62 @@ class AutoreviewHardeningTests(unittest.TestCase):
                     "Read(/**)",
                     "Write(**)",
                     "Write(/**)",
+                    "Mcp(*)",
                 ],
             )
+            self.assertEqual(record["config"]["permissions"]["allow"], [])
             self.assertEqual(record["config"]["authInfo"], {"type": "fake-auth"})
             self.assertNotIn("enabledPlugins", record["config"])
             self.assertEqual(args.actual_model, "cursor-grok-4.5-high-fast")
             self.assertEqual(self.helper["extract_json"](output), report)
+
+    def test_cursor_capability_probe_requires_trust(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            repo = init_repo(Path(tempdir))
+            args = argparse.Namespace(model="cursor-grok-4.5-high-fast")
+            help_without_trust = "--print --output-format --mode --sandbox --workspace --model"
+            completed = subprocess.CompletedProcess(
+                ["cursor-agent", "--help"],
+                0,
+                help_without_trust,
+                "",
+            )
+            probe = self.helper["ensure_cursor_supported"]
+            with mock.patch.dict(probe.__globals__, {"run": lambda *_args, **_kwargs: completed}):
+                with self.assertRaisesRegex(SystemExit, "--trust"):
+                    probe(args, repo, "cursor-agent", {})
+
+    def test_cursor_metadata_and_stream_content_are_defensive(self) -> None:
+        control = chr(27) + "]52;c;VEVTVA==" + chr(7)
+        event = json.dumps(
+            {
+                "type": "result",
+                "session_id": control,
+                "request_id": "request",
+            }
+        )
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            self.helper["print_cursor_metadata"](event)
+
+        rendered = stderr.getvalue()
+        self.assertNotIn(chr(27), rendered)
+        self.assertNotIn(chr(7), rendered)
+        self.assertIn(r"\x1b", rendered)
+        self.assertIn(r"\x07", rendered)
+
+        display = self.helper["CursorStreamDisplay"]()
+        self.assertIsNone(
+            display(
+                "stdout",
+                json.dumps(
+                    {
+                        "type": "assistant",
+                        "message": {"content": 42},
+                    }
+                ),
+            )
+        )
 
     def test_local_models_and_claude_effort_defaults(self) -> None:
         codex = self.helper["reviewer_args"](
