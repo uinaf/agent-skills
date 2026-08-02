@@ -1,21 +1,27 @@
 # Tessl Audit Commands
 
-Use the repo wrappers when present; they own the audited Tessl pin and batch behavior.
+Use the repo wrappers when present; they own the locked Tessl version and batch
+behavior.
 
 ```bash
 ./scripts/review.sh
 ```
 
-For a formal single-skill audit or a repo without wrappers, use the same pin as the repo's review scripts:
+For a formal single-skill audit or a repo without wrappers, use its locked,
+repository-local Tessl executable:
 
 ```bash
 skill_dir="skills/<name>"
-tessl_version="${TESSL_CLI_VERSION:-0.94.0}"
-npx "tessl@$tessl_version" plugin lint "$skill_dir"
-npx "tessl@$tessl_version" review run --workspace uinaf --threshold 0 --json "$skill_dir"
+pnpm exec tessl plugin lint "$skill_dir"
+pnpm exec tessl review run --workspace uinaf --threshold 0 --json "$skill_dir"
 ```
 
-Capture the score, summary, and concrete suggestions before proposing edits. Prefer per-skill `--json` for a narrow or structured loop. If the audited Tessl version is unavailable, install or initialize it using the [CLI documentation](https://docs.tessl.io/reference/cli-commands).
+Capture the score, summary, and concrete suggestions before proposing edits.
+Prefer per-skill `--json` for a narrow or structured loop. If the repo does not
+own Tessl yet, add an exact development dependency and lockfile entry or follow
+its existing tool-version policy. Do not let `dlx`, `npx`, or another fallback
+silently resolve the latest release. Use the
+[CLI documentation](https://docs.tessl.io/reference/cli-commands) for setup.
 
 Use optimization only when explicitly requested:
 
@@ -23,8 +29,8 @@ Use optimization only when explicitly requested:
 ./scripts/optimize.sh <name>
 ```
 
-If the repo has no optimizer wrapper, reuse the audited `tessl_version` from the formal audit block:
+If the repo has no optimizer wrapper, use the same locked executable:
 
 ```bash
-npx "tessl@$tessl_version" skill review --optimize --yes --max-iterations 1 skills/<name>
+pnpm exec tessl skill review --optimize --yes --max-iterations 1 skills/<name>
 ```

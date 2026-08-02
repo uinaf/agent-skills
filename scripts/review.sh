@@ -5,7 +5,6 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
 threshold="${TESSL_THRESHOLD:-100}"
-tessl_version="${TESSL_CLI_VERSION:-0.94.0}"
 workspace="${TESSL_WORKSPACE:-uinaf}"
 args=()
 use_lint=false
@@ -32,7 +31,7 @@ for arg in "$@"; do
 done
 
 if [[ "$has_json" == true ]]; then
-  echo "batch review does not support --json; run pnpm dlx tessl review run --json skills/<name> per skill"
+  echo "batch review does not support --json; run pnpm exec tessl review run --json skills/<name> per skill"
   exit 1
 fi
 
@@ -55,13 +54,13 @@ fi
 for skill_dir in skills/*; do
   if [[ -d "$skill_dir" ]]; then
     echo "== tessl plugin lint: ${skill_dir#skills/} =="
-    pnpm dlx "tessl@$tessl_version" plugin lint "$skill_dir"
+    pnpm exec tessl plugin lint "$skill_dir"
 
     if [[ "$use_lint" == true ]]; then
       continue
     else
       echo "== tessl review: ${skill_dir#skills/} =="
-      pnpm dlx "tessl@$tessl_version" review run "${args[@]}" "$skill_dir"
+      pnpm exec tessl review run "${args[@]}" "$skill_dir"
     fi
   fi
 done

@@ -1,8 +1,8 @@
 # Skill Evaluation
 
-Use the repository wrappers for Tessl review and optimization. They own the
-audited CLI version, workspace, and quality threshold so examples do not repeat
-release configuration.
+Use the repository wrappers for Tessl review and optimization. The exact CLI is
+installed from `devDependencies` and locked by `pnpm-lock.yaml`; the wrappers
+own the workspace and quality threshold.
 
 ## Verify the repository
 
@@ -26,9 +26,9 @@ Run a read-only plugin lint plus quality review across every local skill:
 ```
 
 By default, authenticated review uses the `uinaf` workspace and requires a
-score of 100. The wrapper pins the CLI invocation; Tessl still owns the remote
-review service. Override `TESSL_CLI_VERSION`, `TESSL_WORKSPACE`, or
-`TESSL_THRESHOLD` only for deliberate diagnostics.
+score of 100. The lockfile pins the CLI; Tessl still owns the remote review
+service. Override `TESSL_WORKSPACE` or `TESSL_THRESHOLD` only for deliberate
+diagnostics.
 
 CI has two trust-aware lanes:
 
@@ -41,23 +41,27 @@ CI has two trust-aware lanes:
 Set `TESSL_REVIEW_MODE=lint` to force the pull-request lane locally. If `CI` is
 set and `TESSL_TOKEN` is absent, the wrapper also falls back to lint mode.
 
-For structured output from one package, use the Tessl CLI directly with
-`review run --json`; `scripts/review.sh` intentionally reviews the whole
-portfolio and rejects `--json`.
+For structured output from one package, use the locked CLI directly;
+`scripts/review.sh` intentionally reviews the whole portfolio and rejects
+`--json`:
+
+```bash
+pnpm exec tessl review run --json --workspace uinaf --threshold 100 skills/verify
+```
 
 ## Impact evals
 
 Eval scenarios live under each skill's `evals/` directory. Generate missing scenarios with Tessl and merge them into the target skill:
 
 ```bash
-tessl scenario generate --workspace uinaf --count 3 skills/<skill-name>
-tessl scenario download --output skills/<skill-name>/evals --strategy merge <generation-id>
+pnpm exec tessl scenario generate --workspace uinaf --count 3 skills/<skill-name>
+pnpm exec tessl scenario download --output skills/<skill-name>/evals --strategy merge <generation-id>
 ```
 
 Run plugin impact evals from a skill directory when validating score-impact changes:
 
 ```bash
-tessl eval run --quality-check skills/<skill-name>
+pnpm exec tessl eval run --quality-check skills/<skill-name>
 ```
 
 Publishing is documented separately in [Distribution](../docs/distribution.md).

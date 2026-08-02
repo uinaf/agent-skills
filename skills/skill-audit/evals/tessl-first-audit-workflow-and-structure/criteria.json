@@ -10,7 +10,7 @@
     {
       "name": "Correct single-skill command",
       "max_score": 10,
-      "description": "audit-log.sh contains `npx tessl review run` (or `tessl review run`) with the `--json` flag and a path targeting the single skill folder"
+      "description": "audit-log.sh contains a repository-local locked Tessl invocation such as `pnpm exec tessl review run`, with the `--json` flag and a path targeting the single skill folder"
     },
     {
       "name": "Score reported",

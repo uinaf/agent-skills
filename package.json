@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/node": "24.13.3",
     "github-actionlint": "1.7.12",
+    "tessl": "0.94.0",
     "typescript": "7.0.2"
   }
 }

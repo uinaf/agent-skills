@@ -4,7 +4,6 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-tessl_version="${TESSL_CLI_VERSION:-0.94.0}"
 workspace="${TESSL_WORKSPACE:-uinaf}"
 bump="${TESSL_PUBLISH_BUMP:-patch}"
 publish_all="${TESSL_PUBLISH_ALL:-false}"
@@ -55,8 +54,8 @@ for plugin_dir in "${plugin_dirs[@]}"; do
   fi
 
   echo "== tessl plugin lint: ${plugin_dir#skills/} =="
-  pnpm dlx "tessl@$tessl_version" plugin lint "$plugin_dir"
+  pnpm exec tessl plugin lint "$plugin_dir"
 
   echo "== tessl plugin publish: ${plugin_dir#skills/} =="
-  pnpm dlx "tessl@$tessl_version" plugin publish "${publish_args[@]}" "$plugin_dir"
+  pnpm exec tessl plugin publish "${publish_args[@]}" "$plugin_dir"
 done

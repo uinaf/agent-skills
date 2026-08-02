@@ -14,6 +14,9 @@ importers:
       github-actionlint:
         specifier: 1.7.12
         version: 1.7.12
+      tessl:
+        specifier: 0.94.0
+        version: 0.94.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -172,6 +175,11 @@ packages:
     resolution: {integrity: sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==}
     engines: {node: '>=18'}
 
+  tessl@0.94.0:
+    resolution: {integrity: sha512-4l45DkL8UO8usIjOeERKJ93KVihin8hTFRIsT93A4RZB6/jzmiNpR/2KIHj80q7UqN0rBCOPMZ6uAPkNIwkTgQ==}
+    engines: {node: '>=20'}
+    hasBin: true
+
   typescript@7.0.2:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
@@ -276,6 +284,8 @@ snapshots:
       minipass: 7.1.3
       minizlib: 3.1.0
       yallist: 5.0.0
+
+  tessl@0.94.0: {}
 
   typescript@7.0.2:
     optionalDependencies:

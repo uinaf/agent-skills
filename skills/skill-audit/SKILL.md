@@ -109,4 +109,4 @@ Keep details compact:
 
 - [references/scorecard.md](references/scorecard.md) — audit dimensions, severity, and a compact review template
 - [references/best-practices.md](references/best-practices.md) — distilled skill-authoring guidance from common repo conventions and Claude's skill best-practices guide
-- [references/tessl.md](references/tessl.md) — pinned formal-review, batch, and optimizer commands
+- [references/tessl.md](references/tessl.md) — locked formal-review, batch, and optimizer commands

@@ -30,6 +30,9 @@ non-cancellable concurrency so version probing and writeback cannot race.
 Publish-path actions are pinned to full commit SHAs with same-line version
 comments for maintenance tooling.
 
+Both jobs install the frozen pnpm lockfile and invoke the exact Tessl
+`devDependency` through `pnpm exec tessl`.
+
 ## Required GitHub Environment
 
 Configure a GitHub Environment named `release`:
@@ -45,7 +48,7 @@ Create a Tessl API key for the `uinaf` workspace, then add it to the `release` E
 You can create the key either from the Tessl web UI or with the CLI:
 
 ```bash
-pnpm dlx tessl api-key create --workspace uinaf --name github-actions-publish --role publisher
+pnpm exec tessl api-key create --workspace uinaf --name github-actions-publish --role publisher
 ```
 
 The workflows still reference the token as `${{ secrets.TESSL_TOKEN }}`; GitHub resolves that value from the `release` Environment only for jobs that declare `environment: release`. Pull-request jobs do not declare the environment and force lint mode instead.
