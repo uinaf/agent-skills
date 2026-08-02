@@ -5,7 +5,7 @@ This skill tracks OpenClaw's shared agent-skills repo as its canonical upstream.
 - Source: https://github.com/openclaw/agent-skills/tree/main/skills/autoreview
 - Reviewed and applied upstream commit: `66cf3df`.
 
-This repo's version keeps `uinaf/agents` packaging files such as
+This repo's version keeps `uinaf/skills` packaging files such as
 `.tessl-plugin/plugin.json`, `agents/openai.yaml`, and this provenance note
 around the upstream skill core.
 It prunes engine/platform branches Altay does not use: the local helper keeps

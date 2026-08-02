@@ -1,7 +1,5 @@
 .claude/
 node_modules/
-rules/agents.local.md
-rules/agents.final.md
 
 # Python
 __pycache__/

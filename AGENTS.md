@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Repo-local contributor guidance. Global agent behavior lives in [`rules/agents.md`](rules/agents.md).
+Contributor guidance for this reusable skill catalog.
 
 - Keep top-level docs short. Put skill depth in `skills/<name>/references/` only when it earns its keep.
 - Skill frontmatter has `name` and `description` only unless a supported

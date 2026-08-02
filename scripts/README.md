@@ -2,15 +2,6 @@
 
 This repo uses Tessl as the evaluation loop for skill quality, clarity, self-activation, and impact scenarios.
 
-## Sync
-
-The public entrypoint remains a small compatibility wrapper around the typed
-Node 24 implementation in `sync/sync.ts`:
-
-```bash
-./scripts/sync/sync.sh
-```
-
 Run the canonical local gate without pulling repositories or changing globally
 installed skills:
 
@@ -20,22 +11,8 @@ pnpm run verify
 ```
 
 The gate expects ShellCheck on `PATH`; actionlint and the TypeScript toolchain
-are installed from the lockfile. It runs the TypeScript, shell, workflow, sync,
+are installed from the lockfile. It runs the TypeScript, shell, workflow,
 autoreview, and Tessl plugin checks used by CI.
-
-The sync tests use an isolated fixture runtime. They prove that every manifest
-skill is attempted, installer failures are reported together, a partial failure
-exits nonzero, invalid manifests fail before rule mutation, local overrides are
-included, managed links are replaced, and unmanaged global rule files are left
-untouched. CI runs the same verification command on pull requests and pushes to
-`main`.
-
-Sync refuses linked worktrees, non-`main` branches, tracked or staged changes,
-and local `main` commits not published to the configured upstream before
-changing global agent state. Ignored local/generated rule files remain allowed.
-It preflights both global rule destinations and replaces only absent paths or
-symlinks already managed by this checkout. Installer failures include a bounded
-diagnostic with common credential-shaped values redacted.
 
 ## Review
 
