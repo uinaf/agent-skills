@@ -65,42 +65,6 @@
       "source": "tanstack-skills/tanstack-skills"
     },
     {
-      "name": "ui-add-dark-mode",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-brand-kit",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-canonicalize-tailwind",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-componentize",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-dark-mode-image",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-design",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-ideas",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-make-responsive",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
-      "name": "ui-markup-from-image",
-      "source": "zebroid-skate/uidotsh-skills"
-    },
-    {
       "name": "vercel-react-best-practices",
       "source": "vercel-labs/agent-skills"
     },
