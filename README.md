@@ -1,3 +1,5 @@
+![skills — reusable agent skills with deterministic review and publishing gates.](https://uinaf.dev/og/banner/skills.png)
+
 # uinaf/skills
 
 A small catalog of standalone skills for coding agents. Install only what you
