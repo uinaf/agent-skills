@@ -14,5 +14,7 @@ Repo-local contributor guidance. Global agent behavior lives in [`rules/agents.m
   Optional documentation links are fine; composition belongs to the consumer.
 - Check reality before editing docs or examples; keep commands and paths repo-valid.
 - Run `pnpm run verify` before handoff; CI uses the same repository gate.
-- Run `pnpm dlx tessl@0.94.0 review run --workspace uinaf skills/<name>` for skill changes, or `./scripts/skills/review.sh` for broad changes.
+- Run `pnpm run verify:skills` for every skill change. It is the same authenticated
+  100-point portfolio gate used before remote publication. During iteration, use
+  `pnpm dlx tessl@0.94.0 review run --workspace uinaf --threshold 100 skills/<name>`.
 - Use repo-relative links in checked-in Markdown. No absolute local paths, `file://`, or editor URIs.

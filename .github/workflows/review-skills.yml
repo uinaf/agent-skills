@@ -2,9 +2,6 @@ name: Review Skills
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -37,33 +34,3 @@ jobs:
         env:
           TESSL_AUTO_UPDATE_INTERVAL_MINUTES: "0"
         run: pnpm run verify
-
-  main-review:
-    needs: verify
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    environment:
-      name: release
-    env:
-      TESSL_AUTO_UPDATE_INTERVAL_MINUTES: "0"
-      TESSL_THRESHOLD: "90"
-      TESSL_TOKEN: ${{ secrets.TESSL_TOKEN }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version-file: ".node-version"
-          package-manager-cache: false
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
-        with:
-          standalone: true
-
-      - name: Review skills with authenticated Tessl
-        run: ./scripts/skills/review.sh

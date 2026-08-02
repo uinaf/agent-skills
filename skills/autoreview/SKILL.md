@@ -7,30 +7,18 @@ description: "Run the bundled Codex, Claude, or Cursor autoreview helper as a st
 
 Run the bundled structured review helper as a closeout check. This is code review, not Guardian `auto_review` approval routing.
 
-Use when:
+## Rules
 
-- user asks for Codex review / Claude review / Cursor review / autoreview / second-model review
-- after non-trivial code edits and builder verification, when a tool-backed second-model closeout is wanted
-- reviewing a local branch or PR branch after fixes
-
-## Boundaries
-
-- Require the authoritative task context before review: the current request plus any PR/MR description, linked ticket, referenced spec, or explicit non-goals.
-- Require completed builder guardrails and real-surface proof before starting; cite the existing evidence or report the missing prerequisite.
-- Report advisory findings and closeout cleanliness. Do not turn this pass into an independent ship decision or invoke additional reviewer workflows.
-
-## Contract
-
-- Treat review output as advisory: verify every finding against real code, adjacent files, and dependency docs/types when relevant.
-- Require the reviewer to check implementation completeness against the supplied objective and acceptance criteria, not only code quality.
-- Reject speculative or over-broad findings; fix accepted issues with the smallest change at the right ownership boundary.
-- When a finding exposes a repeated bug class, inspect the current PR scope for sibling instances before fixing.
-- Keep review-triggered fixes inside the original task scope.
-- If a review-triggered fix changes code, rerun focused proof plus autoreview until the helper exits cleanly; stop there.
-- Honor the requested engine/model, do not invoke nested reviewers, and use review panels only when explicitly requested or risk justifies them.
-- Treat the validated bundle as the reviewer's only repository input. Before engine invocation, the helper requires TruffleHog and scans temporary snapshots of the exact added, modified, or deleted content under review using its `verified,unknown` policy. It never auto-installs the scanner.
-- Sensitive paths are omitted from the review bundle. Binary, gitlink, unsafe linked, incomplete, or unsafe secret-bearing input still fails closed rather than widening filesystem access.
-- Split oversized changes into coherent review targets when the helper refuses a bundle; independent chunks cannot safely prove cross-file or cross-chunk contracts.
+- Require the authoritative task context plus completed builder guardrails and
+  real-surface proof; cite the evidence or report the missing prerequisite.
+- Treat findings as advisory and keep fixes inside the original task scope. Do
+  not make a ship decision or invoke additional reviewer workflows.
+- Honor the requested engine and model. Use panels only when explicitly
+  requested or justified by risk.
+- Treat the validated bundle as the reviewer's only repository input. Never bypass
+  its required secret scan, sensitive-path omissions, or fail-closed input guards.
+- Split refused oversized bundles into coherent targets; independent chunks
+  cannot prove cross-file contracts.
 - If the source tree changes after bundle creation, discard the result and rerun against the updated tree.
 - Do not push just to review. Push only when the user requested push, ship, or PR update.
 
@@ -59,37 +47,26 @@ If no external ticket or spec exists, use the current user request as the task c
 3. Set `AUTOREVIEW` and `AUTOREVIEW_HARNESS` once for the active skill location.
 4. Pick the real target: dirty local work, branch/PR base, or a single commit.
 5. Run the helper with the task contract and Codex by default, or Claude/Cursor when requested.
-6. Verify each finding against the code and task contract; reject weak findings explicitly.
-7. Fix accepted findings at the right ownership boundary.
+6. Verify each finding against the code and task contract; reject weak findings
+   and inspect same-scope sibling instances of repeated bug classes.
+7. Fix accepted findings with the smallest change at the right ownership boundary.
 8. Rerun focused tests plus autoreview with the same task contract when fixes change code.
 9. Stop after the helper exits 0 with no accepted/actionable findings and report that exact clean run.
 
 ## Skill Path (set once)
 
-Set the skill script paths once, then use `"$AUTOREVIEW"` and `"$AUTOREVIEW_HARNESS"` in the examples below.
-
-Choose one:
-
-```bash
-# Project-local skill in the current repo:
-export AUTOREVIEW=".agents/skills/autoreview/scripts/autoreview"
-export AUTOREVIEW_HARNESS=".agents/skills/autoreview/scripts/test-review-harness"
-```
+Set `skill_root` to the project-local, source-checkout, or global skill directory,
+then reuse the exported commands below. For Claude Code globals, use
+`$HOME/.claude/skills/autoreview`.
 
 ```bash
-# Source checkout of openclaw/agent-skills:
-export AUTOREVIEW="skills/autoreview/scripts/autoreview"
-export AUTOREVIEW_HARNESS="skills/autoreview/scripts/test-review-harness"
+skill_root="${AGENTS_HOME:-$HOME/.agents}/skills/autoreview"
+export AUTOREVIEW="$skill_root/scripts/autoreview"
+export AUTOREVIEW_HARNESS="$skill_root/scripts/test-review-harness"
 ```
 
-```bash
-# Global skill:
-export AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
-export AUTOREVIEW="$AGENTS_HOME/skills/autoreview/scripts/autoreview"
-export AUTOREVIEW_HARNESS="$AGENTS_HOME/skills/autoreview/scripts/test-review-harness"
-```
-
-When using Claude Code, set `AGENTS_HOME="$HOME/.claude"` for global skills. Project-local skills live under `.claude/skills/` in the current repo.
+Project-local roots are `.agents/skills/autoreview` or
+`.claude/skills/autoreview`; this source checkout uses `skills/autoreview`.
 
 ## Pick Target
 
@@ -99,12 +76,8 @@ Dirty local work:
 "$AUTOREVIEW" --mode local
 ```
 
-Use this only when the patch is actually unstaged/staged/untracked in the
-current checkout. `--mode uncommitted` is accepted as an alias for `--mode local`.
-For committed, pushed, or PR work, point the helper at the commit
-or branch diff instead; do not force dirty modes just
-because the helper docs mention dirty work first. A clean local review
-only proves there is no local patch.
+Use local mode only for an actual unstaged, staged, or untracked patch;
+`--mode uncommitted` is an alias. Use commit or branch mode for pushed work.
 
 Branch/PR work:
 
@@ -138,17 +111,8 @@ Committed single change:
 "$AUTOREVIEW" --mode commit --commit HEAD
 ```
 
-Use commit review for already-landed or already-pushed work on `main`. Reviewing
-clean `main` against `origin/main` is usually an empty diff after push. For a
-small stack, review each commit explicitly or review the branch before merging
-with `--base`.
-
-## Large Review Bundles
-
-The helper scans the full patch before checking its aggregate prompt limit. It
-fails closed when the complete bundle does not fit one review pass, because
-independent chunks can miss defects that span files or chunks. Split the change
-into coherent targets and review each target explicitly.
+Use commit review for landed or pushed `main` work. For a small stack, review
+each commit or review the branch before merging.
 
 ## Parallel Closeout
 
@@ -188,10 +152,7 @@ Inline syntax is also supported for simple model IDs:
 "$AUTOREVIEW" --reviewers codex:gpt-5.6-sol:high,claude:claude-opus-5:high
 ```
 
-Codex maps thinking to `model_reasoning_effort` and accepts `none`, `minimal`,
-`low`, `medium`, `high`, `xhigh`, or `max`. Claude maps thinking to `--effort`
-and accepts `low`, `medium`, `high`, `xhigh`, or `max`. Cursor encodes effort
-in its model ID and does not accept `--thinking`.
+Engine-specific thinking levels and Cursor effort behavior are documented below.
 
 For models with slashes or extra colons, prefer keyed form:
 
@@ -208,10 +169,6 @@ Cursor Agent can also run alone; `cursor-agent` is accepted as an engine alias:
 ## Engine Details
 
 Use [references/engine-details.md](references/engine-details.md) for model defaults, preferred model lists, environment overrides, and engine isolation details.
-
-## Context Efficiency
-
-Run the helper directly so target selection, engine choice, structured validation, and exit status all stay in one path. If output is noisy, summarize the completed helper output after it returns; do not ask another agent or reviewer to rerun the review.
 
 ## Helper
 
@@ -237,7 +194,7 @@ Include:
 - findings accepted/rejected, briefly why
 - the clean review result from the final helper/review run, or why a remaining finding was consciously rejected
 
-Do not run another review solely to improve the final report wording. If the final helper run exited 0 and produced no accepted/actionable findings, report that exact run as clean.
+Do not rerun solely to improve report wording.
 
 ## References
 
