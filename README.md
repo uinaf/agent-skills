@@ -14,13 +14,7 @@ pnpm dlx skills add uinaf/skills --list
 pnpm dlx skills add uinaf/skills -g -y -a codex -a claude-code -s verify
 ```
 
-## Layout
-
-- `skills/` contains the independent skill packages.
-- `scripts/` contains Tessl review, optimization, and publishing helpers.
-- `docs/distribution.md` documents the publication contract.
-
-## Verify
+## Develop
 
 ```bash
 corepack enable pnpm
@@ -32,11 +26,11 @@ The local gate typechecks scripts, runs helper and autoreview tests, lints shell
 and GitHub Actions, and validates every skill package. It expects ShellCheck on
 `PATH`; CI runs the same command.
 
-For any skill change, run the authenticated release gate too:
+For a skill change, also run the authenticated quality gate:
 
 ```bash
 pnpm run verify:skills
 ```
 
-See [Skill evaluation](scripts/README.md) and
-[Distribution](docs/distribution.md) for the focused workflows.
+See [Skill evaluation](scripts/README.md) for focused review and optimization,
+and [Distribution](docs/distribution.md) for publication and release setup.

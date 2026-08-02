@@ -14,7 +14,7 @@ Contributor guidance for this reusable skill catalog.
   Composition belongs to the consumer.
 - Check reality before editing docs or examples; keep commands and paths repo-valid.
 - Run `pnpm run verify` before handoff; CI uses the same repository gate.
-- Run `pnpm run verify:skills` for every skill change. It is the same authenticated
-  100-point portfolio gate used before remote publication. During iteration, use
-  `pnpm dlx tessl@0.94.0 review run --workspace uinaf --threshold 100 skills/<name>`.
+- Run `pnpm run verify:skills` for every skill change. It is the authenticated
+  100-point portfolio gate used before publication. Follow
+  [Skill evaluation](scripts/README.md) for focused review and optimization.
 - Use repo-relative links in checked-in Markdown. No absolute local paths, `file://`, or editor URIs.

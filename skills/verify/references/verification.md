@@ -4,14 +4,14 @@ Prove your own changes work on real surfaces. Independent ship decisions belong 
 
 ## Sources
 
-- Anthropic evaluator pattern: https://www.anthropic.com/engineering/harness-design-long-running-apps
-- Anthropic PR review toolkit (agent-per-concern): https://github.com/anthropics/claude-code/tree/main/plugins/pr-review-toolkit/agents
-- Anthropic code simplifier agent: https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md
-- OpenAI Codex subagents: https://developers.openai.com/codex/concepts/subagents
-- HumanLayer context flooding: https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents
-- Datadog verification pyramid: https://www.datadoghq.com/blog/ai/harness-first-agents/
-- Desloppify: https://github.com/peteromallet/desloppify
-- Context rot research: https://research.trychroma.com/context-rot
+- [Anthropic evaluator pattern](https://www.anthropic.com/engineering/harness-design-long-running-apps)
+- [Anthropic PR review toolkit](https://github.com/anthropics/claude-code/tree/main/plugins/pr-review-toolkit/agents)
+- [Anthropic code simplifier agent](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md)
+- [OpenAI Codex subagents](https://developers.openai.com/codex/concepts/subagents)
+- [HumanLayer context-flooding guidance](https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents)
+- [Datadog verification pyramid](https://www.datadoghq.com/blog/ai/harness-first-agents/)
+- [Desloppify](https://github.com/peteromallet/desloppify)
+- [Context-rot research](https://research.trychroma.com/context-rot)
 
 ## Contents
 

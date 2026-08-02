@@ -77,7 +77,10 @@ Use [references/best-practices.md](references/best-practices.md) when the skill 
 
 Check for repo-relative links, stale paths, duplicated guidance, and conflicts with the source repo's conventions.
 
-Treat `agents/openai.yaml` as picker-facing metadata: keep `interface.default_prompt` to one scope-aligned sentence. Do not invent undocumented Codex limits; use the real loader or a shared versioned linter when deterministic enforcement is necessary.
+Treat `agents/openai.yaml` as picker-facing metadata: keep
+`interface.default_prompt` compact and scope-aligned. Do not invent
+undocumented Codex limits; use the real loader or a shared versioned linter
+when deterministic enforcement is necessary.
 
 Require package independence across frontmatter, picker metadata, bodies, references, scripts, and evals. A skill may state prerequisites and boundaries, but it must explain them locally instead of naming or requiring sibling skills.
 

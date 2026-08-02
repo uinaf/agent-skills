@@ -12,28 +12,33 @@ To inspect the current published plugin names locally:
 jq -r '.name' skills/*/.tessl-plugin/plugin.json
 ```
 
-## How publishing works
+## Publish flow
 
-- Each skill directory under `skills/*` has its own `.tessl-plugin/plugin.json`
-- `.github/workflows/publish-skills.yml` runs the canonical repository verification gate first, including secretless skill lint, then runs authenticated Tessl review and publish through the `release` Environment for secret scoping
-- Pushes to `main` publish only the plugins that changed
-- Manual workflow runs publish all plugins only when the run ref is `main`; non-`main` manual runs can lint, but authenticated review and publish are skipped
-- The publish job runs `scripts/publish.sh`, which detects changed plugin directories, runs `tessl plugin lint`, and publishes with `tessl plugin publish`
-- The script defaults to `--bump patch`; set `TESSL_PUBLISH_BUMP=minor` or `major` only for intentional release version changes
-- After a successful publish, the workflow commits the resulting `.tessl-plugin/plugin.json` version bumps back to `main` as `github-actions[bot]` with the workflow `GITHUB_TOKEN` and a skip-CI commit message
-- Both review and publish jobs skip `[skip ci]` commits, and the publish job uses non-cancellable concurrency so version probing and writeback cannot race another publish
-- Publish-path actions are pinned to full commit SHAs with trailing comments for their human version tags
+1. `.github/workflows/publish-skills.yml` runs the secretless repository gate.
+2. Authenticated review requires a score of 100 through the `release`
+   Environment.
+3. On pushes to `main`, `scripts/publish.sh` lints and publishes only changed
+   plugins. A manual run on `main` publishes every plugin; other refs stop after
+   the secretless gate.
+4. Publishing defaults to a patch bump. Set `TESSL_PUBLISH_BUMP=minor` or
+   `major` only for an intentional release change.
+5. After publishing, `github-actions[bot]` writes the updated plugin versions
+   back to `main` with the workflow `GITHUB_TOKEN` and a skip-CI commit.
+
+Review and publish jobs skip version-writeback commits. Publishing uses
+non-cancellable concurrency so version probing and writeback cannot race.
+Publish-path actions are pinned to full commit SHAs with same-line version
+comments for maintenance tooling.
 
 ## Required GitHub Environment
 
-Create a GitHub Environment named `release` for the publish job:
+Configure a GitHub Environment named `release`:
 
 - Do not add required reviewers; releases should stay continuously publishable after the review job passes on `main`
 - Limit Environment deployment branches to `main`
 - Store the Tessl publish token as the Environment secret `TESSL_TOKEN`; do not store it as a plain repository Actions secret
 - Use workflow `GITHUB_TOKEN` writeback and do not enable branch push restrictions; GitHub's built-in `github-actions[bot]` actor is not a normal allowed-user entry. Repos that require push restrictions should use a narrowly scoped GitHub App release actor instead of a personal publish bot.
 - Protect `main` with force-push and branch deletion blocked where GitHub supports those controls
-- If publish or release tags are added later, restrict tag creation and mutation to trusted release automation or release admins
 
 Create a Tessl API key for the `uinaf` workspace, then add it to the `release` Environment as `TESSL_TOKEN`. Use a `uinaf` workspace key, not a token from another Tessl workspace.
 
@@ -45,9 +50,11 @@ pnpm dlx tessl api-key create --workspace uinaf --name github-actions-publish --
 
 The workflows still reference the token as `${{ secrets.TESSL_TOKEN }}`; GitHub resolves that value from the `release` Environment only for jobs that declare `environment: release`. Pull-request jobs do not declare the environment and force lint mode instead.
 
-## Local checks
+## Dry-run one plugin
 
 ```bash
-pnpm dlx tessl@0.94.0 plugin lint skills/verify
-pnpm dlx tessl@0.94.0 plugin publish --dry-run --workspace uinaf --bump patch skills/verify
+TESSL_DRY_RUN=true ./scripts/publish.sh skills/verify
 ```
+
+The wrapper uses the same CLI, workspace, lint, and bump defaults as the hosted
+publish path.

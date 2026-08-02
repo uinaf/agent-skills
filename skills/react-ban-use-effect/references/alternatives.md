@@ -89,15 +89,15 @@ Suppress only when the code is intentionally unusual, and keep suppressions line
 
 ## Sources
 
-- Factory: https://factoryai.com/blog/why-we-banned-useeffect
-- Factory thread mirror: https://threadnavigator.com/thread/2033969062834045089/
-- React: https://react.dev/learn/you-might-not-need-an-effect
-- React: https://react.dev/learn/synchronizing-with-effects
-- React: https://react.dev/learn/separating-events-from-effects
-- React: https://react.dev/learn/removing-effect-dependencies
-- React: https://react.dev/reference/react/useSyncExternalStore
-- React: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
-- TanStack Query: https://tanstack.com/query/latest/docs/framework/react/overview
-- TanStack Query options: https://tanstack.com/query/latest/docs/framework/react/guides/query-options
-- Vercel React Server Components: https://vercel.com/blog/understanding-react-server-components
-- React Doctor CLI: https://www.react.doctor/docs
+- [Factory: Why We Banned `useEffect`](https://factoryai.com/blog/why-we-banned-useeffect)
+- [Factory thread mirror](https://threadnavigator.com/thread/2033969062834045089/)
+- [React: You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
+- [React: Synchronizing with Effects](https://react.dev/learn/synchronizing-with-effects)
+- [React: Separating Events from Effects](https://react.dev/learn/separating-events-from-effects)
+- [React: Removing Effect Dependencies](https://react.dev/learn/removing-effect-dependencies)
+- [React: `useSyncExternalStore`](https://react.dev/reference/react/useSyncExternalStore)
+- [React lint: `set-state-in-effect`](https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect)
+- [TanStack Query overview](https://tanstack.com/query/latest/docs/framework/react/overview)
+- [TanStack Query options](https://tanstack.com/query/latest/docs/framework/react/guides/query-options)
+- [Vercel: Understanding React Server Components](https://vercel.com/blog/understanding-react-server-components)
+- [React Doctor CLI](https://www.react.doctor/docs)

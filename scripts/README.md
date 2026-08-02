@@ -1,18 +1,21 @@
 # Skill Evaluation
 
-This repo uses Tessl as the evaluation loop for skill quality, clarity, self-activation, and impact scenarios.
+Use the repository wrappers for Tessl review and optimization. They own the
+audited CLI version, workspace, and quality threshold so examples do not repeat
+release configuration.
 
-Run the canonical local gate without pulling repositories or changing globally
-installed skills:
+## Verify the repository
+
+Run the local gate without pulling repositories or changing globally installed
+skills:
 
 ```bash
 pnpm install --frozen-lockfile
 pnpm run verify
 ```
 
-The gate expects ShellCheck on `PATH`; actionlint and the TypeScript toolchain
-are installed from the lockfile. It runs the TypeScript, shell, workflow,
-autoreview, and Tessl plugin checks used by CI.
+The gate expects ShellCheck on `PATH`. It typechecks the scripts, lints shell
+and workflow files, runs helper tests, and validates each Tessl plugin.
 
 ## Review
 
@@ -22,11 +25,10 @@ Run a read-only plugin lint plus quality review across every local skill:
 ./scripts/review.sh
 ```
 
-By default this enforces `--threshold 100` in the `uinaf` workspace. Override
-the workspace or CLI version only for deliberate diagnostics; the canonical
-authoring and publication gate remains 100.
-The wrapper defaults to an exact Tessl CLI version so the same commit uses the
-same evaluator. Set `TESSL_CLI_VERSION=<version>` to test a deliberate upgrade.
+By default, authenticated review uses the `uinaf` workspace and requires a
+score of 100. The wrapper pins the CLI invocation; Tessl still owns the remote
+review service. Override `TESSL_CLI_VERSION`, `TESSL_WORKSPACE`, or
+`TESSL_THRESHOLD` only for deliberate diagnostics.
 
 CI has two trust-aware lanes:
 
@@ -39,15 +41,9 @@ CI has two trust-aware lanes:
 Set `TESSL_REVIEW_MODE=lint` to force the pull-request lane locally. If `CI` is
 set and `TESSL_TOKEN` is absent, the wrapper also falls back to lint mode.
 
-Useful direct invocations:
-
-```bash
-pnpm dlx tessl@0.94.0 review run --workspace uinaf --threshold 100 skills/autoreview
-pnpm dlx tessl@0.94.0 review run --json --workspace uinaf --threshold 100 skills/verify
-pnpm dlx tessl@0.94.0 plugin lint skills/vite-plus
-```
-
-Use per-skill `--json` output directly with Tessl rather than `scripts/review.sh`, because the batch wrapper emits one review per skill.
+For structured output from one package, use the Tessl CLI directly with
+`review run --json`; `scripts/review.sh` intentionally reviews the whole
+portfolio and rejects `--json`.
 
 ## Impact evals
 
@@ -64,7 +60,7 @@ Run plugin impact evals from a skill directory when validating score-impact chan
 tessl eval run --quality-check skills/<skill-name>
 ```
 
-`scripts/publish.sh` publishes with `tessl plugin publish --bump patch` by default. Set `TESSL_SCENARIO_QUALITY_CHECK=true` only when Tessl's scenario-quality workflow is healthy enough to be a publish gate.
+Publishing is documented separately in [Distribution](../docs/distribution.md).
 
 ## Optimize
 
@@ -74,25 +70,14 @@ Apply Tessl's optimizer to one skill at a time:
 ./scripts/optimize.sh verify
 ```
 
-Direct form:
+The optimizer mutates one package. Inspect its diff before keeping the result.
 
-```bash
-pnpm dlx tessl@0.94.0 skill review --optimize --yes --max-iterations 1 skills/verify
-```
-
-## Suggested workflow
+## Workflow
 
 1. Edit the skill
 2. Run `pnpm run verify:skills`
-3. If the score or suggestions are weak, run Tessl optimize on a single skill or apply the feedback manually
-4. Re-run review and inspect the diff before keeping any optimizer changes
+3. If the score or suggestions are weak, optimize one skill or apply the
+   feedback manually.
+4. Inspect the diff and rerun both gates.
 
-## Notes
-
-- `pnpm run verify:skills` is the canonical local and trusted-remote skill gate
-- `scripts/review.sh` is the scored portfolio-review component of that gate
-- `scripts/optimize.sh` applies mutations, so run it intentionally and inspect the resulting diff
-- Prefer optimizing one skill at a time rather than churning the whole repo at once
-- PR CI runs the deterministic `pnpm run verify` subset without secrets; the
-  trusted publish workflow runs the complete `pnpm run verify:skills` command
-- Skill packages use `.tessl-plugin/plugin.json`; do not reintroduce `tile.json`
+The canonical plugin metadata is `skills/<name>/.tessl-plugin/plugin.json`.
