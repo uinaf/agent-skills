@@ -9,8 +9,8 @@ a review just because it has been quiet for 2-5 minutes; inspect the process onl
 after missing multiple expected heartbeats, after 30 minutes, or after an
 obviously failed subprocess.
 
-Pass `--stream-engine-output` when live engine text is useful. Codex and Claude
-filter tool/file chatter while preserving structured validation.
+Pass `--stream-engine-output` when live engine text is useful. Codex, Claude,
+and Cursor filter tool/file chatter while preserving structured validation.
 
 ## Gitcrawl Repair
 
