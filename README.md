@@ -1,20 +1,40 @@
-# skills
+# uinaf skills
 
-Reusable agent skills with deterministic review and publishing gates.
+A small catalog of standalone skills for coding agents. Install only what you
+need; each skill works independently of this repository's development tooling
+and the other skills in the catalog.
 
-Each directory under `skills/` is a standalone package. Consumers can install
-one skill without adopting this repository's tooling or another skill package.
+## Catalog
+
+| Skill | Use it for |
+| --- | --- |
+| [`agent-readiness`](skills/agent-readiness/SKILL.md) | Making repositories and runners dependable for autonomous work. |
+| [`autoreview`](skills/autoreview/SKILL.md) | Running a structured second-model review against the task contract. |
+| [`docs`](skills/docs/SKILL.md) | Auditing and rewriting repository documentation and agent guidance. |
+| [`gh-setup`](skills/gh-setup/SKILL.md) | Setting up GitHub collaboration, CI, releases, and deployments. |
+| [`react-ban-use-effect`](skills/react-ban-use-effect/SKILL.md) | Replacing direct React `useEffect` with clearer patterns and enforcement. |
+| [`skill-audit`](skills/skill-audit/SKILL.md) | Auditing skill activation, packaging, instructions, and quality. |
+| [`verify`](skills/verify/SKILL.md) | Proving a completed change works before independent review. |
+| [`vite-plus`](skills/vite-plus/SKILL.md) | Migrating frontend packages and monorepos to Vite+. |
 
 ## Install
 
-List or install packages with the Agent Skills CLI:
+Browse the catalog:
 
 ```bash
 pnpm dlx skills add uinaf/skills --list
+```
+
+Install one skill globally for Codex and Claude Code:
+
+```bash
 pnpm dlx skills add uinaf/skills -g -y -a codex -a claude-code -s verify
 ```
 
-## Develop
+Replace `verify` with any catalog name. Omit `-g` for a repository-local
+installation.
+
+## Contributing
 
 ```bash
 corepack enable pnpm
@@ -22,15 +42,11 @@ pnpm install --frozen-lockfile
 pnpm run verify
 ```
 
-The local gate typechecks scripts, runs helper and autoreview tests, lints shell
-and GitHub Actions, and validates every skill package. It expects ShellCheck on
-`PATH`; CI runs the same command.
-
-For a skill change, also run the authenticated quality gate:
+Skill changes also need the authenticated quality gate:
 
 ```bash
 pnpm run verify:skills
 ```
 
-See [Skill evaluation](scripts/README.md) for focused review and optimization,
-and [Distribution](docs/distribution.md) for publication and release setup.
+See [Skill maintenance](scripts/README.md) for focused review and optimization,
+or [Distribution](docs/distribution.md) for publication and release setup.
