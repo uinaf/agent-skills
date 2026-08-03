@@ -116,20 +116,21 @@ Prefer a narrowly scoped GitHub App installation token for release GitHub writes
     GH_TOKEN: ${{ steps.release-bot.outputs.token }}
   run: gh auth setup-git
 
-# GitHub links bot commits when the noreply email uses `{user-id}+{slug}[bot]@…`.
+# GitHub links bot commits when the noreply email uses `<user-id>+<app-slug>[bot]@…`.
 - name: Resolve release bot identity
   id: release-bot-identity
+  shell: bash
   env:
     GH_TOKEN: ${{ steps.release-bot.outputs.token }}
     APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
   run: |
     set -euo pipefail
-    user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+    user_id="$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)"
     if [[ ! "$user_id" =~ ^[0-9]+$ ]]; then
       echo "failed to resolve numeric bot user id for ${APP_SLUG}[bot]" >&2
       exit 1
     fi
-    echo "user-id=${user_id}" >> "$GITHUB_OUTPUT"
+    echo "user_id=${user_id}" >> "$GITHUB_OUTPUT"
 ```
 
 Set author metadata on the release step only (not job-wide):
@@ -138,14 +139,14 @@ Set author metadata on the release step only (not job-wide):
 env:
   GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
   GIT_AUTHOR_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-  GIT_AUTHOR_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
+  GIT_AUTHOR_EMAIL: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
   GIT_COMMITTER_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-  GIT_COMMITTER_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
+  GIT_COMMITTER_EMAIL: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
 ```
 
 - The token actor and commit identity must agree. `GIT_AUTHOR_*`/`GIT_COMMITTER_*` with `GITHUB_TOKEN` still writes as `github-actions[bot]`.
 - When branch push restrictions or required signed commits block writeback, allow the App as an Integration bypass rather than disabling those rules for humans.
-- Do not hard-code a bot numeric user id in the workflow; resolve it from `/users/{app-slug}[bot]`.
+- Do not hard-code a bot numeric user id in the workflow; resolve it from `/users/<app-slug>%5Bbot%5D`.
 - If a third-party action commits internally, verify it accepts author/committer inputs or honors `GIT_AUTHOR_*`/`GIT_COMMITTER_*`. Checkout tokens do not override hardcoded metadata.
 - Org-specific Environment variable/secret names (`RELEASE_APP_*` above) are examples — keep whatever naming contract the owning org documents.
 
