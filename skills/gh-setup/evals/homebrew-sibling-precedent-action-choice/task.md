@@ -61,6 +61,11 @@ update-homebrew-tap:
           healthd
           homebrew-tap
         permission-contents: write
+    - id: release-bot-identity
+      env:
+        GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+        APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
+      run: echo "user-id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
     - uses: Justintime50/homebrew-releaser@<full-sha> # v3.3.0
       with:
         homebrew_owner: uinaf
@@ -68,7 +73,7 @@ update-homebrew-tap:
         formula_folder: Formula
         github_token: ${{ steps.release-bot.outputs.token }}
         commit_owner: ${{ steps.release-bot.outputs.app-slug }}[bot]
-        commit_email: 312581908+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
+        commit_email: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
         install: 'bin.install "healthd"'
         test: 'system "#{bin}/healthd", "--version"'
 =============== END FILE ===============
