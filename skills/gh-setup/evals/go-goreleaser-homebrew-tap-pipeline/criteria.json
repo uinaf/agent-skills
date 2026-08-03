@@ -23,9 +23,9 @@
       "description": "The Homebrew tap repo is referenced with the `homebrew-` prefix in its name (e.g., `homebrew-tap`, `homebrew-<name>`)"
     },
     {
-      "name": "TAP_GITHUB_TOKEN scope",
+      "name": "Release App token scope",
       "max_score": 8,
-      "description": "The workflow or documentation specifies that TAP_GITHUB_TOKEN is a fine-grained PAT (or equivalent) scoped only to the tap repo, NOT a broad classic PAT"
+      "description": "The workflow mints a short-lived GitHub App installation token (or documents equivalent App credentials) explicitly scoped to the source repo and Homebrew tap, and does not introduce a broad classic PAT"
     },
     {
       "name": "Attestation permissions",
@@ -65,7 +65,7 @@
     {
       "name": "Secrets on step",
       "max_score": 6,
-      "description": "GITHUB_TOKEN and TAP_GITHUB_TOKEN are declared in the GoReleaser step's `env:`, not at the job level"
+      "description": "The GoReleaser step receives the minted App token (for example as `GITHUB_TOKEN` and `HOMEBREW_TAP_TOKEN`) in the step `env:`, not at the job level"
     },
     {
       "name": "SR action version",
