@@ -122,7 +122,14 @@ Prefer a narrowly scoped GitHub App installation token for release GitHub writes
   env:
     GH_TOKEN: ${{ steps.release-bot.outputs.token }}
     APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
-  run: echo "user-id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+  run: |
+    set -euo pipefail
+    user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+    if [[ ! "$user_id" =~ ^[0-9]+$ ]]; then
+      echo "failed to resolve numeric bot user id for ${APP_SLUG}[bot]" >&2
+      exit 1
+    fi
+    echo "user-id=${user_id}" >> "$GITHUB_OUTPUT"
 ```
 
 Set author metadata on the release step only (not job-wide):
