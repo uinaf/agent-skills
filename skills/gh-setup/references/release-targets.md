@@ -106,14 +106,28 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     permission-issues: write
     permission-pull-requests: write
 
+- name: Resolve release bot identity
+  id: release-bot-identity
+  env:
+    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
+  run: |
+    set -euo pipefail
+    user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
+    if [[ ! "$user_id" =~ ^[0-9]+$ ]]; then
+      echo "failed to resolve numeric bot user id for ${APP_SLUG}[bot]" >&2
+      exit 1
+    fi
+    echo "user-id=${user_id}" >> "$GITHUB_OUTPUT"
+
 - uses: cycjimmy/semantic-release-action@<full-sha> # v6.0.0
   id: release
   env:
     GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
     GIT_AUTHOR_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-    GIT_AUTHOR_EMAIL: <bot-user-id>+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
+    GIT_AUTHOR_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
     GIT_COMMITTER_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-    GIT_COMMITTER_EMAIL: <bot-user-id>+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
+    GIT_COMMITTER_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
 
 - if: steps.release.outputs.new_release_published == 'true'
   uses: goreleaser/goreleaser-action@<full-sha> # v7.2.2
@@ -207,7 +221,7 @@ Default for Uinaf (and preferred elsewhere):
 - Store `UINAF_RELEASE_APP_ID` as a `release` Environment variable and `UINAF_RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
 - Mint a short-lived installation token with SHA-pinned `actions/create-github-app-token`.
 - Pass explicit `owner`, `repositories` (source repo + `homebrew-tap`), and least permissions (`permission-contents: write`; add Issues/PRs write only when `@semantic-release/github` side effects stay enabled).
-- Set commit author/committer to `<app-slug>[bot]` / `<bot-user-id>+<app-slug>[bot]@users.noreply.github.com`.
+- Set commit author/committer to `<app-slug>[bot]` / `{user-id}+<app-slug>[bot]@users.noreply.github.com`, resolving `{user-id}` at runtime from `/users/{app-slug}[bot]` (see Bot Identity in `release-workflows.md`).
 - Prefer `gh auth setup-git` with `GH_TOKEN` over embedding tokens in remote URLs.
 
 Do not introduce org-wide long-lived `TAP_GITHUB_TOKEN` PATs for new work. Retire existing PAT consumers after an App-backed path has live release proof.
