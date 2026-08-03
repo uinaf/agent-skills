@@ -13,10 +13,10 @@ Move a frontend repo closer to the stock Vite+ toolchain while preserving repo-s
 Default to this destination unless a repo-specific boundary clearly blocks it. If you keep an old command shape, document the reason.
 
 - CI uses `voidzero-dev/setup-vp` on GitHub and GitLab. The GitHub Action owns Node and package-manager bootstrap; the GitLab template uses the job-provided Node runtime. Both install dependencies by default. Disable `run-install` only for an intentional explicit install step. Pin GitHub Actions to full commit SHAs when the repo requires it
-- Tooling versions have one checked-in source of truth. Node comes from `.node-version`; package-manager versions come from `package.json#packageManager`; Vite+ comes from the repo's `vite-plus` dependency or workspace catalog. Do not repeat Node, pnpm, or Vite+ literals in workflows when a source file can be read
+- Tooling versions have one checked-in source of truth. Preserve the repo's existing Node declaration (`.node-version`, `.nvmrc`, `.tool-versions`, or `package.json`) and pass that file to `setup-vp`; package-manager versions come from `package.json#packageManager` or `devEngines.packageManager`; Vite+ comes from the repo's `vite-plus` dependency or workspace catalog. Do not repeat Node, package-manager, or Vite+ literals in workflows when a source file can be read
 - test files use `vite-plus/test` (and `vite-plus/test/browser/context` for browser mode); Vite+ 0.2.x runs upstream Vitest directly and no longer uses `@voidzero-dev/vite-plus-test`
 - scripts prefer `vp dev`, `vp test`, `vp test watch`, `vp test run --coverage`, `vp pack`, `vp build`, `vp preview`, and `vp run <script>` (or `vpr <script>`) over direct package-manager, raw Vitest, or tsdown wiring
-- hooks use `vp config`, `.vite-hooks`, and `vp staged` as the default hook stack
+- hooks use `vp config`, `.vite-hooks`, and `vp staged` as the default hook stack; read [references/hooks.md](references/hooks.md) before migrating, disabling, or removing hooks
 - single-source config in `vite.config.ts`: no parallel `vitest.config.ts`, `.oxlintrc*`, `.oxfmtrc*`, or `tsdown.config.ts`
 - project agent guidance comes from Vite+ itself when possible: `vp migrate --agent <name>` writes the official short `AGENTS.md`/`CLAUDE.md` block, and installed projects may expose the same guidance at `node_modules/vite-plus/AGENTS.md`
 - contributor docs move to the new `vp` commands in the same change
@@ -28,7 +28,7 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 2. Audit current scripts, workflows, Vite config, test imports, release flow, package manager, and packaging.
 3. Read [references/bootstrap.md](references/bootstrap.md) for entrypoints (`vp create`, `vp migrate`), editor/agent config, local guidance-file discovery, and validation path.
 4. Pick the shape and load only that reference: [references/packages.md](references/packages.md) for standalone packages, or [references/monorepos.md](references/monorepos.md) for workspaces.
-5. Migrate scripts, `vite.config.ts`, test imports, hooks, and packaging together. Verify interactively with `pnpm exec vp check && pnpm exec vp test` before moving on.
+5. Migrate scripts, `vite.config.ts`, test imports, hooks, and packaging together. Read [references/hooks.md](references/hooks.md) when hooks are in scope. Verify interactively with `pnpm exec vp check && pnpm exec vp test` before moving on.
 6. Update CI per [references/ci-cd.md](references/ci-cd.md).
 7. Update tests and coverage per [references/testing.md](references/testing.md).
 8. Check [references/commands.md](references/commands.md) before changing command invocations. Load [references/known-issues.md](references/known-issues.md) only on unexpected behavior or when upgrading Vite+.
@@ -40,8 +40,8 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 
 Before changing CI, preserve one canonical version owner:
 
-- Node: `.node-version`; wire it through `node-version-file: ".node-version"`
-- package manager: `package.json#packageManager`
+- Node: preserve the repo-owned declaration and wire its path through `node-version-file`; current `setup-vp` accepts `.node-version`, `.nvmrc`, `.tool-versions`, and `package.json`
+- package manager: `package.json#packageManager` or `devEngines.packageManager`; do not create a second declaration just for CI
 - Vite+: the `vite-plus` dependency or workspace catalog; when CI needs an explicit `version`, derive it from that source with a structured parser
 - Vite core: keep the `vite` manifest dependency plus package-manager override/catalog/resolution pointed at the matching `npm:@voidzero-dev/vite-plus-core@<version>`
 - Vitest: do not add a `vitest` override for node-mode-only Vite+ 0.2.x projects; add direct Vitest and `@vitest/*` packages only when the project uses Vitest APIs, coverage packages, UI, or browser providers directly

@@ -32,7 +32,7 @@ Vite+ does not support older upstream versions. In Vite+ 0.2.x and newer, node-m
 
 ## Notes
 
-- Vite+ detects the package manager from the workspace in this order: `packageManager` in `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `yarn.lock` / `.yarnrc.yml`, `package-lock.json`, `bun.lock` / `bun.lockb`, then a few config-only fallbacks. With none of those, `vp` falls back to `pnpm`.
+- Vite+ detects the package manager from the workspace in this order: `packageManager`, `devEngines.packageManager`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `yarn.lock` / `.yarnrc.yml`, `package-lock.json`, `bun.lock` / `bun.lockb`, then config-only fallbacks. With none of those, `vp` falls back to `pnpm`. Preserve an existing explicit declaration instead of adding a competing source.
 - `vp migrate` merges tool-specific config such as `.oxlintrc*`, `.oxfmtrc*`, and lint-staged config into `vite.config.ts`. Prefer that merge path before deleting old config files.
 - Prefer a single coherent migration over partial adoption that leaves scripts, imports, and CI out of sync.
 - Validate migrations with `pnpm install --frozen-lockfile`, `pnpm exec vp check`, `pnpm exec vp test`, and then `pnpm exec vp build` or `pnpm exec vp pack` as appropriate. Diagnose Node and Corepack through the repo's declared runtime manager; `vp env` belongs to the standalone launcher and is not part of this repository-local workflow.

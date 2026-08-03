@@ -5,7 +5,7 @@
     {
       "name": "Uses setup-vp action",
       "max_score": 15,
-      "description": "The migrated workflow uses `voidzero-dev/setup-vp` instead of a hand-rolled `actions/setup-node` or Corepack bootstrapping step. If the repo pins GitHub Actions, the action is pinned to a full commit SHA with a same-line exact version comment for Dependabot."
+      "description": "The migrated workflow uses `voidzero-dev/setup-vp` instead of a hand-rolled `actions/setup-node` or Corepack bootstrapping step, and preserves the repo-owned `.nvmrc` through `node-version-file` instead of creating `.node-version` or duplicating the Node version. If the repo pins GitHub Actions, the action is pinned to a full commit SHA with a same-line exact version comment for Dependabot."
     },
     {
       "name": "No redundant vp env step",

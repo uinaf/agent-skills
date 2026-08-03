@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".node-version"
+          node-version-file: ".nvmrc"
 
       - name: Enable Corepack
         run: corepack enable
@@ -71,7 +71,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".node-version"
+          node-version-file: ".nvmrc"
           registry-url: 'https://registry.npmjs.org'
 
       - name: Enable Corepack
@@ -119,5 +119,5 @@ jobs:
   }
 }
 
-=============== FILE: .node-version ===============
+=============== FILE: .nvmrc ===============
 24

@@ -4,7 +4,7 @@ Use this reference before changing command invocations, package-manager usage, o
 
 ## Defaults
 
-- Do not require a machine-global `vp`. Install dependencies with the package manager pinned by `package.json#packageManager`, then invoke the repository-local CLI as `pnpm exec vp ...` interactively.
+- Do not require a machine-global `vp`. Install dependencies with the package manager pinned by `package.json#packageManager` or `devEngines.packageManager`, then invoke the repository-local CLI as `pnpm exec vp ...` interactively.
 - Keep bare `vp` inside `package.json` scripts: the package manager adds `node_modules/.bin` to the script environment. Bare `vp` is also correct in CI after `voidzero-dev/setup-vp`.
 - Use the built-in `pnpm exec vp test`, `pnpm exec vp lint`, `pnpm exec vp fmt`, and `pnpm exec vp check` commands interactively.
 - Built-in commands cannot be overridden by same-named scripts. `vp build` always runs the built-in Vite build; use `vp run build` (or `vpr build`) to execute a `package.json` `build` script.
@@ -12,7 +12,7 @@ Use this reference before changing command invocations, package-manager usage, o
 
 ## Runtime and Package Manager
 
-- Let the repo's runtime manager own Node and let Corepack honor `package.json#packageManager` for pnpm. Verify with `node --version`, `corepack --version`, and `pnpm --version`.
+- Let the repo's runtime manager own Node and honor its existing package-manager declaration (`packageManager` or `devEngines.packageManager`). Verify with `node --version`, `corepack --version`, and the selected package manager's version command.
 - Bootstrap with `pnpm install --frozen-lockfile`; use `pnpm install --no-frozen-lockfile` only when the task intentionally changes manifests or the lockfile.
 - The standalone launcher's `vp env`, `vp install`, and self-upgrade surface are outside this workflow. Do not add a global launcher just to use them.
 
