@@ -61,7 +61,7 @@ jobs:
       group: publish-skills-${{ github.repository }}-main
       cancel-in-progress: false
     permissions:
-      contents: write
+      contents: read
     env:
       TESSL_TOKEN: ${{ secrets.TESSL_TOKEN }}
     steps:
@@ -84,10 +84,28 @@ jobs:
           run_install: |
             - args: [--frozen-lockfile]
 
+      - name: Create release bot token
+        id: release-bot
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.UINAF_RELEASE_APP_ID }}
+          private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+
       - name: Authorize version-bump pushes
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.release-bot.outputs.token }}
         run: gh auth setup-git
+
+      # GitHub links bot commits when the noreply email uses `{user-id}+{slug}[bot]@…`.
+      - name: Resolve release bot identity
+        id: release-bot-identity
+        env:
+          GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+          APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
+        run: echo "user-id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
 
       - name: Publish changed plugins
         env:
@@ -100,14 +118,16 @@ jobs:
       - name: Commit published plugin versions
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+          RELEASE_BOT_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
+          RELEASE_BOT_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
         run: |
           if git diff --quiet -- skills; then
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "${RELEASE_BOT_NAME}"
+          git config user.email "${RELEASE_BOT_EMAIL}"
           git add skills
           git commit -m "chore: sync published plugin versions [skip ci]"
           git push

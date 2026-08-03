@@ -98,20 +98,49 @@ Apply on **both** verification and release jobs. Skipping it on verification mea
 
 ## Bot Identity
 
-Set inside the release step's `env:` (not at the job level — only semantic-release uses these):
+Prefer a narrowly scoped GitHub App installation token for release GitHub writes. Mint it in the `release` Environment, authorize git with `gh auth setup-git`, then resolve the bot user id at runtime so noreply emails stay linked if the App is recreated:
+
+```yaml
+- name: Create release bot token
+  id: release-bot
+  uses: actions/create-github-app-token@<full-sha> # v3.2.0
+  with:
+    app-id: ${{ vars.RELEASE_APP_ID }}
+    private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+    owner: ${{ github.repository_owner }}
+    repositories: ${{ github.event.repository.name }}
+    permission-contents: write
+
+- name: Authorize release writes
+  env:
+    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+  run: gh auth setup-git
+
+# GitHub links bot commits when the noreply email uses `{user-id}+{slug}[bot]@…`.
+- name: Resolve release bot identity
+  id: release-bot-identity
+  env:
+    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
+  run: echo "user-id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+```
+
+Set author metadata on the release step only (not job-wide):
 
 ```yaml
 env:
-  GIT_AUTHOR_NAME: release-bot
-  GIT_AUTHOR_EMAIL: release-bot@users.noreply.github.com
-  GIT_COMMITTER_NAME: release-bot
-  GIT_COMMITTER_EMAIL: release-bot@users.noreply.github.com
+  GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
+  GIT_AUTHOR_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
+  GIT_AUTHOR_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
+  GIT_COMMITTER_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
+  GIT_COMMITTER_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
 ```
 
-Use a `noreply.github.com` address or a dedicated bot account so bump commits are attributed to automation.
-
-- The token actor and commit identity must agree. `GIT_AUTHOR_*`/`GIT_COMMITTER_*` with `GITHUB_TOKEN` still writes as `github-actions[bot]`. When branch push restrictions are not enabled, workflow `GITHUB_TOKEN` writeback is acceptable for low-risk repos. When branch push restrictions are required, use a narrowly scoped GitHub App release actor that branch rules or rulesets can explicitly allow.
+- The token actor and commit identity must agree. `GIT_AUTHOR_*`/`GIT_COMMITTER_*` with `GITHUB_TOKEN` still writes as `github-actions[bot]`.
+- When branch push restrictions or required signed commits block writeback, allow the App as an Integration bypass rather than disabling those rules for humans.
+- Do not hard-code a bot numeric user id in the workflow; resolve it from `/users/{app-slug}[bot]`.
 - If a third-party action commits internally, verify it accepts author/committer inputs or honors `GIT_AUTHOR_*`/`GIT_COMMITTER_*`. Checkout tokens do not override hardcoded metadata.
+- Org-specific Environment variable/secret names (`RELEASE_APP_*` above) are examples — keep whatever naming contract the owning org documents.
 
 ## Caches
 
