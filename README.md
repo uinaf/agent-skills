@@ -14,6 +14,7 @@ and the other skills in the catalog.
 | [`autoreview`](skills/autoreview/SKILL.md) | Running a structured second-model review against the task contract. |
 | [`docs`](skills/docs/SKILL.md) | Auditing and rewriting repository documentation and agent guidance. |
 | [`gh-setup`](skills/gh-setup/SKILL.md) | Setting up GitHub collaboration, CI, releases, and deployments. |
+| [`planning`](skills/planning/SKILL.md) | Saving agreed work as resumable plans in the repository's preferred tracker. |
 | [`react-ban-use-effect`](skills/react-ban-use-effect/SKILL.md) | Replacing direct React `useEffect` with clearer patterns and enforcement. |
 | [`skill-audit`](skills/skill-audit/SKILL.md) | Auditing skill activation, packaging, instructions, and quality. |
 | [`verify`](skills/verify/SKILL.md) | Proving a completed change works before independent review. |
