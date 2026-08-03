@@ -2,15 +2,15 @@
 
 ## Problem/Feature Description
 
-The `tccutil` repo publishes a small non-Go CLI and needs its release workflow fixed so new GitHub releases update `uinaf/homebrew-tap` automatically. A previous attempt used `dawidd6/action-homebrew-bump-formula`, but the action tried to follow a fork/PR path and failed with the existing fine-grained `TAP_GITHUB_TOKEN`.
+The `tccutil` repo publishes a small non-Go CLI and needs its release workflow fixed so new GitHub releases update `uinaf/homebrew-tap` automatically. A previous attempt used `dawidd6/action-homebrew-bump-formula`, but the action tried to follow a fork/PR path and failed with the existing token shape.
 
-The organization already has a known-good sibling repo, `uinaf/healthd`, with an `update-homebrew-tap` job that successfully pushes directly to the same style of tap using the v3 line of `Justintime50/homebrew-releaser`, pinned to a full commit SHA. The desired fix is to copy that boring working pattern, not invent an inline clone/sed/push script and not swap in another Homebrew action.
+The organization already has a known-good sibling repo, `uinaf/healthd`, with an App-backed Homebrew update that successfully pushes directly to the same style of tap using the v3 line of `Justintime50/homebrew-releaser`, pinned to a full commit SHA, with a short-lived `uinaf-releaser` installation token. The desired fix is to copy that boring working pattern, not invent an inline clone/sed/push script and not swap in another Homebrew action.
 
 ## Output Specification
 
 Update `.github/workflows/release.yml` for `tccutil` so the release job updates the Homebrew tap after a release is published.
 
-Also write a short `SETUP.md` note documenting the required `TAP_GITHUB_TOKEN` scope.
+Also write a short `SETUP.md` note documenting the `UINAF_RELEASE_APP_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY` Environment credentials and that the minted token must be Contents-scoped to the source repo and `homebrew-tap`.
 
 ## Input Files
 
@@ -39,7 +39,7 @@ jobs:
         if: steps.release.outputs.new_release_published == 'true'
         uses: dawidd6/action-homebrew-bump-formula@<full-sha> # v5
         with:
-          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tap: uinaf/homebrew-tap
           formula: tccutil
           tag: v${{ steps.release.outputs.new_release_version }}
@@ -51,14 +51,24 @@ update-homebrew-tap:
   if: needs.release.outputs.new_release_published == 'true'
   runs-on: ubuntu-latest
   steps:
+    - uses: actions/create-github-app-token@<full-sha> # v3.2.0
+      id: release-bot
+      with:
+        app-id: ${{ vars.UINAF_RELEASE_APP_ID }}
+        private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
+        owner: uinaf
+        repositories: |
+          healthd
+          homebrew-tap
+        permission-contents: write
     - uses: Justintime50/homebrew-releaser@<full-sha> # v3.3.0
       with:
         homebrew_owner: uinaf
         homebrew_tap: homebrew-tap
         formula_folder: Formula
-        github_token: ${{ secrets.TAP_GITHUB_TOKEN }}
-        commit_owner: uinaf release bot
-        commit_email: release-bot@users.noreply.github.com
+        github_token: ${{ steps.release-bot.outputs.token }}
+        commit_owner: ${{ steps.release-bot.outputs.app-slug }}[bot]
+        commit_email: 312581908+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
         install: 'bin.install "healthd"'
         test: 'system "#{bin}/healthd", "--version"'
 =============== END FILE ===============

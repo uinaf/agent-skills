@@ -90,13 +90,30 @@ Plugins (tag-only — no `@semantic-release/git`, no source bump):
 "@semantic-release/github"
 ```
 
-Two-step release job:
+Two-step release job (mint a short-lived GitHub App installation token first; see Homebrew Tap):
 
 ```yaml
+- uses: actions/create-github-app-token@<full-sha> # v3.2.0
+  id: release-bot
+  with:
+    app-id: ${{ vars.UINAF_RELEASE_APP_ID }}
+    private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
+    owner: <org>
+    repositories: |
+      <repo>
+      homebrew-tap
+    permission-contents: write
+    permission-issues: write
+    permission-pull-requests: write
+
 - uses: cycjimmy/semantic-release-action@<full-sha> # v6.0.0
   id: release
   env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
+    GIT_AUTHOR_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
+    GIT_AUTHOR_EMAIL: <bot-user-id>+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
+    GIT_COMMITTER_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
+    GIT_COMMITTER_EMAIL: <bot-user-id>+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
 
 - if: steps.release.outputs.new_release_published == 'true'
   uses: goreleaser/goreleaser-action@<full-sha> # v7.2.2
@@ -104,8 +121,8 @@ Two-step release job:
     version: v2.15.4
     args: release --clean
   env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
+    HOMEBREW_TAP_TOKEN: ${{ steps.release-bot.outputs.token }}
 
 - if: steps.release.outputs.new_release_published == 'true'
   uses: actions/attest-build-provenance@<full-sha> # v4.1.0
@@ -113,7 +130,7 @@ Two-step release job:
     subject-path: 'dist/*.tar.gz,dist/*.zip'
 ```
 
-- `TAP_GITHUB_TOKEN` is needed only if GoReleaser publishes to a Homebrew tap in another repo (see Homebrew Tap below).
+- Prefer an org-owned release GitHub App over a long-lived `TAP_GITHUB_TOKEN` PAT when publishing to a sibling Homebrew tap.
 - Add `id-token: write` and `attestations: write` to the job's `permissions:` for the attestation step.
 - `--clean` wipes `dist/` before building so a previous run cannot poison the new release.
 - Build and upload release artifacts from the release tag or verified release commit. If a workflow intentionally promotes an existing artifact, require recorded provenance: source commit, tag, build number/version, artifact digest, and producing workflow run.
@@ -184,9 +201,16 @@ A Homebrew tap is just a separate GitHub repo named `homebrew-<tap>` (the `homeb
 
 Whichever flow you pick, you need a token that can push to the tap repo from the source repo's release workflow. The default `GITHUB_TOKEN` is scoped to the source repo only.
 
-- Create a fine-grained PAT (or GitHub App installation token) with `contents: write` on the tap repo only.
-- Store it as `TAP_GITHUB_TOKEN` (or similar) in the source repo's `release` Environment secrets by default. Use a repository secret only when an Environment is intentionally not part of the publish boundary.
-- Use one narrowly scoped token per org and purpose.
+Default for Uinaf (and preferred elsewhere):
+
+- Use an org-owned release GitHub App (`uinaf-releaser` for Uinaf).
+- Store `UINAF_RELEASE_APP_ID` as a `release` Environment variable and `UINAF_RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
+- Mint a short-lived installation token with SHA-pinned `actions/create-github-app-token`.
+- Pass explicit `owner`, `repositories` (source repo + `homebrew-tap`), and least permissions (`permission-contents: write`; add Issues/PRs write only when `@semantic-release/github` side effects stay enabled).
+- Set commit author/committer to `<app-slug>[bot]` / `<bot-user-id>+<app-slug>[bot]@users.noreply.github.com`.
+- Prefer `gh auth setup-git` with `GH_TOKEN` over embedding tokens in remote URLs.
+
+Do not introduce org-wide long-lived `TAP_GITHUB_TOKEN` PATs for new work. Retire existing PAT consumers after an App-backed path has live release proof.
 
 ### Flow A — GoReleaser auto-update
 
@@ -198,7 +222,7 @@ brews:
     repository:
       owner: <org>
       name: homebrew-tap
-      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     directory: Formula
     homepage: "https://github.com/<org>/<repo>"
     description: "<one-line description>"
@@ -207,7 +231,7 @@ brews:
       system "#{bin}/<cli-name>", "--version"
 ```
 
-GoReleaser commits the updated `Formula/<cli-name>.rb` straight to the tap's default branch on every release. No extra workflow step needed.
+Pass the minted App token as `HOMEBREW_TAP_TOKEN` (and usually also as `GITHUB_TOKEN`) in the GoReleaser step. GoReleaser commits the updated `Formula/<cli-name>.rb` straight to the tap's default branch on every release. No extra workflow step needed.
 
 ### Flow B — Non-Go CLI (Node, Ruby, etc.)
 
@@ -216,15 +240,26 @@ First check whether the org already has a non-Go CLI publishing to the same tap.
 For script or binary CLIs whose Homebrew formula can be generated from the GitHub Release archive, [`Justintime50/homebrew-releaser`](https://github.com/Justintime50/homebrew-releaser) is the boring direct-to-tap pattern. It clones the source repo and tap repo, generates or updates the formula, and commits straight to the tap branch using the supplied token. Pin the action to a full commit SHA with a same-line version comment matching the version line the working sibling repo uses.
 
 ```yaml
+- uses: actions/create-github-app-token@<full-sha> # v3.2.0
+  id: release-bot
+  with:
+    app-id: ${{ vars.UINAF_RELEASE_APP_ID }}
+    private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
+    owner: <org>
+    repositories: |
+      <repo>
+      homebrew-tap
+    permission-contents: write
+
 - if: steps.release.outputs.new_release_published == 'true'
   uses: Justintime50/homebrew-releaser@<full-sha> # v3.3.0
   with:
     homebrew_owner: <org>
     homebrew_tap: homebrew-tap
     formula_folder: Formula
-    github_token: ${{ secrets.TAP_GITHUB_TOKEN }}
-    commit_owner: release-bot
-    commit_email: release-bot@users.noreply.github.com
+    github_token: ${{ steps.release-bot.outputs.token }}
+    commit_owner: ${{ steps.release-bot.outputs.app-slug }}[bot]
+    commit_email: <bot-user-id>+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
     install: 'bin.install "<cli-name>"'
     test: 'system "#{bin}/<cli-name>", "--version"'
 ```
@@ -235,7 +270,7 @@ Use [`dawidd6/action-homebrew-bump-formula`](https://github.com/dawidd6/action-h
 - if: steps.release.outputs.new_release_published == 'true'
   uses: dawidd6/action-homebrew-bump-formula@<full-sha> # v7
   with:
-    token: ${{ secrets.TAP_GITHUB_TOKEN }}
+    token: ${{ steps.release-bot.outputs.token }}
     tap: <org>/homebrew-tap
     formula: <cli-name>
     tag: v${{ steps.release.outputs.new_release_version }}

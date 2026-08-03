@@ -30,7 +30,7 @@
     {
       "name": "Token scope documented",
       "max_score": 10,
-      "description": "`SETUP.md` documents that `TAP_GITHUB_TOKEN` needs contents write access to the tap repo and should be narrowly scoped"
+      "description": "`SETUP.md` documents App credentials (`UINAF_RELEASE_APP_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY`) and that the minted token is Contents-scoped to the source repo and `homebrew-tap`"
     },
     {
       "name": "Preserves semantic-release",
@@ -40,7 +40,7 @@
     {
       "name": "No broad PAT advice",
       "max_score": 8,
-      "description": "The setup note does not recommend a broad classic PAT or org-wide token when a fine-grained tap-scoped token is sufficient"
+      "description": "The setup note does not recommend a broad classic PAT or org-wide long-lived tap token when a short-lived App installation token is sufficient"
     },
     {
       "name": "Mentions sibling precedent",

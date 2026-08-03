@@ -55,7 +55,7 @@
     {
       "name": "Fine-grained PAT",
       "max_score": 6,
-      "description": "Any PAT used for cross-repo operations is stored with a scoped name (e.g. `TAP_GITHUB_TOKEN`, `OPS_TRIGGER_TOKEN`) and the explanation does NOT reference a classic `ghp_` PAT or an unscoped token"
+      "description": "Cross-repo GitHub writes use a narrowly scoped credential (preferred: short-lived GitHub App installation token; otherwise a purpose-scoped secret name such as `OPS_TRIGGER_TOKEN`) and the explanation does NOT reference a classic `ghp_` PAT or an unscoped token"
     },
     {
       "name": "GitHub secrets only for bootstrap",
