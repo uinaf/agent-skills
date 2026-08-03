@@ -72,7 +72,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Enable Corepack
         run: corepack enable
@@ -86,10 +85,9 @@ jobs:
       - name: Pack
         run: pnpm pack
 
+      # Publishes via npm Trusted Publishing (OIDC); no NPM_TOKEN.
       - name: Publish to npm
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
