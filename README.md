@@ -11,7 +11,6 @@ and the other skills in the catalog.
 | Skill | Use it for |
 | --- | --- |
 | [`agent-readiness`](skills/agent-readiness/SKILL.md) | Making repositories and runners dependable for autonomous work. |
-| [`autoreview`](skills/autoreview/SKILL.md) | Running a structured second-model review against the task contract. |
 | [`docs`](skills/docs/SKILL.md) | Auditing and rewriting repository documentation and agent guidance. |
 | [`gh-setup`](skills/gh-setup/SKILL.md) | Setting up GitHub collaboration, CI, releases, and deployments. |
 | [`planning`](skills/planning/SKILL.md) | Saving agreed work as resumable plans in the repository's preferred tracker. |
