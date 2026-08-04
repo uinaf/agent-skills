@@ -71,6 +71,7 @@ Default posture:
 - PR templates should ask for summary, changed surfaces, risks, verification, and complexity.
 - `SECURITY.md` should be private-first and avoid public issue reporting for vulnerabilities.
 - On public repos, enable GitHub private vulnerability reporting before (or with) shipping that `SECURITY.md`, so the documented route works.
+- On private repos, do not document GitHub private vulnerability reporting; point reporters at an existing private maintainer channel instead.
 - `CONTRIBUTING.md` should describe contributor setup, validation, and PR workflow only when the repo accepts outside or cross-team contributions.
 - Issue templates should exist only when they improve triage; avoid checklist theater.
 - Keep durable workflow detail in docs, not copied across README, CONTRIBUTING, templates, and agent guidance.

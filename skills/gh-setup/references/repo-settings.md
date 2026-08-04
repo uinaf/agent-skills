@@ -33,8 +33,10 @@ For public repositories that ship a private-first `SECURITY.md`:
   points reporters at that route.
 - Skip upstream forks and other repos that intentionally do not accept
   vulnerability reports here.
-- Private repositories do not expose this public reporting surface; do not
-  require it there.
+
+Private repositories do not expose that reporting surface. Do not enable or
+document PVR there; use a private-maintainer-channel `SECURITY.md` instead
+(see [templates](templates.md)).
 
 ## Merge Policy
 
