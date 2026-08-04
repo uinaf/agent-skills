@@ -1,4 +1,0 @@
-interface:
-  display_name: "Autoreview"
-  short_description: "Review code against its task contract"
-  default_prompt: "Use $autoreview to read the authoritative request, ticket, and spec, pass their acceptance criteria into the bundled Codex, Claude, or Cursor closeout on the correct target, validate every finding, and report the final clean result without issuing a ship decision."
