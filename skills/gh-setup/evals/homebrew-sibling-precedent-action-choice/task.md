@@ -10,7 +10,7 @@ The organization already has a known-good sibling repo, `uinaf/healthd`, with an
 
 Update `.github/workflows/release.yml` for `tccutil` so the release job updates the Homebrew tap after a release is published.
 
-Also write a short `SETUP.md` note documenting the `UINAF_RELEASE_APP_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY` Environment credentials and that the minted token must be Contents-scoped to the source repo and `homebrew-tap`.
+Also write a short `SETUP.md` note documenting the `UINAF_RELEASE_APP_CLIENT_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY` Environment credentials and that the minted token must be Contents-scoped to the source repo and `homebrew-tap`.
 
 ## Input Files
 
@@ -54,7 +54,7 @@ update-homebrew-tap:
     - uses: actions/create-github-app-token@<full-sha> # v3.2.0
       id: release-bot
       with:
-        app-id: ${{ vars.UINAF_RELEASE_APP_ID }}
+        client-id: ${{ vars.UINAF_RELEASE_APP_CLIENT_ID }}
         private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
         owner: uinaf
         repositories: |

@@ -96,7 +96,7 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 - uses: actions/create-github-app-token@<full-sha> # v3.2.0
   id: release-bot
   with:
-    app-id: ${{ vars.UINAF_RELEASE_APP_ID }}
+    client-id: ${{ vars.UINAF_RELEASE_APP_CLIENT_ID }}
     private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
     owner: <org>
     repositories: |
@@ -219,7 +219,7 @@ Whichever flow you pick, you need a token that can push to the tap repo from the
 Default for Uinaf (and preferred elsewhere):
 
 - Use an org-owned release GitHub App (`uinaf-releaser` for Uinaf).
-- Store `UINAF_RELEASE_APP_ID` as a `release` Environment variable and `UINAF_RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
+- Store `UINAF_RELEASE_APP_CLIENT_ID` as a `release` Environment variable and `UINAF_RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
 - Mint a short-lived installation token with SHA-pinned `actions/create-github-app-token`.
 - Pass explicit `owner`, `repositories` (source repo + `homebrew-tap`), and least permissions (`permission-contents: write`; add Issues/PRs write only when `@semantic-release/github` side effects stay enabled).
 - Set commit author/committer to `<app-slug>[bot]` / `<user-id>+<app-slug>[bot]@users.noreply.github.com`, resolving `<user-id>` at runtime from `/users/<app-slug>%5Bbot%5D` (see Bot Identity in `release-workflows.md`).
@@ -258,7 +258,7 @@ For script or binary CLIs whose Homebrew formula can be generated from the GitHu
 - uses: actions/create-github-app-token@<full-sha> # v3.2.0
   id: release-bot
   with:
-    app-id: ${{ vars.UINAF_RELEASE_APP_ID }}
+    client-id: ${{ vars.UINAF_RELEASE_APP_CLIENT_ID }}
     private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
     owner: <org>
     repositories: |

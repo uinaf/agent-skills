@@ -100,12 +100,14 @@ Apply on **both** verification and release jobs. Skipping it on verification mea
 
 Prefer a narrowly scoped GitHub App installation token for release GitHub writes. Mint it in the `release` Environment, authorize git with `gh auth setup-git`, then resolve the bot user id at runtime so noreply emails stay linked if the App is recreated:
 
+Use the current non-deprecated inputs declared by the pinned action version.
+
 ```yaml
 - name: Create release bot token
   id: release-bot
   uses: actions/create-github-app-token@<full-sha> # v3.2.0
   with:
-    app-id: ${{ vars.RELEASE_APP_ID }}
+    client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
     private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
     owner: ${{ github.repository_owner }}
     repositories: ${{ github.event.repository.name }}

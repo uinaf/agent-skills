@@ -24,6 +24,7 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
    - `docs/`
    - package, build, release, deploy, and verification scripts
 2. Check live GitHub settings before recommending changes: default branch, merge methods, branch/ruleset policy, Actions permissions, allowed GitHub Actions, Environments, Environment protection rules, secrets/vars locations, protected tags, and allowed push actors.
+   Record the relevant as-is values for readback and rollback.
    Useful probes:
    - `gh repo view --json defaultBranchRef,mergeCommitAllowed,rebaseMergeAllowed,squashMergeAllowed,deleteBranchOnMerge`
    - `gh api repos/{owner}/{repo}/actions/permissions`
@@ -36,6 +37,7 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
    - **Both**: publish the durable artifact first, then deploy from that published boundary. Read both release and deploy references.
 4. Use repo-local commands as the source of truth. If a release repo lacks stable verification/package proof, or a deploy repo lacks stable verification, e2e, monitoring, or rollback hooks, pause GitHub wiring until the repo has durable readiness proof.
 5. Keep `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, and `docs/` current when GitHub changes affect contributor or operator workflows.
+6. After changes, run the repo gates and read back live GitHub settings. Fix and retry until the result matches the intended diff, or restore the recorded state.
 
 ## Baseline Shape
 

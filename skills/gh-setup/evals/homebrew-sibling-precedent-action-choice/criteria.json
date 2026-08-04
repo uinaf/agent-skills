@@ -30,7 +30,7 @@
     {
       "name": "Token scope documented",
       "max_score": 10,
-      "description": "`SETUP.md` documents App credentials (`UINAF_RELEASE_APP_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY`) and that the minted token is Contents-scoped to the source repo and `homebrew-tap`"
+      "description": "`SETUP.md` documents App credentials (`UINAF_RELEASE_APP_CLIENT_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY`) and that the minted token is Contents-scoped to the source repo and `homebrew-tap`"
     },
     {
       "name": "Preserves semantic-release",

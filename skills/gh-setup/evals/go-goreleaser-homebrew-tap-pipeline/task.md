@@ -16,7 +16,7 @@ Produce the following files:
 - `.releaserc.json` — semantic-release configuration
 - `.goreleaser.yaml` — GoReleaser configuration including Homebrew tap automation
 
-Include a brief `SETUP.md` at the repo root documenting the release Environment App credentials (`UINAF_RELEASE_APP_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY` or equivalent) and the explicit repository scope required for the minted token.
+Include a brief `SETUP.md` at the repo root documenting the release Environment App credentials (`UINAF_RELEASE_APP_CLIENT_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY` or equivalent) and the explicit repository scope required for the minted token.
 
 ## Input Files
 
