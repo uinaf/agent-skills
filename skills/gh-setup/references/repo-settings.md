@@ -20,6 +20,22 @@ Check the live repo before making severity calls or writing instructions:
 
 Prefer `gh` or the GitHub UI/API for live settings. Checked-in workflow files are evidence, not proof of repo settings.
 
+## Private Vulnerability Reporting
+
+For public repositories that ship a private-first `SECURITY.md`:
+
+- Enable GitHub private vulnerability reporting so the Security tab reporting
+  route works.
+- Verify with `GET /repos/{owner}/{repo}/private-vulnerability-reporting`
+  (`enabled: true`) and enable with
+  `PUT /repos/{owner}/{repo}/private-vulnerability-reporting`.
+- Treat a missing or disabled setting as a settings gap when `SECURITY.md`
+  points reporters at that route.
+- Skip upstream forks and other repos that intentionally do not accept
+  vulnerability reports here.
+- Private repositories do not expose this public reporting surface; do not
+  require it there.
+
 ## Merge Policy
 
 Default posture:

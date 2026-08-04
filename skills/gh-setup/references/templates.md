@@ -54,6 +54,13 @@ Security vulnerabilities should route to `SECURITY.md`, not public issues.
 - Avoid promising response times unless the maintainer can meet them.
 - Keep product- or organization-specific contact details in the owning overlay, not in this generic base skill.
 
+On public repositories, the default private route is GitHub private
+vulnerability reporting. Enable it in repo settings (or via
+`PUT /repos/{owner}/{repo}/private-vulnerability-reporting`) before or
+together with adding `SECURITY.md`. Do not document that route while the
+setting is off. Private repositories cannot use that public reporting surface;
+point them at an existing private maintainer channel instead.
+
 ## Contributor Docs
 
 `CONTRIBUTING.md` should explain:
