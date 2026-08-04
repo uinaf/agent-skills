@@ -41,9 +41,13 @@ For public repositories that ship a private-first `SECURITY.md`:
 Default posture:
 
 - Enable squash merge for repos that value a clean mainline.
+- Enable delete-branch-on-merge so merged PR branches are cleaned up automatically.
 - Disable merge commits and rebase merge unless the repo intentionally supports them.
 - Preserve existing merge policy when a repo has a documented reason.
 - Keep PR title conventions aligned with the repo's release tooling when squash commits become release commits.
+
+Squash-only is compatible with stacked PRs; expect a restack after each
+bottom PR lands because squash rewrites those commits on the trunk.
 
 Do not change merge methods just to satisfy taste. Tie the change to release notes, review ergonomics, auditability, or maintainer policy.
 
@@ -95,6 +99,13 @@ Use least privilege at both repository and workflow levels:
 - Secret-bearing jobs grant scopes per job.
 - Allowed actions policy should permit known pinned actions and repo-owned local actions.
 - Fork PRs should run read-only checks with no release or deploy secrets.
+- When the plan supports it, enable repository Actions SHA pinning
+  (`sha_pinning_required` via
+  `PUT /repos/{owner}/{repo}/actions/permissions`) so third-party `uses:`
+  lines must be full commit SHAs. Pair this with Dependabot
+  `github-actions` updates so pins do not rot. Inspect current state with
+  `GET /repos/{owner}/{repo}/actions/permissions` and read
+  `sha_pinning_required`.
 
 ## Environments
 
