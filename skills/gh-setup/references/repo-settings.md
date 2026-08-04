@@ -20,14 +20,36 @@ Check the live repo before making severity calls or writing instructions:
 
 Prefer `gh` or the GitHub UI/API for live settings. Checked-in workflow files are evidence, not proof of repo settings.
 
+## Private Vulnerability Reporting
+
+For public repositories that ship a private-first `SECURITY.md`:
+
+- Enable GitHub private vulnerability reporting so the Security tab reporting
+  route works.
+- Verify with `GET /repos/{owner}/{repo}/private-vulnerability-reporting`
+  (`enabled: true`) and enable with
+  `PUT /repos/{owner}/{repo}/private-vulnerability-reporting`.
+- Treat a missing or disabled setting as a settings gap when `SECURITY.md`
+  points reporters at that route.
+- Skip upstream forks and other repos that intentionally do not accept
+  vulnerability reports here.
+
+Private repositories do not expose that reporting surface. Do not enable or
+document PVR there; use a private-maintainer-channel `SECURITY.md` instead
+(see [templates](templates.md)).
+
 ## Merge Policy
 
 Default posture:
 
 - Enable squash merge for repos that value a clean mainline.
+- Enable delete-branch-on-merge so merged PR branches are cleaned up automatically.
 - Disable merge commits and rebase merge unless the repo intentionally supports them.
 - Preserve existing merge policy when a repo has a documented reason.
 - Keep PR title conventions aligned with the repo's release tooling when squash commits become release commits.
+
+Squash-only is compatible with stacked PRs; expect a restack after each
+bottom PR lands because squash rewrites those commits on the trunk.
 
 Do not change merge methods just to satisfy taste. Tie the change to release notes, review ergonomics, auditability, or maintainer policy.
 
@@ -79,6 +101,13 @@ Use least privilege at both repository and workflow levels:
 - Secret-bearing jobs grant scopes per job.
 - Allowed actions policy should permit known pinned actions and repo-owned local actions.
 - Fork PRs should run read-only checks with no release or deploy secrets.
+- When the plan supports it, enable repository Actions SHA pinning
+  (`sha_pinning_required` via
+  `PUT /repos/{owner}/{repo}/actions/permissions`) so third-party `uses:`
+  lines must be full commit SHAs. Pair this with Dependabot
+  `github-actions` updates so pins do not rot. Inspect current state with
+  `GET /repos/{owner}/{repo}/actions/permissions` and read
+  `sha_pinning_required`.
 
 ## Environments
 

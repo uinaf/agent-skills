@@ -44,6 +44,23 @@ Before committing a pin, verify the SHA resolves upstream. Dependabot can update
 
 Enable Dependabot `github-actions` updates for repos with pinned Actions. Pinning without an update path turns security hardening into drift.
 
+When the repository plan supports it, also enable GitHub's Actions
+`sha_pinning_required` setting so unpinned actions fail closed. This lives on
+the repository Actions permissions object (allowed-actions policy), not the
+default `GITHUB_TOKEN` workflow-permissions endpoint:
+
+```bash
+gh api repos/{owner}/{repo}/actions/permissions
+gh api --method PUT repos/{owner}/{repo}/actions/permissions --input - <<'EOF'
+{"enabled": true, "allowed_actions": "all", "sha_pinning_required": true}
+EOF
+```
+
+Read the current permissions object first and preserve `enabled` /
+`allowed_actions` (and selected-action allowlists) the repo intentionally set.
+Local `uses: ./.github/actions/...` paths are unaffected; once the setting is
+on, remote actions must use full commit SHAs.
+
 ## Standard Hardening
 
 Prefer scanner-backed gates before bespoke workflow validators:

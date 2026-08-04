@@ -27,6 +27,7 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
    Useful probes:
    - `gh repo view --json defaultBranchRef,mergeCommitAllowed,rebaseMergeAllowed,squashMergeAllowed,deleteBranchOnMerge`
    - `gh api repos/{owner}/{repo}/actions/permissions`
+   - `gh api repos/{owner}/{repo}/private-vulnerability-reporting`
    - `gh api repos/{owner}/{repo}/environments`
    - `gh api repos/{owner}/{repo}/rulesets`
 3. Classify the repo:
@@ -54,6 +55,7 @@ Read [repo settings](references/repo-settings.md) when changing merge policy, br
 Default posture:
 
 - Prefer squash merge for small and medium repos unless the repo has a clear history-preservation reason.
+- Enable delete-branch-on-merge by default so landed PR branches do not accumulate.
 - Disable merge methods the repo does not intentionally support.
 - Preserve existing approval, status-check, signed-commit, actor, and tag restrictions unless the user explicitly asks to change them.
 - Prefer signed-commit requirements on protected/default branches when the plan and automation path support them.
@@ -68,6 +70,8 @@ Default posture:
 
 - PR templates should ask for summary, changed surfaces, risks, verification, and complexity.
 - `SECURITY.md` should be private-first and avoid public issue reporting for vulnerabilities.
+- On public repos, enable GitHub private vulnerability reporting before (or with) shipping that `SECURITY.md`, so the documented route works.
+- On private repos, do not document GitHub private vulnerability reporting; point reporters at an existing private maintainer channel instead.
 - `CONTRIBUTING.md` should describe contributor setup, validation, and PR workflow only when the repo accepts outside or cross-team contributions.
 - Issue templates should exist only when they improve triage; avoid checklist theater.
 - Keep durable workflow detail in docs, not copied across README, CONTRIBUTING, templates, and agent guidance.
@@ -81,6 +85,7 @@ Hard defaults:
 - Do not use `pull_request_target` for workflows that check out, install, build, test, package, publish, sign, deploy, or execute project code.
 - Default workflow permissions to read-only or `{}` and grant scopes per job.
 - Pin high-trust release, publish, upload, signing, and deploy actions to full commit SHAs with same-line version comments when the repo can maintain them.
+- When available, enable the repository Actions setting `sha_pinning_required` so unpinned third-party actions fail closed.
 - Run `actionlint` for syntax and `zizmor` for GitHub Actions security before inventing bespoke validators.
 - Run repository-history secret detection in a dedicated GitHub Actions workflow.
 - Keep workflow YAML boring: prefer maintained actions and repo-owned commands over large inline shell/JavaScript blocks.
