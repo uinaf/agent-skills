@@ -8,4 +8,3 @@ any known mitigations. Do not include live credentials or private source code.
 
 Security fixes are applied on a best-effort basis to the latest release and the
 latest code on `main`.
-
