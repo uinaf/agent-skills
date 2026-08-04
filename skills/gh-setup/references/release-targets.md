@@ -313,7 +313,10 @@ Use [`dawidd6/action-homebrew-bump-formula`](https://github.com/dawidd6/action-h
 ### Tap repo conventions
 
 - Keep formulae under `Formula/`. Homebrew also accepts repo root, but `Formula/` scales when you add more CLIs.
-- Add a CI job to the tap repo that runs `brew audit --strict --online Formula/*.rb` on PR. Catches malformed formulae before they break user installs.
+- Add a CI job to the tap repo that runs `brew audit --online` on formulae and
+  casks. Prefer not to use `--strict` for GoReleaser-generated formulae: the
+  generator always emits `version`, which GitHub release URLs already encode,
+  and `--strict` rejects that as redundant.
 - Pin the tap to a release branch only if you need staged rollouts. Default to publishing straight to `main`.
 - A formula update commit on the tap is itself a release event for users — bot identity and `[skip ci]` semantics apply there too if the tap repo has its own CI.
 
