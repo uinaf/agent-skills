@@ -85,6 +85,7 @@ Use when aligning GitHub Actions release workflow files.
 
 - Both jobs: `actions/checkout@<full-sha> # v6.0.2` with `fetch-depth: 0`. Semantic-release walks history to compute the next version; a shallow clone breaks it.
 - Keep `persist-credentials: false` through checkout, install, build, and pack steps whenever possible, especially before package-manager lifecycle scripts run. If `@semantic-release/git` must push a bump commit, add write credentials only at the narrow release boundary: use a release bot or GitHub App token that branch rules explicitly allow, configure the git remote or credential helper immediately before semantic-release, and avoid exposing that token to dependency install steps.
+- Do not assume a later `GITHUB_TOKEN` or `GH_TOKEN` environment variable overrides checkout authentication. With persisted credentials, Git can keep using checkout's default token and push as `github-actions[bot]` even after a GitHub App token is minted. Disable credential persistence at checkout, then configure Git authentication with the intended token at the release boundary.
 
 ## `[skip ci]` Gate
 

@@ -23,9 +23,9 @@
       "description": "The Homebrew tap repo is referenced with the `homebrew-` prefix in its name (e.g., `homebrew-tap`, `homebrew-<name>`)"
     },
     {
-      "name": "Release App token scope",
+      "name": "Release App credential path",
       "max_score": 8,
-      "description": "The workflow mints a short-lived GitHub App installation token (or documents equivalent App credentials) explicitly scoped to the source repo and Homebrew tap, and does not introduce a broad classic PAT"
+      "description": "The workflow mints a short-lived GitHub App installation token explicitly scoped to the source repo and Homebrew tap, does not introduce a broad classic PAT, disables checkout credential persistence, and uses the App token for Git and release writes at the release boundary"
     },
     {
       "name": "Attestation permissions",

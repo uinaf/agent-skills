@@ -18,6 +18,12 @@ Common failure modes when standing up or operating this pipeline. Check here bef
 - Cause: semantic-release reached the push-back step without a git credential that branch rules allow.
 - Fix: keep checkout credentials unpersisted through install/build, then configure a release-bot or GitHub App token immediately before semantic-release and grant the release job `contents: write`. Do not fix this by exposing a write token to dependency install steps.
 
+## GitHub App token minted, but push is denied to `github-actions[bot]`
+
+- Cause: `actions/checkout` persisted the job's default token before the App token was minted. Setting `GITHUB_TOKEN` or `GH_TOKEN` on the release step does not necessarily replace Git's configured checkout credential, so the push still authenticates as `github-actions[bot]` and may fail with `EGITNOPERMISSION` or HTTP 403.
+- Verify: the App-token step succeeded, but the failed push names `github-actions[bot]`; checkout logs show `persist-credentials: true` or omit the input.
+- Fix: set `persist-credentials: false` on release-job checkout, then configure Git with the minted App token immediately before semantic-release, for example with `GH_TOKEN` and `gh auth setup-git`.
+
 ## Tag created but no GitHub Release / no published artifact
 
 - Cause: `@semantic-release/github` or the publish plugin ran without the credential it expected.
