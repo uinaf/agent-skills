@@ -30,7 +30,7 @@
     {
       "name": "What and when in descriptions",
       "max_score": 9,
-      "description": "Each proposed replacement description in rewrite-suggestions.md states both what the skill does and when to use it"
+      "description": "Each proposed replacement description in rewrite-suggestions.md front-loads what the skill does, states when to use it, and avoids padding the trigger with synonyms for the same request branch"
     },
     {
       "name": "Overlap boundary in descriptions",
