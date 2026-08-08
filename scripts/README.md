@@ -95,8 +95,9 @@ The optimizer mutates one package. Inspect its diff before keeping the result.
 ## Workflow
 
 1. Edit the skill
-2. Run `pnpm run verify` (free lint/structure gate)
-3. Before publish, run `pnpm run verify:skills` (reviews changed skills at 100)
+2. Run `pnpm run verify` (free lint/structure gate; what CI runs)
+3. Optionally run `pnpm run verify:skills` when you want a fresh local 100-point
+   cloud score for changed skills
 4. If the score or suggestions are weak, optimize one skill or apply the
    feedback manually; rerun the changed-skill review
 5. Use `TESSL_REVIEW_ALL=true` only for an intentional portfolio audit

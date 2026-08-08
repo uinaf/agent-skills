@@ -44,11 +44,12 @@ pnpm install --frozen-lockfile
 pnpm run verify
 ```
 
-Skill changes also need the authenticated quality gate:
+CI uses that same free lint/structure gate. For an intentional local 100-point
+Tessl cloud score before a sensitive skill change:
 
 ```bash
 pnpm run verify:skills
 ```
 
-See [Skill maintenance](scripts/README.md) for focused review and optimization,
-or [Distribution](docs/distribution.md) for publication and release setup.
+See [Skill evaluation](scripts/README.md) for lint vs review lanes, or
+[Distribution](docs/distribution.md) for publication and release setup.
