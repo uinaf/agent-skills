@@ -12,7 +12,7 @@ beside the product.
 | `uinaf/attach` | `skills/attach-cli` | `.github/workflows/publish-skill.yml` via `tessl-publish-action` (`review-mode: lint`) |
 | `uinaf/autoreview` | `skills/autoreview` | same pattern |
 | `uinaf/slopomatic` | `skills/slopomatic` | same pattern |
-| `uinaf/intake` | `skills/uinaf-intake` | `.github/workflows/lint-skill.yml` (free plugin lint; no Tessl publish yet) |
+| `uinaf/intake` | `skills/uinaf-intake` | PR lint via `lint-skill.yml`; publish via `publish-skill.yml` + `tessl-publish-action` (`review-mode: lint`) |
 
 Do not treat harness-local copies under `~/.agents` or consumer
 `.agents/skills/` as sources of truth. Edit and publish from the owner repo.
