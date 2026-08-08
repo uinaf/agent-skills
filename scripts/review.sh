@@ -52,15 +52,21 @@ elif [[ "$use_lint" == true ]]; then
 fi
 
 for skill_dir in skills/*; do
-  if [[ -d "$skill_dir" ]]; then
-    echo "== tessl plugin lint: ${skill_dir#skills/} =="
-    pnpm exec tessl plugin lint "$skill_dir"
-
-    if [[ "$use_lint" == true ]]; then
-      continue
-    else
-      echo "== tessl review: ${skill_dir#skills/} =="
-      pnpm exec tessl review run "${args[@]}" "$skill_dir"
-    fi
+  if [[ ! -d "$skill_dir" ]]; then
+    continue
   fi
+  if [[ ! -f "$skill_dir/.tessl-plugin/plugin.json" ]]; then
+    echo "Skipping $skill_dir: missing .tessl-plugin/plugin.json"
+    continue
+  fi
+
+  echo "== tessl plugin lint: ${skill_dir#skills/} =="
+  pnpm exec tessl plugin lint "$skill_dir"
+
+  if [[ "$use_lint" == true ]]; then
+    continue
+  fi
+
+  echo "== tessl review: ${skill_dir#skills/} =="
+  pnpm exec tessl review run "${args[@]}" "$skill_dir"
 done

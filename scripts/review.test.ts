@@ -31,6 +31,11 @@ test("local and trusted remote skill gates use the same 100-point contract", () 
     "pnpm run verify && pnpm run review:skills",
   );
   assert.match(reviewScript, /threshold="\$\{TESSL_THRESHOLD:-100\}"/);
+  assert.match(
+    reviewScript,
+    /\.tessl-plugin\/plugin\.json/,
+    "review.sh must skip directories that are not Tessl plugins",
+  );
   for (const script of [reviewScript, optimizeScript, publishScript]) {
     assert.match(script, /pnpm exec tessl/);
     assert.doesNotMatch(script, new RegExp(`${deprecatedCliOverride}|pnpm dlx`));
