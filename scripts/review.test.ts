@@ -10,7 +10,7 @@ function readRepoFile(path: string): string {
   return readFileSync(join(repoRoot, path), "utf8");
 }
 
-test("local and trusted remote skill gates use the same 100-point contract", () => {
+test("CI uses free lint verify; authenticated 100-point review stays local", () => {
   const packageJson = JSON.parse(readRepoFile("package.json")) as {
     devDependencies: Record<string, string>;
     scripts: Record<string, string>;
@@ -33,6 +33,16 @@ test("local and trusted remote skill gates use the same 100-point contract", () 
   assert.match(reviewScript, /threshold="\$\{TESSL_THRESHOLD:-100\}"/);
   assert.match(
     reviewScript,
+    /TESSL_REVIEW_ALL/,
+    "review.sh must support an intentional full-portfolio review",
+  );
+  assert.match(
+    reviewScript,
+    /GITHUB_EVENT_BEFORE/,
+    "review.sh must scope authenticated review to changed skills when used",
+  );
+  assert.match(
+    reviewScript,
     /\.tessl-plugin\/plugin\.json/,
     "review.sh must skip directories that are not Tessl plugins",
   );
@@ -40,11 +50,16 @@ test("local and trusted remote skill gates use the same 100-point contract", () 
     assert.match(script, /pnpm exec tessl/);
     assert.doesNotMatch(script, new RegExp(`${deprecatedCliOverride}|pnpm dlx`));
   }
-  assert.match(publishWorkflow, /TESSL_THRESHOLD: "100"/);
-  assert.match(publishWorkflow, /run: pnpm run verify:skills/);
+  assert.match(publishWorkflow, /name: Verify skills/);
+  assert.match(publishWorkflow, /run: pnpm run verify\n/);
+  assert.doesNotMatch(publishWorkflow, /run: pnpm run verify:skills/);
+  assert.doesNotMatch(publishWorkflow, /TESSL_THRESHOLD:/);
+  assert.doesNotMatch(publishWorkflow, /TESSL_REVIEW_ALL:/);
+  // publish job still needs the token for registry publish
+  assert.match(publishWorkflow, /TESSL_TOKEN: \$\{[{] secrets\.TESSL_TOKEN [}]\}/);
   assert.doesNotMatch(publishWorkflow, /run: \.\/scripts\/review\.sh/);
   assert.doesNotMatch(publishWorkflow, /tesslio\/setup-tessl|id-token: write/);
-  assert.match(publishWorkflow, /TESSL_TOKEN: \$\{\{ secrets\.TESSL_TOKEN \}\}/);
+  assert.match(pullRequestWorkflow, /run: pnpm run verify\n/);
   assert.doesNotMatch(pullRequestWorkflow, /main-review:/);
   assert.doesNotMatch(pullRequestWorkflow, /^  push:/m);
 });

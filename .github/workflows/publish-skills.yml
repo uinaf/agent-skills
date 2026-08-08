@@ -19,16 +19,12 @@ permissions:
 
 jobs:
   quality:
-    name: Verify and review skills
+    name: Verify skills
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment:
-      name: release
     env:
       TESSL_AUTO_UPDATE_INTERVAL_MINUTES: "0"
-      TESSL_THRESHOLD: "100"
-      TESSL_TOKEN: ${{ secrets.TESSL_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -48,8 +44,9 @@ jobs:
           run_install: |
             - args: [--frozen-lockfile]
 
-      - name: Run canonical skill verification
-        run: pnpm run verify:skills
+      # Free local lane only. Cloud Tessl review stays intentional/local, not CI.
+      - name: Run repository verification
+        run: pnpm run verify
 
   publish:
     needs: quality

@@ -1,7 +1,7 @@
 {
   "name": "uinaf/react-ban-use-effect",
   "version": "1.1.6",
-  "description": "Ban direct `useEffect` in React components. Use when writing, refactoring, or reviewing React code so derived state, data fetching, user actions, resets, and mount-only external synchronization use declarative replacement patterns instead of dependency-array choreography.",
+  "description": "Detect, replace, and lint-ban direct `useEffect` in React components and hooks. Prefer declarative replacements for derived state, fetching, event reactions, resets, and external sync; add ESLint or agent rules for a no-direct-useEffect policy. Use when writing, refactoring, reviewing, or migrating React code that imports or calls `useEffect`, or when an agent reaches for an effect by default. Do not use for ordinary React work with no effect smell, non-React code, or legitimate effect architecture outside React.",
   "private": false,
   "skills": [
     "SKILL.md"

@@ -1,11 +1,12 @@
 ---
 name: react-ban-use-effect
-description: "Ban direct `useEffect` in React code. Use when writing, refactoring, reviewing, or migrating React components or hooks that import, call, add, or replace direct `useEffect`; when an agent reaches for effects for derived state, fetching, event reactions, resets, or external sync; or when adding lint/agent rules for a no-direct-useEffect policy. Do not use for ordinary React work with no effect smell, non-React code, or legitimate effect architecture outside React."
+description: "Detect, replace, and lint-ban direct `useEffect` in React components and hooks. Prefer declarative replacements for derived state, fetching, event reactions, resets, and external sync; add ESLint or agent rules for a no-direct-useEffect policy. Use when writing, refactoring, reviewing, or migrating React code that imports or calls `useEffect`, or when an agent reaches for an effect by default. Do not use for ordinary React work with no effect smell, non-React code, or legitimate effect architecture outside React."
 ---
 
 # React Ban useEffect
 
-Default stance: do not import or call `useEffect` directly in React components. Treat effects as an escape hatch for synchronizing with external systems, not as the default place to put render, event, data, or reset logic.
+Default stance: do not import or call `useEffect` directly in React components.
+Treat effects as an escape hatch for synchronizing with external systems.
 
 ## Start Here
 
@@ -18,31 +19,63 @@ Default stance: do not import or call `useEffect` directly in React components. 
    - async UI, pending state, or request waterfall
    - external-system synchronization
 3. Replace it with the narrowest declarative pattern from [references/replacements.md](references/replacements.md).
-4. For data, forms, external stores, or performance work, also check the stronger alternative map in [references/alternatives.md](references/alternatives.md).
-5. Keep behavior proof concrete: run the repo's lint/type/test gate, the optional `react-doctor` CLI diff scan when available, plus the smallest runtime or component check that exercises the changed path. Fix failures and rerun before completion.
+4. For data, forms, external stores, or performance work, also check [references/alternatives.md](references/alternatives.md).
+5. Prove the change: run the repo's lint/type/test gate, optional `react-doctor`
+   CLI diff scan when available, plus the smallest runtime check for the changed
+   path. Fix failures and rerun before completion.
 
 ## Replacement Ladder
 
-Use the highest applicable layer:
+Highest applicable layer wins. Intent → layer:
+
+| Intent | Prefer |
+| --- | --- |
+| derive from props/state | render-time calculation |
+| fetch / server state | server, loader, or TanStack Query / SWR / Relay / Apollo |
+| user action | event handler, form action, or mutation |
+| reset on identity change | keyed component boundary |
+| read external store | `useSyncExternalStore` |
+| other external sync | reviewed domain-specific hook |
 
 1. render-time calculation
 2. server, loader, or framework data API
 3. server-state library such as TanStack Query, SWR, Relay, or Apollo
 4. event handler, form action, or mutation
 5. keyed component boundary
-6. `useSyncExternalStore` or a reviewed domain-specific external-system hook with explicit reactive inputs
+6. `useSyncExternalStore` or a reviewed domain-specific external-system hook
 
-If none of these fit, stop and explain why the code truly needs an effect instead of adding direct `useEffect`.
+Common keyed reset:
+
+```tsx
+function ProfilePage({ userId }: { userId: string }) {
+  return <Profile key={userId} userId={userId} />;
+}
+```
+
+If none fit, stop and explain why the code truly needs an effect instead of
+adding direct `useEffect`.
 
 ## Allowed Escape Hatches
 
-Prefer an existing repo integration hook. If the repo has no standard, add a domain-specific hook that names the external system, owns its setup and cleanup, accepts every reactive input explicitly, and keeps those inputs in the effect dependency list. See [the external-system replacement](references/replacements.md#5-synchronize-external-systems) for the concrete shape.
+Prefer an existing repo integration hook. Otherwise add a domain-specific hook
+that names the external system, owns setup/cleanup, and lists every reactive
+input in the dependency array. See
+[the external-system replacement](references/replacements.md#5-synchronize-external-systems).
 
-Do not expose a generic effect callback or dependency list to callers, and do not suppress `react-hooks/exhaustive-deps`. A truly mount-only integration may use an empty dependency list only when its setup reads no reactive value from props, state, or the component closure. Prefer `useSyncExternalStore` for external stores or browser values that change over time. Never use an exception hook to fetch server state, copy props into state, or relay user actions.
+Do not expose a generic effect callback or dependency list to callers.
+Do not suppress `react-hooks/exhaustive-deps`.
+A mount-only empty dependency list is allowed only when setup reads no reactive
+props, state, or closure values.
+Prefer `useSyncExternalStore` for stores or browser values that change over time.
+Never use an exception hook to fetch server state, copy props into state, or
+relay user actions.
 
 ## Enforcement
 
-For new policy work, prefer the repo's existing ESLint shape. The usual rule is `no-restricted-imports` against `useEffect` from `react`, with the message pointing developers to declarative replacements and reviewed external-integration hooks. Also block namespace calls such as `React.useEffect(...)` with `no-restricted-syntax` or a custom rule. Allow only named, reviewed external-integration hook files as direct-import/call exceptions; do not create a general-purpose wrapper exemption. If the repo already uses another lint shape, preserve that local convention.
+Prefer the repo's existing ESLint shape. Usual rules: `no-restricted-imports`
+against `useEffect` from `react`, plus `no-restricted-syntax` (or a custom rule)
+for `React.useEffect(...)`. Allow only named, reviewed external-integration hook
+files as exceptions. Preserve any existing local lint convention.
 
 ```ts
 {
@@ -58,9 +91,9 @@ For new policy work, prefer the repo's existing ESLint shape. The usual rule is 
 }
 ```
 
-For reviews, treat new direct `useEffect` as a finding unless the diff also introduces a clear, reviewed exception. Ask for a replacement plan rather than dependency-array tuning.
-
-For upstream provenance and uinaf tailoring notes, use [references/upstream.md](references/upstream.md).
+In reviews, treat new direct `useEffect` as a finding unless the diff also adds
+a clear, reviewed exception. Ask for a replacement plan, not dependency-array
+tuning. Provenance notes: [references/upstream.md](references/upstream.md).
 
 ## Boundaries
 

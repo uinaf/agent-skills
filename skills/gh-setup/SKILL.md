@@ -1,6 +1,6 @@
 ---
 name: gh-setup
-description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch/ruleset policy, PR and security templates, Actions hardening, GitHub Environments, release workflows, and deploy workflows. Use when standardizing GitHub setup for repos, CI/CD, publishing versioned packages, or deploying running apps; route app deploy details to deploy references and package publish details to release references."
+description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch/ruleset policy, PR and security templates, Actions hardening, GitHub Environments, release workflows, and deploy workflows. Use when standardizing GitHub setup for repos, CI/CD, GitHub Actions, branch protection, release or publish pipelines, publishing versioned packages, or deploying running apps; route app deploy details to deploy references and package publish details to release references."
 disable-model-invocation: true
 ---
 
@@ -54,12 +54,11 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
 
 Read [repo settings](references/repo-settings.md) when changing merge policy, branch protections, rulesets, tag protection, Actions permissions, Environment settings, or repository descriptions.
 
-Default posture:
+Default posture (pair each change with a live probe or write):
 
-- Prefer squash merge for small and medium repos unless the repo has a clear history-preservation reason.
-- Enable delete-branch-on-merge by default so landed PR branches do not accumulate.
-- Disable merge methods the repo does not intentionally support.
-- Preserve existing approval, status-check, signed-commit, actor, and tag restrictions unless the user explicitly asks to change them.
+- Prefer squash merge: `gh repo edit --enable-squash-merge --enable-delete-branch-on-merge`; disable unused methods with `--enable-merge-commit=false` / `--enable-rebase-merge=false` unless history preservation requires them.
+- Confirm with `gh repo view --json squashMergeAllowed,deleteBranchOnMerge,mergeCommitAllowed,rebaseMergeAllowed`.
+- Preserve existing approval, status-check, signed-commit, actor, and tag restrictions unless the user explicitly asks to change them (`gh api repos/{owner}/{repo}/rulesets`).
 - Prefer signed-commit requirements on protected/default branches when the plan and automation path support them.
 - If direct pushes to `main` must remain allowed, prefer branch protection with conversation resolution rather than forcing all default-branch changes through PRs by accident.
 - For release bump commits, confirm the token actor is allowed by branch/ruleset policy before relying on bot metadata.
@@ -85,9 +84,18 @@ Read [Actions security](references/actions-security.md) before editing workflows
 Hard defaults:
 
 - Do not use `pull_request_target` for workflows that check out, install, build, test, package, publish, sign, deploy, or execute project code.
-- Default workflow permissions to read-only or `{}` and grant scopes per job.
+- Default workflow permissions to read-only or `{}` and grant scopes per job (`permissions: {}` at workflow top; widen per job).
 - Pin high-trust release, publish, upload, signing, and deploy actions to full commit SHAs with same-line version comments when the repo can maintain them.
-- When available, enable the repository Actions setting `sha_pinning_required` so unpinned third-party actions fail closed.
+- Enable `sha_pinning_required` after reading current policy:
+
+  ```bash
+  gh api repos/{owner}/{repo}/actions/permissions
+  gh api --method PUT repos/{owner}/{repo}/actions/permissions --input - <<'EOF'
+  {"enabled": true, "allowed_actions": "all", "sha_pinning_required": true}
+  EOF
+  ```
+
+  Preserve any intentional `allowed_actions` / allowlist values from the GET.
 - Run `actionlint` for syntax and `zizmor` for GitHub Actions security before inventing bespoke validators.
 - Run repository-history secret detection in a dedicated GitHub Actions workflow.
 - Keep workflow YAML boring: prefer maintained actions and repo-owned commands over large inline shell/JavaScript blocks.

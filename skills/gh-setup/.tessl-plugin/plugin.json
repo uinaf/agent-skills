@@ -1,7 +1,7 @@
 {
   "name": "uinaf/gh-setup",
   "version": "2.0.14",
-  "description": "Set up or align GitHub repo settings, branch/ruleset policy, templates, Actions hardening, Environments, release workflows, and deploy workflows for continuously publishable or deployable repositories.",
+  "description": "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch/ruleset policy, PR and security templates, Actions hardening, GitHub Environments, release workflows, and deploy workflows. Use when standardizing GitHub setup for repos, CI/CD, GitHub Actions, branch protection, release or publish pipelines, publishing versioned packages, or deploying running apps; route app deploy details to deploy references and package publish details to release references.",
   "private": false,
   "skills": [
     "SKILL.md"
