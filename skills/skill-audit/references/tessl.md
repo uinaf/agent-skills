@@ -58,8 +58,10 @@ TESSL_REVIEW_MODE=lint ./scripts/review.sh
 TESSL_REVIEW_ALL=true ./scripts/review.sh
 ```
 
-CI does not run cloud review. Treat `pnpm run verify:skills` as a human-owned
-publish-readiness check when credits and scores matter.
+CI does not run cloud review. The monthly portfolio workflow is lint-only too.
+Treat `pnpm run verify:skills` as a human-owned publish-readiness check when
+credits and scores matter. Never schedule fleet-wide cloud review across this
+catalog or the distributed skill shippers in [Skill fleet](../../../docs/skill-fleet.md).
 
 For a formal single-skill score or a repo without wrappers, use its locked,
 repository-local Tessl executable:

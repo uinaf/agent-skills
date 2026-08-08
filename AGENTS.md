@@ -13,11 +13,12 @@ Contributor guidance for this reusable skill catalog.
   validation dependencies on external setup or workspace repositories.
   Composition belongs to the consumer.
 - Check reality before editing docs or examples; keep commands and paths repo-valid.
-- Run `pnpm run verify` before handoff; CI (PR and main) uses this free
-  lint/structure gate only — it does not burn Tessl review credits.
+- Run `pnpm run verify` before handoff; CI (PR, main, and monthly lint) uses
+  this free lint/structure gate only — it does not burn Tessl review credits.
 - Before publishing a skill that needs a fresh 100-point score, run
   `pnpm run verify:skills` locally (changed skills) or
   `TESSL_REVIEW_ALL=true pnpm run review:skills` for a portfolio gate. Prefer
-  `tessl plugin lint` over credit-burning review for routine audits. Follow
-  [Skill evaluation](scripts/README.md).
+  `tessl plugin lint` over credit-burning review for routine audits. Never
+  schedule cloud review across the fleet. Follow
+  [Skill evaluation](scripts/README.md) and [Skill fleet](docs/skill-fleet.md).
 - Use repo-relative links in checked-in Markdown. No absolute local paths, `file://`, or editor URIs.

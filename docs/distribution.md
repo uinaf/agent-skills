@@ -36,6 +36,9 @@ run `pnpm run verify:skills` locally (changed skills) or
 `TESSL_REVIEW_ALL=true pnpm run review:skills` for the portfolio. See
 [Skill evaluation](../scripts/README.md).
 
+Fleet inventory, monthly free lint, and the ban on scheduled cloud review live
+in [Skill fleet](skill-fleet.md).
+
 ## Required GitHub Environment
 
 Configure a GitHub Environment named `release` for the **publish** job only:

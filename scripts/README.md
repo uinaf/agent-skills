@@ -50,10 +50,13 @@ CI stays on the free lint lane:
 
 - Pull requests and main `Publish Skills` quality both run `pnpm run verify`
   (typecheck, shell/action lint, tests, `tessl plugin lint`). No cloud review.
+- A monthly scheduled workflow also runs `pnpm run verify` only — never cloud
+  review. See [Skill fleet](../docs/skill-fleet.md).
 - Main still publishes changed plugins after that gate; Tessl registry publish
   uses `TESSL_TOKEN` in the publish job only.
 - Run authenticated 100-point review locally with `pnpm run verify:skills` or
   `TESSL_REVIEW_ALL=true ./scripts/review.sh` when you intentionally want scores.
+  Do not put that on a cron.
 
 Set `TESSL_REVIEW_MODE=lint` to force the lint lane locally. If `CI` is set and
 `TESSL_TOKEN` is absent, the wrapper also falls back to lint mode.

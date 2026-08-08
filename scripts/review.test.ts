@@ -62,4 +62,9 @@ test("CI uses free lint verify; authenticated 100-point review stays local", () 
   assert.match(pullRequestWorkflow, /run: pnpm run verify\n/);
   assert.doesNotMatch(pullRequestWorkflow, /main-review:/);
   assert.doesNotMatch(pullRequestWorkflow, /^  push:/m);
+
+  const monthlyLintWorkflow = readRepoFile(".github/workflows/monthly-lint.yml");
+  assert.match(monthlyLintWorkflow, /schedule:/);
+  assert.match(monthlyLintWorkflow, /run: pnpm run verify\n/);
+  assert.doesNotMatch(monthlyLintWorkflow, /secrets\.TESSL_TOKEN|verify:skills|review\.sh|review-mode:\s*review/);
 });

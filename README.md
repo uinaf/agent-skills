@@ -51,5 +51,7 @@ Tessl cloud score before a sensitive skill change:
 pnpm run verify:skills
 ```
 
-See [Skill evaluation](scripts/README.md) for lint vs review lanes, or
-[Distribution](docs/distribution.md) for publication and release setup.
+See [Skill evaluation](scripts/README.md) for lint vs review lanes,
+[Distribution](docs/distribution.md) for publication and release setup, and
+[Skill fleet](docs/skill-fleet.md) for the cross-repo inventory and monthly
+lint cadence (no scheduled cloud review).
