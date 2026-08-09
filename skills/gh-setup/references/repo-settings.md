@@ -80,7 +80,8 @@ Running checks on pull requests does not enforce them. Read the effective rules
 for the default branch before enabling required checks:
 
 ```bash
-gh api repos/{owner}/{repo}/rules/branches/{default_branch}
+default_branch="$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name')"
+gh api "repos/{owner}/{repo}/rules/branches/$default_branch"
 ```
 
 For an organization with multiple repository shapes:
