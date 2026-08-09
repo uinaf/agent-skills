@@ -21,6 +21,9 @@ Because plugin v1.0.1 has no atomic expected-head precondition, enforce an
 exclusive-writer policy for the default branch throughout release preparation;
 a superseded-run preflight alone is insufficient. Restore a credential-free
 `origin` immediately after semantic-release in an `if: always()` step.
+Use a repo-owned `[skip release]` marker and branch-job guards for the version
+commit; GitHub's recognized `[skip ci]` would also suppress cargo-dist's tag
+workflow.
 
 ## Output Specification
 

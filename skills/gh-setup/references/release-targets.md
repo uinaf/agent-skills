@@ -242,7 +242,7 @@ Plugins:
 }],
 ["@jno21/semantic-release-github-commit", {
   "files": ["Cargo.toml", "Cargo.lock"],
-  "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
+  "commitMessage": "chore(release): ${nextRelease.version} [skip release]"
 }]
 ```
 
@@ -267,6 +267,10 @@ Semantic-release job:
 ```
 
 - No `CARGO_REGISTRY_TOKEN` needed — nothing publishes to crates.io.
+- Guard the semantic-release workflow's branch jobs against the repo-owned
+  `[skip release]` marker. Do not use GitHub's recognized `[skip ci]` / `[ci
+  skip]` instructions on this tagged commit: they also suppress cargo-dist's
+  tag-push workflow.
 - `cargo-dist` is a CLI and generated workflow system, not a maintained GitHub Action. Do not use stale `axodotdev/cargo-dist-action` snippets.
 - Run `dist init` or `dist generate` so cargo-dist owns the tag-triggered
   workflow. That generated workflow should cover plan, build, host, publish,
@@ -308,7 +312,7 @@ permissions:
     owner: <org>
     repositories: <repo>
     permission-contents: write
-    # Release PR job only; omit from the release-only job.
+    # Release PR job: write. Release-only job: read.
     permission-pull-requests: write
 
 - uses: dtolnay/rust-toolchain@<full-sha> # stable
@@ -341,8 +345,8 @@ permissions:
   starting cargo-dist. Scope the App to this repository and the minimum
   permissions required by each release-plz job. Keep the workflow's default
   token read-only. The Release PR job needs App Contents and Pull requests
-  write; the release-only job needs App Contents write but no Pull requests
-  permission.
+  write; the release-only job needs App Contents write plus Pull requests read
+  so it can identify the merged Release PR and its commits.
 
 ### Caveats
 

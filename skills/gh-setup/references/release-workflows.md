@@ -168,6 +168,11 @@ if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
 
 Apply on **both** verification and release jobs. Skipping it on verification means the bump commit re-runs the verification suite for nothing; skipping it on release means the bump commit recursively triggers a new release.
 
+Exception: if another workflow must run from a tag on the version commit, do
+not place GitHub's recognized skip instructions in that commit. They apply to
+tag `push` workflows too. Use a repo-owned marker such as `[skip release]` and
+job-level conditions in the branch workflow instead.
+
 ## Signed Bot Commits
 
 Use a narrowly scoped GitHub App installation token for release writes. An App
