@@ -99,12 +99,14 @@ jobs:
           TESSL_PUBLISH_ALL: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: ./scripts/publish.sh
 
+      - name: Stage published plugin versions
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: git add -- skills
+
       - name: Commit published plugin versions
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        env:
-          EXPECTED_COMMIT_AUTHOR: ${{ steps.release-bot.outputs.app-slug }}[bot]
-          GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-        run: >-
-          node scripts/create-signed-commit.ts
-          "chore: sync published plugin versions [skip ci]"
-          skills
+        uses: grafana/github-api-commit-action@b1d81091e8480dd11fcea8bc1f0ab977a0376ca5 # v1.0.0
+        with:
+          commit-message: "chore: sync published plugin versions [skip ci]"
+          success-if-no-changes: true
+          token: ${{ steps.release-bot.outputs.token }}

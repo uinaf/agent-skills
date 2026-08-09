@@ -100,10 +100,10 @@ Apply on **both** verification and release jobs. Skipping it on verification mea
 ## Signed Bot Commits
 
 Prefer a narrowly scoped GitHub App installation token for release GitHub
-writes. For commits, use GraphQL `createCommitOnBranch`: GitHub authors the
-commit as the authenticated App, signs it, and returns signature metadata that
-the workflow can assert. This avoids storing a signing key and lets the App
-obey required-signature rules without a bypass.
+writes. For commits, use a full-SHA-pinned API commit action backed by GraphQL
+`createCommitOnBranch`: GitHub authors the commit as the authenticated App and
+signs it. This avoids storing a signing key and lets the App obey
+required-signature rules without a bypass.
 
 Use the current non-deprecated inputs declared by the pinned action version.
 
@@ -118,19 +118,21 @@ Use the current non-deprecated inputs declared by the pinned action version.
     repositories: ${{ github.event.repository.name }}
     permission-contents: write
 
+- name: Stage version file
+  run: git add -- package.json
+
 - name: Create signed version commit
-  env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-  run: node scripts/create-signed-commit.ts "chore: sync version [skip ci]" package.json
+  uses: grafana/github-api-commit-action@b1d81091e8480dd11fcea8bc1f0ab977a0376ca5 # v1.0.0
+  with:
+    commit-message: "chore: sync version [skip ci]"
+    success-if-no-changes: true
+    token: ${{ steps.release-bot.outputs.token }}
 ```
 
-- Keep the mutation in a small repo-owned script with tests; workflow YAML
-  should only provide the App token, commit message, and intended paths.
-- Set `expectedHeadOid` to the checked-out HEAD so concurrent default-branch
-  updates fail closed instead of being overwritten.
-- Pass only intended additions/deletions and reject unexpected generated paths.
-- Query `signature { isValid wasSignedByGitHub signer { login } }` and fail the
-  job unless GitHub confirms a valid GitHub signature.
+- Stage only the intended generated paths; leave `stage-all-files` disabled.
+- Pin the commit action to a reviewed full SHA, not a mutable tag.
+- Keep required-signature enforcement active with no App bypass so an unsigned
+  writeback is rejected by the branch rule.
 - Do not provide custom author, committer, or signature fields; that disables
   GitHub's authenticated bot-signing path.
 - Use `gh auth setup-git` only for remaining tag, ref, or asset operations that
