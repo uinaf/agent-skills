@@ -116,9 +116,9 @@ If a cache is unavoidable, namespace it by workflow, event/trust level, platform
 
 GitHub Actions artifacts are temporary CI scratch storage. They are acceptable for same-run handoff when retention and quota are understood, but they are a weak durable boundary.
 
-Prefer durable publish/deploy inputs:
+Use same-job tested output only for a same-run deploy. Recovery and later runs
+must use durable publish/deploy inputs:
 
-- same-job tested output for simple static deploys
 - GitHub Release asset
 - package registry version
 - container image digest

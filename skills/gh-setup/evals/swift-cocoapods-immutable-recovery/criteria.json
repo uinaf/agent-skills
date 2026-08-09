@@ -12,7 +12,7 @@
     { "name": "Immutable metadata release", "max_score": 8, "description": "@semantic-release/github is the sole GitHub Release owner, appends no assets after publication, and completion requires immutable: true plus gh release verify." },
     { "name": "Tag and version parity", "max_score": 8, "description": "The tag points to the verified version commit and both checked-in version strings plus the podspec source tag equal the release version." },
     { "name": "State-specific backfill", "max_score": 12, "description": "Validated exact-tag recovery publishes only a missing pod or missing GitHub Release, rejects inconsistent state, never creates another bump, and does not rely on a normal semantic-release rerun." },
-    { "name": "Live completion proof", "max_score": 8, "description": "Initial and recovery paths reread commit verification, default-branch versions, tag target, CocoaPods version, GitHub immutability, release verification, and parity." },
+    { "name": "Live completion proof", "max_score": 8, "description": "Initial and recovery paths reread the peeled tag target and verified signed commit, version files from that commit, containment in the live default branch, CocoaPods Trunk version, GitHub immutability, release verification, and parity." },
     { "name": "Release guardrails", "max_score": 4, "description": "Release uses full history, skip-ci guards on verify/release, non-cancellable release concurrency, and full-SHA high-trust action pins." },
     { "name": "No unsigned escape", "max_score": 6, "description": "No local git commit/push, GPG workaround, custom bot identity, second writeback job, or destructive tag/release retry is introduced." }
   ]

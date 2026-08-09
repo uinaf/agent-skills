@@ -158,9 +158,10 @@ every workflow that creates a GitHub Release. Metadata-only releases are
 usually compatible; workflows that upload or replace assets after publication
 must move to a draft-first transaction described in the release workflow
 reference. Do not call a rollout complete from a green workflow alone: require
-one real release and read back immutability, release attestation, signed
-writebacks, default-branch version files, and downstream registry or tap state
-for every surface that applies to that repository.
+one real release for every distinct release shape, exercising each applicable
+package, version-file, registry, and tap path. Read back immutability, release
+attestation, signed writebacks, default-branch containment, and downstream
+state for every surface that applies to that repository.
 
 ## Deploy Route
 

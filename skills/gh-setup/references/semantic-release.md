@@ -159,9 +159,10 @@ never invoke the failed publisher. Use the durable-state recovery table in
 [release workflows](release-workflows.md#partial-failure-recovery); do not
 promise automatic resume without an implemented backfill path.
 
-Validate the signed writeback with a real release. Require the tag to resolve
-to the signed version commit, the live default-branch files to equal the release
-version, the registry to publish that version, and the GitHub Release to report
-`immutable: true`. Run `gh release verify` for both asset-bearing and
-metadata-only immutable releases; the release attestation exists even when the
-asset list is empty.
+Validate the signed writeback with a real release. Require the peeled remote tag
+to resolve to the signed version commit, read the released version files from
+that commit, and separately prove the live default branch contains it; later
+unreleased commits may legitimately advance those files. Require the registry
+to publish that version and the GitHub Release to report `immutable: true`. Run
+`gh release verify` for both asset-bearing and metadata-only immutable releases;
+the release attestation exists even when the asset list is empty.

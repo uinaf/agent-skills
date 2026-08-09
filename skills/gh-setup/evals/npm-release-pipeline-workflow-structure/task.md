@@ -22,8 +22,11 @@ URL in an `if: always()` step.
 The organization also enforces immutable GitHub Releases. This package has no
 post-publication release assets, so semantic-release may publish the metadata-
 only release directly. The workflow must then prove `immutable: true`, run
-`gh release verify`, and confirm the npm version and live default-branch files
-match. Retries must inspect the existing release and registry state instead of
+`gh release verify`, resolve and peel the remote release tag, and require that
+commit to be the verified App-signed writeback. Read `package.json` and
+`CHANGELOG.md` from that immutable commit for npm parity; check the live default
+branch separately only to prove it contains the writeback commit. Retries must
+inspect the existing release and registry state instead of
 creating another bump or trying to mutate a published release. Include a
 validated backfill path for an existing trusted tag when npm or the GitHub
 Release was published but the other boundary is missing; a normal

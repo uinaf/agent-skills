@@ -6,7 +6,7 @@ interface:
 
     Goal: align GitHub policy, Actions, secrets, and delivery with the repo's real operating model.
 
-    Inspect the repo and live settings first. Align merge/ruleset policy, permissions, templates, Environments, tags, and secrets. Pull requests run read-only verification. Packages run verification before release; apps add e2e, deploy, monitoring, and rollback. For immutable releases, use draft-first publication only when assets or other release mutations follow creation. When deterministic source files change, prefer the release tool's native GitHub App-signed writeback. Prove all applicable release, signature, default-branch, registry, and tap state from live evidence. Store durable payloads in a registry, release, image, provider package, or same-job output—not Actions artifacts.
+    Inspect the repo and live settings first. Align merge/ruleset policy, permissions, templates, Environments, tags, and secrets. Pull requests run read-only verification. Packages run verification before release; apps add e2e, deploy, monitoring, and rollback. For immutable releases, use draft-first publication only when assets or other release mutations follow creation. When deterministic source files change, prefer the release tool's native GitHub App-signed writeback. Prove all applicable release, signature, default-branch, registry, and tap state from live evidence. Use same-job output only for ephemeral handoff in the current run. Store recovery payloads in a registry, release, image, or provider package—not Actions artifacts.
 
     Boundaries: keep provider and organization details with their owner. Pause wiring when verification, runtime proof, or monitoring entrypoints are missing. Keep affected docs aligned.
 

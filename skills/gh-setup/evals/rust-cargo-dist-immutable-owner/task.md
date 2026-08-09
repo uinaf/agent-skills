@@ -17,6 +17,8 @@ publisher uses an ordinary local commit. Configure a custom reusable
 post-announce job that commits the generated formula through a full-SHA-pinned
 signed API action with a short-lived GitHub App token. The recovery path must
 reconcile an existing immutable release and missing tap update by exact tag. A
+tap write must stage only the generated formula, use the observed tap checkout
+parent as the atomic expected head, and fail if the tap advances. A
 superseded-run preflight and Actions concurrency are not an atomic branch lock.
 Use plugin v1.0.1 only if a concrete external branch lease blocks every merge
 and direct push from before semantic-release starts release analysis through

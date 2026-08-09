@@ -38,8 +38,11 @@ a missing metadata-only GitHub Release or repair the moving major tag from the
 existing trusted tag even though semantic-release no longer reports a new
 release. Before moving `v<major>`, prove the candidate is the highest eligible
 published stable SemVer in that major line, reject an unknown or newer current
-pointer, and update against the observed pointer so stale recovery cannot roll
-consumers backward.
+pointer, and resolve the candidate's peeled Git ref commit OID. Observe the raw
+`refs/tags/v<major>` OID, update it with an atomic expected-old-OID
+compare-and-swap (including an expected-absence precondition), then reread the
+remote ref and require it to equal the candidate commit OID. GitHub Release
+fields are not the commit source of truth.
 
 ## Output Specification
 

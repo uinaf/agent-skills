@@ -52,9 +52,10 @@ Common failure modes when standing up or operating this pipeline. Check here bef
 
 - Cause: the GitHub Release or registry publisher failed after the tag was
   created, often because its credential was missing or rejected.
-- Verify the exact tag target, commit signature, default-branch version,
-  GitHub Release state, and registry state. Action logs may show "no GH token"
-  or "ENEEDAUTH", but durable state decides recovery.
+- Verify the exact peeled tag target, commit signature, version files read from
+  that commit, containment in the live default branch, GitHub Release state,
+  and registry state. Action logs may show "no GH token" or "ENEEDAUTH", but
+  durable state decides recovery.
 - Fix the credential for future releases, then run the state-specific backfill
   from [release workflows](release-workflows.md#partial-failure-recovery).
   Do not assume semantic-release will publish after it sees the existing tag.
@@ -127,9 +128,11 @@ Common failure modes when standing up or operating this pipeline. Check here bef
   repo-owned `update-major-action-tag` action (see
   [release-targets.md](release-targets.md) -> GitHub Action). Require the
   candidate to be the highest eligible published stable SemVer in that major
-  line, reject an unknown or newer pointer, and update against the observed
-  pointer. Verify that the moving tag resolves to the same commit as the latest
-  eligible `v1.x.y` Release.
+  line from peeled Git ref OIDs, reject an unknown or newer pointer, and update
+  the raw major-tag ref with an expected-old-OID compare-and-swap (including an
+  expected-absence precondition). Reread the remote ref and require its commit
+  OID to equal the candidate tag's peeled commit; a GitHub Release field is not
+  the commit source of truth.
 
 ## "GH_TOKEN env or githubToken provided" with semantic-release action v6
 

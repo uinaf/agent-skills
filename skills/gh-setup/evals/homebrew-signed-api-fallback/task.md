@@ -13,8 +13,10 @@ published, a dependent Linux job reads source state with the source
 repository's read-only workflow token, then mints a separate short-lived App
 token scoped only to the tap. It deterministically prepares only
 `Formula/envctl.rb` and commits that path with the full-SHA-pinned
-`planetscale/ghcommit-action`. Read back the resulting tap commit and fail if
-GitHub does not report `verification.verified: true`.
+`pgaskin/push-signed-commits` action. Stage no other path, use the observed tap
+checkout parent as the atomic expected head, and fail rather than overwrite if
+the tap advances. Read back the resulting tap commit and fail if GitHub does
+not report `verification.verified: true`.
 
 The handoff must use durable state. It should run whenever the exact trusted
 release tag is published and immutable but tap parity is missing, including a
@@ -26,8 +28,8 @@ later recovery run. Do not gate repair solely on semantic-release's
 Update `.github/workflows/release.yml` and write a short `SETUP.md`. Document
 the release Environment's `RELEASE_APP_CLIENT_ID` variable and
 `RELEASE_APP_PRIVATE_KEY` secret, the tap-only token scope, and
-`contents: write`. Do not add a PAT, custom bot identity, ordinary `git push`,
-or a manual tap PR.
+`contents: write`. Keep the source workflow token at `contents: read`. Do not
+add a PAT, custom bot identity, ordinary `git push`, or a manual tap PR.
 
 ## Input Files
 

@@ -23,6 +23,8 @@ App-signed API action. Recovery reconciles crates.io, tag, GitHub Release,
 assets, and tap state without republishing immutable boundaries. If a published
 immutable Release has an incomplete asset set, fail closed and roll forward to
 a new version rather than attempting asset repair.
+The tap write stages only the generated formula, uses the observed tap checkout
+parent as the atomic expected head, and fails if the tap advances.
 
 ## Output Specification
 

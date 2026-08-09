@@ -93,9 +93,10 @@ repo script.
 - SwiftPM consumers pull from the git tag — no separate publish step needed.
 - Treat CocoaPods and GitHub as separate immutable boundaries. If the tag
   exists and only one publication succeeded, run an exact-tag backfill for the
-  missing boundary and reread podspec, tag, default-branch version, signature,
-  and GitHub Release parity. Do not rely on a normal semantic-release rerun or
-  create another version bump.
+  missing boundary. Read the exact CocoaPods Trunk version before deciding what
+  is missing, then reread Trunk, podspec, tag, default-branch containment,
+  signature, and GitHub Release parity afterward. Do not rely on a normal
+  semantic-release rerun or create another version bump.
 - Cache download artifacts only inside a single trust class. Regenerate or verify generated dependency trees such as full `Pods/` inside signed or publishing jobs before signing or publishing.
 
 ## Go (GoReleaser)
@@ -150,6 +151,36 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
       ;;
     esac
 
+- name: Validate remote release tag target
+  if: steps.tag.outputs.present == 'true'
+  id: tag-target
+  env:
+    RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+  run: |
+    remote_refs="$(
+      git ls-remote --tags origin \
+        "refs/tags/${RELEASE_TAG}" "refs/tags/${RELEASE_TAG}^{}"
+    )"
+    remote_target="$(
+      awk -v ref="refs/tags/${RELEASE_TAG}^{}" '$2 == ref { print $1 }' \
+        <<<"$remote_refs"
+    )"
+    if [[ -z "$remote_target" ]]; then
+      remote_target="$(
+        awk -v ref="refs/tags/${RELEASE_TAG}" '$2 == ref { print $1 }' \
+          <<<"$remote_refs"
+      )"
+    fi
+    [[ -n "$remote_target" ]] || {
+      echo "remote tag ${RELEASE_TAG} is missing" >&2
+      exit 1
+    }
+    [[ "$remote_target" == "$(git rev-parse HEAD)" ]] || {
+      echo "remote tag ${RELEASE_TAG} does not resolve to HEAD" >&2
+      exit 1
+    }
+    echo "oid=$remote_target" >> "$GITHUB_OUTPUT"
+
 - name: Inspect GitHub Release state
   if: steps.tag.outputs.present == 'true'
   id: release-state
@@ -172,6 +203,10 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
       ;;
     1)
       release_json="$(jq -c '.[0]' <<<"$matches")"
+      jq -e '.prerelease == false' <<<"$release_json" >/dev/null || {
+        echo "stable tag ${RELEASE_TAG} is attached to a prerelease" >&2
+        exit 1
+      }
       echo "exists=true" >> "$GITHUB_OUTPUT"
       echo "published=$(jq -r '(.draft == false)' <<<"$release_json")" >> "$GITHUB_OUTPUT"
       ;;
@@ -198,10 +233,38 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     HOMEBREW_TAP_TOKEN: ${{ steps.release-bot.outputs.token }}
     GORELEASER_CURRENT_TAG: ${{ steps.tag.outputs.tag }}
 
+- name: Verify exact draft asset manifest
+  if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+  run: ./scripts/verify-draft-assets "$RELEASE_TAG" dist/release-assets.sha256
+
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   uses: actions/attest@<full-sha> # v4.2.2
   with:
     subject-path: 'dist/*.tar.gz,dist/*.zip'
+
+- name: Revalidate release tag before immutable publication
+  if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
+  env:
+    RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+    EXPECTED_TAG_OID: ${{ steps.tag-target.outputs.oid }}
+  run: |
+    remote_target="$(
+      git ls-remote --tags origin "refs/tags/${RELEASE_TAG}^{}" |
+        awk 'NR == 1 { print $1 }'
+    )"
+    if [[ -z "$remote_target" ]]; then
+      remote_target="$(
+        git ls-remote --tags origin "refs/tags/${RELEASE_TAG}" |
+          awk 'NR == 1 { print $1 }'
+      )"
+    fi
+    [[ "$remote_target" == "$EXPECTED_TAG_OID" ]] || {
+      echo "remote tag ${RELEASE_TAG} changed before publication" >&2
+      exit 1
+    }
 
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   env:
@@ -213,10 +276,22 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   env:
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+    EXPECTED_TAG_OID: ${{ steps.tag-target.outputs.oid }}
   run: |
     release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}")"
-    jq -e '.draft == false and .immutable == true' <<<"$release_json"
+    jq -e '.draft == false and .prerelease == false and .immutable == true' <<<"$release_json"
     gh release verify "$RELEASE_TAG"
+    remote_target="$(
+      git ls-remote --tags origin "refs/tags/${RELEASE_TAG}^{}" |
+        awk 'NR == 1 { print $1 }'
+    )"
+    if [[ -z "$remote_target" ]]; then
+      remote_target="$(
+        git ls-remote --tags origin "refs/tags/${RELEASE_TAG}" |
+          awk 'NR == 1 { print $1 }'
+      )"
+    fi
+    [[ "$remote_target" == "$EXPECTED_TAG_OID" ]]
 ```
 
 - Prefer an org-owned release GitHub App over a long-lived `TAP_GITHUB_TOKEN`
@@ -239,15 +314,28 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   endpoint omits drafts, so it cannot decide whether to backfill. Listing
   failures stop the job; zero exact matches means absent, one means resume or
   skip by its draft state, and duplicates are inconsistent.
+- Reject `prerelease: true` for this stable flow both during state discovery and
+  final readback.
+- Protect the release-tag namespace with a ruleset that blocks updates and
+  deletion and restricts creation to the release actor. The publication API has
+  no expected-tag-OID compare-and-swap, so the immediate pre-publication reread
+  is still required.
 - Match the tag filter to the repository's configured semantic-release
   `tagFormat`. Enumerate every tag at `HEAD` and require exactly one eligible
   stable release tag before lookup or backfill; `git describe` is ambiguous
-  when multiple tags share a commit. A manual recovery input must be validated
-  against the same format and checked out at that exact tag.
+  when multiple tags share a commit. Resolve and peel that tag from the remote,
+  then require its commit OID to equal `HEAD` before lookup, backfill, or build.
+  A manual recovery input must be validated against the same format and checked
+  out at that exact remote tag.
 - Pass the selected exact tag as `GORELEASER_CURRENT_TAG` to every GoReleaser
   invocation. Tag validation for the Releases API is insufficient by itself:
   without this binding, another tag on the same commit can change which release
   GoReleaser publishes.
+- Before attestation or publication, compare the complete draft asset name and
+  SHA-256 set with a manifest generated by the current GoReleaser build. Missing,
+  extra, or mismatched assets fail closed. `replace_existing_artifacts` replaces
+  colliding names but does not remove stale extra assets; any cleanup belongs in
+  a separately validated draft-repair path.
 - Gate downstream tap, deployment, and parity work on that durable exact-tag
   state, not only a transient publisher output. A later recovery run must be
   able to reconcile missing downstream state without mutating the published
@@ -321,9 +409,10 @@ Semantic-release job:
   `post-announce-jobs = ["./publish-homebrew"]`. Post-announce jobs are
   guaranteed to run after cargo-dist has created the complete GitHub Release.
   The custom job must verify that exact Release is published and immutable,
-  download its formula/assets, and use the narrow signed API fallback. Give the
-  reusable workflow a validated `workflow_dispatch` recovery path so a missing
-  tap update can be repaired without rerunning or mutating the Release.
+  download its formula/assets, and use the narrow signed API fallback with the
+  tap checkout OID as its atomic expected head. Give the reusable workflow a
+  validated `workflow_dispatch` recovery path so a missing tap update can be
+  repaired without rerunning or mutating the Release.
 - Default targets: `x86_64-unknown-linux-gnu`, `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-pc-windows-msvc`. Add `x86_64-unknown-linux-musl` for static Linux; `aarch64-unknown-linux-gnu` for ARM64 Linux.
 - `cargo-binstall` works out of the box — cargo-dist follows binstall's naming conventions.
 - Simpler alternative if you don't need installers or Homebrew: `taiki-e/upload-rust-binary-action@<full-sha> # v1.30.2` in a matrix job.
@@ -406,9 +495,9 @@ Preferred setup:
 - Mint a short-lived installation token with SHA-pinned `actions/create-github-app-token`.
 - Mint separate installation tokens per write destination. A tap publisher's
   token names only `homebrew-tap` with `permission-contents: write`; source
-  release state is read with the workflow's source-repository token. When a
-  source write truly needs the App, mint a separate source-only token with only
-  the permissions required by that source job.
+  release state is read with the workflow's source-repository token limited to
+  `contents: read`. When a source write truly needs the App, mint a separate
+  source-only token with only the permissions required by that source job.
 - Let GoReleaser sign its own tap commit with
   `commit_author.use_github_app_token: true`. For a publisher without a native
   signed-commit path, generate the file without committing it, then use the
@@ -481,19 +570,24 @@ For a signature-enforced tap, use a dependent Linux job after the release is pub
 - name: Generate formula or cask
   run: <deterministically update homebrew-tap/Formula/<cli-name>.rb>
 
+- name: Stage only the generated formula
+  run: git -C homebrew-tap add -- Formula/<cli-name>.rb
+
 - name: Commit signed tap update
-  uses: planetscale/ghcommit-action@a6b150b81dca5dd027baa898604418eec9e11465 # v0.2.22
+  uses: pgaskin/push-signed-commits@5055c5f30c4dca7aa847ed2f07683d7359b8ff2b # v1.2.0
   with:
-    commit_message: "<cli-name> ${{ needs.release.outputs.version }}"
-    repo: <org>/homebrew-tap
+    path: homebrew-tap
+    repository: <org>/homebrew-tap
     branch: main
-    file_pattern: Formula/<cli-name>.rb
-    repository: homebrew-tap
-  env:
-    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
+    commit-message: "<cli-name> ${{ needs.release.outputs.version }}"
+    github-token: ${{ steps.release-bot.outputs.token }}
 ```
 
 - Compute checksums from the exact immutable release assets consumed by the formula or cask.
+- Keep the tap checkout at the head used to generate and stage the file. The
+  signed action must pass that parent as `expectedHeadOid` and fail if `main`
+  advanced; do not replace it with an action that rereads a newer head only at
+  write time.
 - For a Node CLI distributed via npm rather than a GitHub release archive, write a custom formula that uses `Language::Node::Shebang` and a `resource` block.
 - Formula-generation actions and commands that end with ordinary `git commit`
   and `git push` must not own the final commit on a signature-enforced tap.
@@ -560,12 +654,14 @@ Plugins:
 
   Derive `release-state` from the exact trusted tag and GitHub Release, not only
   semantic-release's transient output. Before updating `v<major>`, prove the
-  candidate is the highest eligible published stable SemVer in that major line.
-  The local action must fail closed if the existing pointer is unknown or newer,
-  and update with a lease against the observed pointer so a stale recovery run
-  cannot roll consumers backward. A recovery run may repair a missing or older
-  pointer after publication. If a maintained semantic-release major-tag plugin
-  enforces the same monotonic contract, prefer that.
+  candidate is the highest eligible published stable SemVer in that major line,
+  using the candidate tag's peeled Git commit OID rather than Release metadata.
+  Observe the raw `refs/tags/v<major>` OID, fail closed if it is unknown or
+  newer, and update it with an expected-old-OID compare-and-swap, including an
+  expected-absence precondition. Reread the remote ref and require its commit OID
+  to equal the candidate. A recovery run may repair only a missing or older
+  pointer. If a maintained semantic-release major-tag plugin enforces the same
+  monotonic contract, prefer that.
 
 - The action's `action.yml` `runs:` block must reference the **bundled**
   entrypoint (`dist/index.js`), not a TypeScript source file. Build and commit

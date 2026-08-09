@@ -22,10 +22,17 @@ Enumerate every tag pointing at `HEAD`, filter by the configured stable release
 tag format, and require exactly one eligible tag; do not let `git describe`
 choose among multiple tags. Pass that selected exact tag as
 `GORELEASER_CURRENT_TAG` to every GoReleaser invocation so a co-located tag
-cannot redirect publication.
+cannot redirect publication. Resolve and peel the remote tag, require its commit
+OID to equal `HEAD` before any backfill or build, and reread the same remote OID
+immediately before immutable publication and again at completion. Protect the
+release-tag namespace against updates/deletion and restrict creation to the
+release actor.
 Because the REST by-tag endpoint omits drafts, inspect an authenticated,
 paginated Releases listing before deciding the exact tag is absent; API failure
-or duplicate exact-tag state must fail closed.
+or duplicate exact-tag state must fail closed. Reject a prerelease for the
+stable tag. Before attestation or publication, require the resumed draft's
+complete asset names and SHA-256 digests to equal the current build manifest;
+missing, extra, or mismatched assets fail closed.
 
 ## Output Specification
 

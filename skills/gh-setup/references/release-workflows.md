@@ -256,7 +256,12 @@ repository that has no release-tool-native signed path. Keep that fallback
 narrow: one deterministic file set, one explicit repository and branch, and no
 custom author/committer. Read source Release state with the source workflow
 token, then mint a separate App token naming only the destination repository
-for the write. Do not grant an Integration bypass merely to preserve an
+for the write. The action must bind its commit to the destination head observed
+before generation and reject a changed head with `expectedHeadOid` or equivalent
+compare-and-swap; alternatively, a concrete external lease must block every
+destination writer from generation through ref update. A fresh head lookup only
+at write time is insufficient because it can overwrite a concurrently changed
+generated file. Do not grant an Integration bypass merely to preserve an
 unsigned local-commit action.
 
 ## Release Completion Proof
@@ -271,8 +276,10 @@ evidence:
   a version file, the tag resolves to that GitHub-signed version commit.
 - Every protected-branch writeback reports
   `commit.verification.verified: true` with `reason: valid`.
-- Version-bearing files on the live default branch equal the published
-  version, including lockfiles when the release contract updates them.
+- Version-bearing files read from the peeled release-tag commit equal the
+  published version, including lockfiles when the release contract updates
+  them. The live default branch contains that commit; it need not still have
+  identical files after later unreleased work.
 - Registries, Homebrew formulae/casks, moving action tags, and deployment
   pointers reference that same version and artifact digest.
 - A retry after publication performs no asset mutation and reaches the same

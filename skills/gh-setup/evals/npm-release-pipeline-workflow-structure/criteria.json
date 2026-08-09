@@ -19,6 +19,6 @@
     { "name": "Release gated by verify", "max_score": 6, "description": "The release job depends on successful verification." },
     { "name": "Credential boundary", "max_score": 6, "description": "Checkout does not persist write credentials and the App token is exposed only at the signed writeback boundary. If plugin v1.0.1 is selected, an immediate if: always() cleanup restores a credential-free origin." },
     { "name": "npm metadata", "max_score": 4, "description": "package.json has matching public repository metadata and public publishConfig.access for the scoped package." },
-    { "name": "Immutable completion proof", "max_score": 10, "description": "After the metadata-only release, the workflow reads back immutable: true, runs gh release verify, confirms npm/default-branch parity and a verified writeback, and implements exact-tag state-specific backfill plus parity reread when npm or the GitHub Release is missing; detect-and-stop or a normal semantic-release rerun is insufficient." }
+    { "name": "Immutable completion proof", "max_score": 10, "description": "After the metadata-only release, the workflow reads back immutable: true, runs gh release verify, binds the peeled remote tag commit to the verified App writeback, reads package/changelog parity from that commit, and separately proves main contains it. Exact-tag recovery backfills only a missing npm or Release boundary, never mutates an existing immutable Release, and rereads parity; detect-and-stop or a normal semantic-release rerun is insufficient." }
   ]
 }
