@@ -1,14 +1,14 @@
-# Preserve the Working Homebrew Tap Pattern
+# Preserve Formula Generation Without Copying an Unsigned Commit
 
 ## Problem/Feature Description
 
 The `tccutil` repo publishes a small non-Go CLI and needs its release workflow fixed so new GitHub releases update `uinaf/homebrew-tap` automatically. A previous attempt used `dawidd6/action-homebrew-bump-formula`, but the action tried to follow a fork/PR path and failed with the existing token shape.
 
-The organization already has a known-good sibling repo, `uinaf/healthd`, with an App-backed Homebrew update that successfully pushes directly to the same style of tap using the v3 line of `Justintime50/homebrew-releaser`, pinned to a full commit SHA, with a short-lived `uinaf-releaser` installation token. The desired fix is to copy that boring working pattern, not invent an inline clone/sed/push script and not swap in another Homebrew action.
+The organization has since enabled required signatures on `homebrew-tap`. A sibling uses `Justintime50/homebrew-releaser` with a short-lived `uinaf-releaser` token, but that action creates an ordinary local Git commit; an App identity and noreply email provide attribution, not a cryptographic signature. The desired fix may reuse its formula shape, but must create the final tap commit through GitHub's signed commit API with a full-SHA-pinned action.
 
 ## Output Specification
 
-Update `.github/workflows/release.yml` for `tccutil` so the release job updates the Homebrew tap after a release is published.
+Update `.github/workflows/release.yml` for `tccutil` so a dependent Linux job updates the Homebrew tap after a release is published. It must mint an App token scoped to both repositories, prepare only `Formula/tccutil.rb`, and commit that path with `planetscale/ghcommit-action`. Do not configure a bot author or use an ordinary `git push` for the tap commit.
 
 Also write a short `SETUP.md` note documenting the `UINAF_RELEASE_APP_CLIENT_ID` / `UINAF_RELEASE_APP_PRIVATE_KEY` Environment credentials and that the minted token must be Contents-scoped to the source repo and `homebrew-tap`.
 

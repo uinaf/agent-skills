@@ -261,14 +261,17 @@ Default for Uinaf (and preferred elsewhere):
 - Store `UINAF_RELEASE_APP_CLIENT_ID` as a `release` Environment variable and `UINAF_RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
 - Mint a short-lived installation token with SHA-pinned `actions/create-github-app-token`.
 - Pass explicit `owner`, `repositories` (source repo + `homebrew-tap`), and least permissions (`permission-contents: write`; add Issues/PRs write only when `@semantic-release/github` side effects stay enabled).
-- Set commit author/committer to `<app-slug>[bot]` / `<user-id>+<app-slug>[bot]@users.noreply.github.com`, resolving `<user-id>` at runtime from `/users/<app-slug>%5Bbot%5D` (see Bot Identity in `release-workflows.md`).
-- Prefer `gh auth setup-git` with `GH_TOKEN` over embedding tokens in remote URLs.
+- For a tap with required signatures, generate the formula or cask without
+  committing it, then use the signed API commit pattern from
+  `release-workflows.md`. A bot name and noreply email do not sign a commit.
+- Use `gh auth setup-git` only for tag or ref operations that still require Git
+  transport; the signed API commit does not need it.
 
 Do not introduce org-wide long-lived `TAP_GITHUB_TOKEN` PATs for new work. Retire existing PAT consumers after an App-backed path has live release proof.
 
 ### Flow A — GoReleaser auto-update
 
-GoReleaser writes the formula directly. Add a `brews:` block in `.goreleaser.yaml`:
+GoReleaser can write the formula directly. Add a `brews:` block in `.goreleaser.yaml` only when the tap does not require verified signatures:
 
 ```yaml
 brews:
@@ -287,6 +290,11 @@ brews:
 
 Pass the minted App token as `HOMEBREW_TAP_TOKEN` (and usually also as `GITHUB_TOKEN`) in the GoReleaser step. GoReleaser commits the updated `Formula/<cli-name>.rb` straight to the tap's default branch on every release. No extra workflow step needed.
 
+That direct Git commit is not cryptographically signed merely because it uses
+an App token. If the tap requires verified signatures, generate the formula
+without pushing or render the same deterministic formula in a dependent Linux
+job, then commit only that path with `planetscale/ghcommit-action`.
+
 With immutable GitHub releases, keep GoReleaser's release as a draft until its
 artifact and tap publishers finish, verify the generated artifacts, then
 publish explicitly. A rerun after publication must skip GoReleaser and resume
@@ -295,9 +303,9 @@ assets.
 
 ### Flow B — Non-Go CLI (Node, Ruby, etc.)
 
-First check whether the org already has a non-Go CLI publishing to the same tap. If it does, copy that action and input shape unless the packaging format is different.
+First check whether the org already has a non-Go CLI publishing to the same tap. Reuse its formula-generation shape, but audit its commit implementation before copying it. Actions that end with ordinary `git commit` and `git push` are incompatible with required-signature rules unless they create a real cryptographic signature.
 
-For script or binary CLIs whose Homebrew formula can be generated from the GitHub Release archive, [`Justintime50/homebrew-releaser`](https://github.com/Justintime50/homebrew-releaser) is the boring direct-to-tap pattern. It clones the source repo and tap repo, generates or updates the formula, and commits straight to the tap branch using the supplied token. Pin the action to a full commit SHA with a same-line version comment matching the version line the working sibling repo uses.
+For a signature-enforced tap, use a dependent Linux job after the release is published and immutable:
 
 ```yaml
 - uses: actions/create-github-app-token@<full-sha> # v3.2.0
@@ -311,49 +319,33 @@ For script or binary CLIs whose Homebrew formula can be generated from the GitHu
       homebrew-tap
     permission-contents: write
 
-- name: Resolve release bot identity
-  id: release-bot-identity
-  shell: bash
-  env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-    APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
-  run: |
-    set -euo pipefail
-    user_id="$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)"
-    if [[ ! "$user_id" =~ ^[0-9]+$ ]]; then
-      echo "failed to resolve numeric bot user id for ${APP_SLUG}[bot]" >&2
-      exit 1
-    fi
-    echo "user_id=${user_id}" >> "$GITHUB_OUTPUT"
-
-- if: steps.release.outputs.new_release_published == 'true'
-  uses: Justintime50/homebrew-releaser@<full-sha> # v3.3.0
+- uses: actions/checkout@<full-sha> # v7.0.1
   with:
-    homebrew_owner: <org>
-    homebrew_tap: homebrew-tap
-    formula_folder: Formula
-    github_token: ${{ steps.release-bot.outputs.token }}
-    commit_owner: ${{ steps.release-bot.outputs.app-slug }}[bot]
-    commit_email: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
-    install: 'bin.install "<cli-name>"'
-    test: 'system "#{bin}/<cli-name>", "--version"'
-```
-
-Use [`dawidd6/action-homebrew-bump-formula`](https://github.com/dawidd6/action-homebrew-bump-formula) when you explicitly want its version-bump workflow and have verified its fork/direct-push behavior against the tap repo. Default to the tap repo's expected release shape; some setups need a direct push to the tap.
-
-```yaml
-- if: steps.release.outputs.new_release_published == 'true'
-  uses: dawidd6/action-homebrew-bump-formula@<full-sha> # v7
-  with:
+    repository: <org>/homebrew-tap
     token: ${{ steps.release-bot.outputs.token }}
-    tap: <org>/homebrew-tap
-    formula: <cli-name>
-    tag: v${{ steps.release.outputs.new_release_version }}
+    path: homebrew-tap
+    persist-credentials: false
+    ref: main
+
+- name: Generate formula or cask
+  run: <deterministically update homebrew-tap/Formula/<cli-name>.rb>
+
+- name: Commit signed tap update
+  uses: planetscale/ghcommit-action@a6b150b81dca5dd027baa898604418eec9e11465 # v0.2.22
+  with:
+    commit_message: "<cli-name> ${{ needs.release.outputs.version }}"
+    repo: <org>/homebrew-tap
+    branch: main
+    file_pattern: Formula/<cli-name>.rb
+    repository: homebrew-tap
+  env:
+    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
 ```
 
-- The action computes the tarball sha256 from the GitHub-hosted release archive, so the source release must complete before this step runs.
-- For a Node CLI distributed via npm rather than a GitHub release archive, write a custom formula that uses `Language::Node::Shebang` and a `resource` block; the bump action does not handle that shape.
-- If the working sibling repo uses `Justintime50/homebrew-releaser`, keep that standard action. Use custom shell only after proving no maintained action fits.
+- Compute checksums from the exact immutable release assets consumed by the formula or cask.
+- For a Node CLI distributed via npm rather than a GitHub release archive, write a custom formula that uses `Language::Node::Shebang` and a `resource` block.
+- Formula-generation actions such as `Justintime50/homebrew-releaser`, `brew bump-cask-pr --commit`, and direct-push GoReleaser flows must not own the final commit on a signature-enforced tap unless their exact pinned implementation creates a verified signature.
+- Read back the tap's new default-branch commit and require `verification.verified: true`; checking only the source repository's release run is incomplete.
 
 ### Tap repo conventions
 
