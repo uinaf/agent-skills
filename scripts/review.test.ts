@@ -59,6 +59,11 @@ test("CI uses free lint verify; authenticated 100-point review stays local", () 
   assert.match(publishWorkflow, /TESSL_TOKEN: \$\{[{] secrets\.TESSL_TOKEN [}]\}/);
   assert.doesNotMatch(publishWorkflow, /run: \.\/scripts\/review\.sh/);
   assert.doesNotMatch(publishWorkflow, /tesslio\/setup-tessl|id-token: write/);
+  assert.match(publishWorkflow, /scripts\/create-signed-commit\.ts/);
+  assert.doesNotMatch(
+    publishWorkflow,
+    /git commit|git push|release-bot-identity/,
+  );
   assert.match(pullRequestWorkflow, /run: pnpm run verify\n/);
   assert.doesNotMatch(pullRequestWorkflow, /main-review:/);
   assert.doesNotMatch(pullRequestWorkflow, /^  push:/m);

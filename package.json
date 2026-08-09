@@ -11,7 +11,7 @@
     "lint:shell": "shellcheck scripts/*.sh",
     "lint:skills": "TESSL_REVIEW_MODE=lint ./scripts/review.sh",
     "review:skills": "./scripts/review.sh",
-    "test:skills": "node --test scripts/review.test.ts",
+    "test:skills": "node --test scripts/*.test.ts",
     "typecheck": "tsc --noEmit",
     "verify": "pnpm run typecheck && pnpm run lint:shell && pnpm run lint:actions && pnpm run test:skills && pnpm run lint:skills",
     "verify:skills": "pnpm run verify && pnpm run review:skills"
