@@ -155,26 +155,10 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   if: steps.tag.outputs.present == 'true'
   id: tag-target
   env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
   run: |
-    remote_refs="$(
-      git ls-remote --tags origin \
-        "refs/tags/${RELEASE_TAG}" "refs/tags/${RELEASE_TAG}^{}"
-    )"
-    remote_target="$(
-      awk -v ref="refs/tags/${RELEASE_TAG}^{}" '$2 == ref { print $1 }' \
-        <<<"$remote_refs"
-    )"
-    if [[ -z "$remote_target" ]]; then
-      remote_target="$(
-        awk -v ref="refs/tags/${RELEASE_TAG}" '$2 == ref { print $1 }' \
-          <<<"$remote_refs"
-      )"
-    fi
-    [[ -n "$remote_target" ]] || {
-      echo "remote tag ${RELEASE_TAG} is missing" >&2
-      exit 1
-    }
+    remote_target="$(./scripts/resolve-remote-tag-oid "$RELEASE_TAG")"
     [[ "$remote_target" == "$(git rev-parse HEAD)" ]] || {
       echo "remote tag ${RELEASE_TAG} does not resolve to HEAD" >&2
       exit 1
@@ -248,19 +232,11 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 - name: Revalidate release tag before immutable publication
   if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
     EXPECTED_TAG_OID: ${{ steps.tag-target.outputs.oid }}
   run: |
-    remote_target="$(
-      git ls-remote --tags origin "refs/tags/${RELEASE_TAG}^{}" |
-        awk 'NR == 1 { print $1 }'
-    )"
-    if [[ -z "$remote_target" ]]; then
-      remote_target="$(
-        git ls-remote --tags origin "refs/tags/${RELEASE_TAG}" |
-          awk 'NR == 1 { print $1 }'
-      )"
-    fi
+    remote_target="$(./scripts/resolve-remote-tag-oid "$RELEASE_TAG")"
     [[ "$remote_target" == "$EXPECTED_TAG_OID" ]] || {
       echo "remote tag ${RELEASE_TAG} changed before publication" >&2
       exit 1
@@ -281,16 +257,7 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}")"
     jq -e '.draft == false and .prerelease == false and .immutable == true' <<<"$release_json"
     gh release verify "$RELEASE_TAG"
-    remote_target="$(
-      git ls-remote --tags origin "refs/tags/${RELEASE_TAG}^{}" |
-        awk 'NR == 1 { print $1 }'
-    )"
-    if [[ -z "$remote_target" ]]; then
-      remote_target="$(
-        git ls-remote --tags origin "refs/tags/${RELEASE_TAG}" |
-          awk 'NR == 1 { print $1 }'
-      )"
-    fi
+    remote_target="$(./scripts/resolve-remote-tag-oid "$RELEASE_TAG")"
     [[ "$remote_target" == "$EXPECTED_TAG_OID" ]]
 ```
 
@@ -327,6 +294,11 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   then require its commit OID to equal `HEAD` before lookup, backfill, or build.
   A manual recovery input must be validated against the same format and checked
   out at that exact remote tag.
+- Implement `resolve-remote-tag-oid` as a small tested repo-owned helper using
+  the source token and authenticated GitHub Git Refs/Tags APIs. It must peel
+  annotated tags to a commit and fail closed on missing refs, API errors,
+  unsupported target types, or cycles. Do not depend on checkout credentials;
+  release checkouts should keep `persist-credentials: false`.
 - Pass the selected exact tag as `GORELEASER_CURRENT_TAG` to every GoReleaser
   invocation. Tag validation for the Releases API is insufficient by itself:
   without this binding, another tag on the same commit can change which release

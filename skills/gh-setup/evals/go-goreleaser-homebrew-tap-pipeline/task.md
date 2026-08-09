@@ -26,7 +26,9 @@ cannot redirect publication. Resolve and peel the remote tag, require its commit
 OID to equal `HEAD` before any backfill or build, and reread the same remote OID
 immediately before immutable publication and again at completion. Protect the
 release-tag namespace against updates/deletion and restrict creation to the
-release actor.
+release actor. Resolve the remote ref through a tested repo-owned helper using
+the read-only source token and authenticated GitHub Git Refs/Tags APIs; the
+checkout keeps persisted credentials disabled.
 Because the REST by-tag endpoint omits drafts, inspect an authenticated,
 paginated Releases listing before deciding the exact tag is absent; API failure
 or duplicate exact-tag state must fail closed. Reject a prerelease for the
