@@ -188,12 +188,21 @@ Use the current non-deprecated inputs declared by the pinned action version.
   run: git add -- package.json
 
 - name: Create signed version commit
-  uses: grafana/github-api-commit-action@b1d81091e8480dd11fcea8bc1f0ab977a0376ca5 # v1.0.0
+  uses: planetscale/ghcommit-action@a6b150b81dca5dd027baa898604418eec9e11465 # v0.2.22
   with:
-    commit-message: "chore: sync version [skip ci]"
-    success-if-no-changes: true
-    token: ${{ steps.release-bot.outputs.token }}
+    commit_message: "chore: sync version [skip ci]"
+    repo: ${{ github.repository }}
+    branch: main
+    file_pattern: package.json
+  env:
+    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
 ```
+
+`planetscale/ghcommit-action` is Docker-based and therefore requires a Linux
+job. If release assembly must run on macOS, expose the verified release version
+as a job output and perform only the deterministic version-file writeback in a
+dependent Ubuntu job. Pass `repo` and `branch` explicitly; do not infer them
+from checkout state.
 
 - Stage only the intended generated paths; leave `stage-all-files` disabled.
 - Pin the commit action to a reviewed full SHA, not a mutable tag.
