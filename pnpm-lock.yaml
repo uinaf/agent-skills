@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  adm-zip@<0.6.0: 0.6.0
+
 importers:
 
   .:
@@ -150,9 +153,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  adm-zip@0.5.18:
-    resolution: {integrity: sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==}
-    engines: {node: '>=12.0'}
+  adm-zip@0.6.0:
+    resolution: {integrity: sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==}
+    engines: {node: '>=14.0'}
 
   chownr@3.0.0:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
@@ -262,13 +265,13 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  adm-zip@0.5.18: {}
+  adm-zip@0.6.0: {}
 
   chownr@3.0.0: {}
 
   github-actionlint@1.7.12:
     dependencies:
-      adm-zip: 0.5.18
+      adm-zip: 0.6.0
       tar: 7.5.22
 
   minipass@7.1.3: {}
