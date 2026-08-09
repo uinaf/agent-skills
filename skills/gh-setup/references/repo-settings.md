@@ -74,6 +74,45 @@ Baseline checks:
 
 Branch protection with only conversation resolution is often a better fit than a full PR-required ruleset when maintainers intentionally keep direct pushes available.
 
+### PR And Required-CI Layering
+
+Running checks on pull requests does not enforce them. Read the effective rules
+for the default branch before calling CI required:
+
+```bash
+gh api repos/{owner}/{repo}/rules/branches/{default_branch}
+```
+
+For an organization with multiple repository shapes:
+
+- Put common PR semantics in an organization ruleset: default branch, squash
+  merge, zero or policy-defined approvals, conversation resolution, and the
+  intended bypass posture.
+- Keep required status checks repository-local when check names differ.
+- Require the smallest stable voting surface that represents the repo's real
+  merge contract. Keep CodeQL, dependency reports, release, deploy, and other
+  intentionally advisory jobs non-blocking unless policy says otherwise.
+- Add one stable final gate only when lane detection, matrices, conditional
+  jobs, or documentation-only skips make raw job names unstable or capable of
+  false greens. The gate must run with `always()`, aggregate every voting job,
+  and fail closed when a required job is unexpectedly skipped. Pin any gate
+  action to a full commit SHA.
+- Use loose status checks by default so an already-green PR does not rerun only
+  because `main` advanced. Enable strict up-to-date checks or merge queue only
+  when integration risk justifies the extra runs.
+
+Before activating a PR-required or required-check rule, inventory every default
+branch writer: maintainers, release version bumps, dependency bots, generated
+data refreshes, Homebrew updates, runtime writebacks, and GitHub Apps. With no
+bypass actors, each writer must open a PR. Otherwise explicitly choose a scoped
+bypass or exclude that repository until the writer is converted. Do not invent
+a preflight-branch protocol unless the user explicitly wants direct-to-main
+writes badly enough to pay its latency and maintenance cost.
+
+Roll out to a verified cohort first, then read back effective rules across every
+target repository. Do not activate an organization-wide required context until
+each target emits that exact context from the expected app.
+
 ### Signed Commits
 
 Prefer signed-commit enforcement on protected/default branches. Use an
