@@ -20,7 +20,9 @@ mutation when that Release is already published and immutable. A missing draft
 must not make an existing tag unrecoverable, and every recovery rereads parity.
 Enumerate every tag pointing at `HEAD`, filter by the configured stable release
 tag format, and require exactly one eligible tag; do not let `git describe`
-choose among multiple tags.
+choose among multiple tags. Pass that selected exact tag as
+`GORELEASER_CURRENT_TAG` to every GoReleaser invocation so a co-located tag
+cannot redirect publication.
 Because the REST by-tag endpoint omits drafts, inspect an authenticated,
 paginated Releases listing before deciding the exact tag is absent; API failure
 or duplicate exact-tag state must fail closed.

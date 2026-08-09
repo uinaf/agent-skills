@@ -196,6 +196,7 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     HOMEBREW_TAP_TOKEN: ${{ steps.release-bot.outputs.token }}
+    GORELEASER_CURRENT_TAG: ${{ steps.tag.outputs.tag }}
 
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   uses: actions/attest@<full-sha> # v4.2.2
@@ -243,6 +244,10 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   stable release tag before lookup or backfill; `git describe` is ambiguous
   when multiple tags share a commit. A manual recovery input must be validated
   against the same format and checked out at that exact tag.
+- Pass the selected exact tag as `GORELEASER_CURRENT_TAG` to every GoReleaser
+  invocation. Tag validation for the Releases API is insufficient by itself:
+  without this binding, another tag on the same commit can change which release
+  GoReleaser publishes.
 - Gate downstream tap, deployment, and parity work on that durable exact-tag
   state, not only a transient publisher output. A later recovery run must be
   able to reconcile missing downstream state without mutating the published
