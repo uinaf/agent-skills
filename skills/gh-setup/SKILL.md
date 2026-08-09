@@ -62,7 +62,8 @@ Default posture (pair each change with a live probe or write):
 - Confirm with `gh repo view --json squashMergeAllowed,deleteBranchOnMerge,mergeCommitAllowed,rebaseMergeAllowed`.
 - Preserve existing approval, status-check, signed-commit, actor, and tag restrictions unless the user explicitly asks to change them (`gh api repos/{owner}/{repo}/rulesets`).
 - Prefer signed-commit requirements on protected/default branches when the plan and automation path support them.
-- If direct pushes to `main` must remain allowed, prefer branch protection with conversation resolution rather than forcing all default-branch changes through PRs by accident.
+- Treat running CI and enforcing green CI as separate states. Prefer an organization ruleset for common PR policy and repository rules for checks whose names legitimately differ; read [repo settings](references/repo-settings.md) before rollout.
+- If direct pushes to `main` must remain allowed, prefer branch protection with conversation resolution rather than forcing all default-branch changes through PRs by accident. A no-bypass PR or required-check rule is incompatible with arbitrary direct pushes; inventory every human and automated writer first.
 - For release bump commits, prefer a full-SHA-pinned API commit action with a
   GitHub App token so GitHub signs the commit; confirm the token actor and
   branch/ruleset policy before relying on writeback automation.
