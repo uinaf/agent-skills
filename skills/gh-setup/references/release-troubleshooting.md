@@ -42,16 +42,25 @@ Common failure modes when standing up or operating this pipeline. Check here bef
   registry, asset, or release publication step failed.
 - Verify the exact tag, GitHub Release state, registry/tap state, default-branch
   version, and commit signature before retrying.
-- Fix the failed boundary and rerun the same release safely. Do not create a
-  second version bump or delete an immutable release to make the run look clean.
-  A correct retry recognizes already-completed boundaries and resumes the
-  missing publication or verification work.
+- Do not assume a normal semantic-release rerun will resume publication after a
+  tag exists. Use the state-specific backfill in
+  [release workflows](release-workflows.md#partial-failure-recovery). Do not
+  create a second version bump or delete an immutable release to make the run
+  look clean.
 
 ## Tag created but no GitHub Release / no published artifact
 
-- Cause: `@semantic-release/github` or the publish plugin ran without the credential it expected.
-- Verify: action logs show "no GH token" or "ENEEDAUTH" near the publish step.
-- Fix: declare `GITHUB_TOKEN` on the semantic-release step. For npm, prefer trusted publishing: configure npm, grant `id-token: write`, and remove `NPM_TOKEN`; use a step-scoped `NPM_TOKEN` only when trusted publishing is unavailable.
+- Cause: the GitHub Release or registry publisher failed after the tag was
+  created, often because its credential was missing or rejected.
+- Verify the exact tag target, commit signature, default-branch version,
+  GitHub Release state, and registry state. Action logs may show "no GH token"
+  or "ENEEDAUTH", but durable state decides recovery.
+- Fix the credential for future releases, then run the state-specific backfill
+  from [release workflows](release-workflows.md#partial-failure-recovery).
+  Do not assume semantic-release will publish after it sees the existing tag.
+  For npm, prefer trusted publishing: configure npm, grant `id-token: write`,
+  and remove `NPM_TOKEN`; use a step-scoped `NPM_TOKEN` only when trusted
+  publishing is unavailable.
 
 ## Release published but deploy is blocked by artifact quota
 

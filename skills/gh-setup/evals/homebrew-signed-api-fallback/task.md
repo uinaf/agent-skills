@@ -15,6 +15,11 @@ to the source and tap repositories, deterministically prepare only
 `planetscale/ghcommit-action`. Read back the resulting tap commit and fail if
 GitHub does not report `verification.verified: true`.
 
+The handoff must use durable state. It should run whenever the exact trusted
+release tag is published and immutable but tap parity is missing, including a
+later recovery run. Do not gate repair solely on semantic-release's
+`new_release_published` output.
+
 ## Output Specification
 
 Update `.github/workflows/release.yml` and write a short `SETUP.md`. Document
@@ -29,4 +34,5 @@ The current workflow publishes through semantic-release and exposes
 `new_release_published` and `new_release_version` as job outputs. It currently
 runs a formula generator directly after semantic-release using the default
 repository token. Replace only that Homebrew handoff; preserve the existing
-release system.
+release system, but replace the transient output gate with exact release-state
+discovery and an idempotent parity check.

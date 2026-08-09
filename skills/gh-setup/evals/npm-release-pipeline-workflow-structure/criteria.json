@@ -8,17 +8,17 @@
     { "name": "Release concurrency", "max_score": 5, "description": "Release has a job-level non-cancellable concurrency group." },
     { "name": "skip ci verify", "max_score": 4, "description": "Verification skips commits whose message contains [skip ci]." },
     { "name": "skip ci release", "max_score": 4, "description": "Release skips commits whose message contains [skip ci]." },
-    { "name": "App-signed writeback", "max_score": 9, "description": "The workflow mints a short-lived GitHub App token and semantic-release uses @jno21/semantic-release-github-commit@1.0.1 for the source writeback." },
+    { "name": "App-signed writeback", "max_score": 9, "description": "The workflow rejects a superseded run whose live main head differs from the analyzed workflow SHA, then mints a short-lived GitHub App token and uses @jno21/semantic-release-github-commit@1.0.1 for source writeback. It does not allow the plugin to absorb unanalyzed concurrent pushes." },
     { "name": "No custom commit identity", "max_score": 4, "description": "The workflow does not set GIT_AUTHOR or GIT_COMMITTER name/email fields; GitHub must sign the App commit." },
     { "name": "Release permissions", "max_score": 6, "description": "Release declares contents: write and id-token: write, without unrelated write scopes unless configured behavior needs them." },
     { "name": "semantic-release action pin", "max_score": 3, "description": "cycjimmy/semantic-release-action is pinned to a full commit SHA with an exact version comment." },
-    { "name": "Plugin order", "max_score": 8, "description": "commit-analyzer and release-notes-generator precede npm; the GitHub commit prepare plugin precedes @semantic-release/github." },
+    { "name": "Plugin order", "max_score": 8, "description": "commit-analyzer and release-notes-generator precede @semantic-release/changelog and npm; the changelog and npm prepare phases deterministically update the existing files before the GitHub commit plugin, which precedes @semantic-release/github." },
     { "name": "Matching preset", "max_score": 4, "description": "commit-analyzer and release-notes-generator both use the conventionalcommits preset." },
-    { "name": "Writeback configuration", "max_score": 7, "description": "The GitHub commit plugin uses files covering package.json and CHANGELOG.md as applicable, plus commitMessage with chore(release): ${nextRelease.version} and [skip ci]; it does not use assets or message option names." },
+    { "name": "Writeback configuration", "max_score": 7, "description": "The GitHub commit plugin lists the existing package.json and CHANGELOG.md prepared by earlier plugins, plus commitMessage with chore(release): ${nextRelease.version} and [skip ci]; it does not use assets or message option names." },
     { "name": "Trusted publishing", "max_score": 7, "description": "npm publishing uses Trusted Publishing/OIDC without registry-url or NPM_TOKEN." },
     { "name": "Release gated by verify", "max_score": 6, "description": "The release job depends on successful verification." },
     { "name": "Credential boundary", "max_score": 6, "description": "Checkout does not persist write credentials and the App token is exposed only at the release boundary, not during dependency installation or build." },
     { "name": "npm metadata", "max_score": 4, "description": "package.json has matching public repository metadata and public publishConfig.access for the scoped package." },
-    { "name": "Immutable completion proof", "max_score": 10, "description": "After the metadata-only release, the workflow reads back immutable: true, runs gh release verify, confirms npm/default-branch parity and a verified writeback, and makes retries inspect existing release/registry state rather than mutate or bump again." }
+    { "name": "Immutable completion proof", "max_score": 10, "description": "After the metadata-only release, the workflow reads back immutable: true, runs gh release verify, confirms npm/default-branch parity and a verified writeback, and implements exact-tag state-specific backfill plus parity reread when npm or the GitHub Release is missing; detect-and-stop or a normal semantic-release rerun is insufficient." }
   ]
 }

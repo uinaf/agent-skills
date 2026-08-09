@@ -3,18 +3,18 @@
   "type": "weighted_checklist",
   "checklist": [
     { "name": "Bundled entrypoint", "max_score": 10, "description": "action.yml runs dist/index.js or another bundled path, never src/index.ts." },
-    { "name": "Build verification", "max_score": 8, "description": "Verification builds the TypeScript bundle and proves the checked-in dist output is current." },
+    { "name": "Build verification", "max_score": 8, "description": "Verification builds the TypeScript bundle and runs an equivalent of git diff --exit-code -- dist to prove checked-in output is current." },
     { "name": "Moving major tag", "max_score": 10, "description": "A maintained plugin or small tested repo-owned action updates v<major>; workflow YAML does not contain inline force-push shell." },
-    { "name": "Conditional major tag", "max_score": 8, "description": "The major-tag update runs only after a new release is published." },
+    { "name": "Durable major-tag repair", "max_score": 8, "description": "The major-tag updater is gated by durable exact-tag/release state and idempotently repairs a missing pointer on later recovery runs; it does not rely solely on new_release_published." },
     { "name": "No npm publish", "max_score": 6, "description": "The configuration does not include @semantic-release/npm." },
     { "name": "Signed writeback plugin", "max_score": 8, "description": "The workflow installs @jno21/semantic-release-github-commit@1.0.1 and .releaserc uses it plus @semantic-release/github." },
-    { "name": "Plugin order", "max_score": 6, "description": "Build/prepare and the GitHub commit plugin precede @semantic-release/github." },
-    { "name": "Writeback options", "max_score": 6, "description": "The GitHub commit plugin uses files for dist and any version file plus commitMessage containing [skip ci]; it does not use assets or message." },
-    { "name": "App-signed boundary", "max_score": 8, "description": "A scoped App token is supplied only at release, checkout does not persist write credentials, and no GIT_AUTHOR/GIT_COMMITTER fields are set." },
+    { "name": "Plugin order", "max_score": 6, "description": "A deterministic prepare step actually updates each listed version manifest before the GitHub commit plugin, which precedes @semantic-release/github." },
+    { "name": "Writeback options", "max_score": 6, "description": "The GitHub commit plugin lists only existing regular version manifests updated by prepare, uses commitMessage containing [skip ci], and does not use dist/**, assets, or message." },
+    { "name": "App-signed boundary", "max_score": 8, "description": "The workflow rejects a superseded run whose live main head differs from the analyzed SHA; a scoped App token is supplied only at release, checkout does not persist write credentials, and no custom author/committer fields are set." },
     { "name": "skip ci guards", "max_score": 6, "description": "Verify and release both skip [skip ci] writeback commits." },
     { "name": "Release concurrency", "max_score": 4, "description": "Release has a job-level non-cancellable concurrency group." },
     { "name": "Full history", "max_score": 4, "description": "Verify and release checkouts use fetch-depth: 0." },
     { "name": "Pinned release action", "max_score": 6, "description": "cycjimmy/semantic-release-action is pinned to a full commit SHA with an exact version comment." },
-    { "name": "Immutable completion proof", "max_score": 10, "description": "The workflow reads back immutable: true, runs gh release verify, proves the exact release tag, verified writeback, bundled runtime, and moving major tag agree, and makes retries skip published-release mutation." }
+    { "name": "Immutable completion proof", "max_score": 10, "description": "The workflow reads back immutable: true, runs gh release verify, proves the exact release tag, verified writeback, bundled runtime, and moving major tag agree, and implements exact-tag backfill plus parity reread for a missing metadata-only Release without another bump or published-release mutation." }
   ]
 }

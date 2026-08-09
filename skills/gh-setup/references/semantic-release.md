@@ -11,7 +11,10 @@ Semantic-release derives the next version from commit messages. The repo must co
 - `feat!:` / `fix!:` / `BREAKING CHANGE:` footer → major bump
 - `chore:`, `docs:`, `refactor:`, `test:`, `build:`, `ci:` → no release (unless flagged via release rules)
 
-Enforce locally with a commit-msg hook (`commitlint` for Node, `convco` for Go, etc.) so PRs cannot land non-conforming subjects. The release pipeline assumes the convention; it does not enforce it.
+Use a local commit-msg hook (`commitlint` for Node, `convco` for Go, etc.) for
+fast feedback, but do not treat a bypassable local hook as enforcement. Validate
+direct-push subjects in CI. In squash-merge repositories, validate the PR title
+because that normally becomes the release-driving commit subject.
 
 ## Plugin Order
 
@@ -54,6 +57,17 @@ Mismatched presets produce inconsistent version decisions and notes.
 - `files` is the explicit list of prepared files to commit. Add
   `pnpm-lock.yaml`, `Cargo.lock`, `Package.swift`, a podspec, or other manifests
   only when the prepare step updates them deterministically.
+- Plugin v1.0.1 is suitable only for existing regular non-executable files. It
+  does not emit deletions and writes matched paths as mode `100644`; do not use
+  it for generated trees, executable files, or symlinks. Preserve those through
+  the pull-request build or a reviewed API implementation with full Git tree
+  semantics.
+- Before semantic-release starts, require the live release branch head to equal
+  the workflow's analyzed `github.sha`; skip superseded queued runs. Plugin
+  v1.0.1 otherwise bases its commit on whatever branch head it reads during
+  `prepare`, and it has no atomic expected-head option. If unmanaged writers can
+  race that prepare window, use an implementation that rejects a head different
+  from the analyzed SHA.
 - The option is `commitMessage`, not `message`. Keep `[skip ci]` in its subject
   so the writeback does not retrigger verification or release.
 - Pass a short-lived GitHub App installation token to semantic-release. Do not
@@ -135,6 +149,10 @@ Semantic-release does not provide an atomic transaction across GitHub and an
 independent immutable registry such as npm or crates.io. The GitHub commit
 plugin also runs during `prepare`, before publication. Document and exercise
 partial-failure recovery for each registry instead of assuming one transaction.
+A normal semantic-release rerun may stop after discovering the existing tag and
+never invoke the failed publisher. Use the durable-state recovery table in
+[release workflows](release-workflows.md#partial-failure-recovery); do not
+promise automatic resume without an implemented backfill path.
 
 Validate the signed writeback with a real release. Require the tag to resolve
 to the signed version commit, the live default-branch files to equal the release

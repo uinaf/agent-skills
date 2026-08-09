@@ -8,10 +8,15 @@ The big challenge is distribution: users of GitHub Actions typically pin to a ma
 
 Additionally, the action is written in TypeScript, but GitHub only runs JavaScript — so the compiled output needs to be what the action actually executes. The team needs the CI pipeline to handle both the verification of the TypeScript source and the proper handoff to the marketplace runtime.
 
-The organization requires verified commits on `main`. The release Environment
-provides `RELEASE_APP_CLIENT_ID` and `RELEASE_APP_PRIVATE_KEY` for an installed
-GitHub App. The bundled `dist/` and any version file must be written back using
-GitHub's App-signed commit path without custom author/committer fields.
+The organization requires verified commits on `main`. Pull requests must build
+the checked-in `dist/` bundle and fail when rebuilding changes it. The release
+Environment provides `RELEASE_APP_CLIENT_ID` and
+`RELEASE_APP_PRIVATE_KEY` for an installed GitHub App. Release-time writeback
+is limited to existing regular version manifests that a deterministic prepare
+step actually updates, through GitHub's App-signed commit path and without
+custom author/committer fields; do not pass `dist/**` to a plugin that cannot
+preserve deletions and Git modes. Reject a superseded release run when the live
+`main` head differs from the analyzed workflow SHA.
 
 The organization enforces immutable GitHub Releases. Because the compiled
 bundle is committed before tagging and no asset is appended after publication,
@@ -19,7 +24,10 @@ semantic-release may publish this metadata-only release directly. The workflow
 must read back `immutable: true`, run `gh release verify`, and prove the exact
 release tag, signed default-branch writeback, bundled runtime, and moving major
 tag all resolve to the intended release. A retry must inspect existing state and
-must not mutate the published release.
+must not mutate the published release. A later recovery run must also backfill
+a missing metadata-only GitHub Release or repair the moving major tag from the
+existing trusted tag even though semantic-release no longer reports a new
+release.
 
 ## Output Specification
 

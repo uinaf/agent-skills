@@ -26,7 +26,8 @@ Set workflow permissions to `contents: read` or `{}` by default, then grant per 
 
 - `contents: write` only for release notes, tags, release assets, or bump commits.
 - `id-token: write` only for OIDC, trusted publishing, or keyless provenance.
-- `attestations: write` only when producing GitHub build attestations.
+- `attestations: write` and `artifact-metadata: write` only when producing
+  GitHub build attestations with current `actions/attest` integrations.
 - `pull-requests: write` only when posting PR comments or checks that require it.
 - Monitoring, incident, or notification jobs stay read-only and receive no provider credentials.
 

@@ -4,11 +4,11 @@
   "checklist": [
     { "name": "Tag-only semantic-release", "max_score": 8, "description": "Plugins include commit-analyzer, release-notes-generator, and github, but no npm or source-writeback plugin." },
     { "name": "Draft-first release", "max_score": 6, "description": "@semantic-release/github creates a draft and GoReleaser is configured to reuse that draft without publishing early." },
-    { "name": "Exact release-state gate", "max_score": 8, "description": "The workflow resolves the exact tag at HEAD and checks that release's draft/published state before running GoReleaser, allowing safe retries." },
+    { "name": "Exact release-state recovery", "max_score": 8, "description": "The workflow resolves the exact trusted tag at HEAD; a confirmed missing Release is backfilled as a draft, an existing draft is resumed, and a published immutable Release skips every GoReleaser mutation. Probe failures other than confirmed not-found stop the job, and recovery rereads parity." },
     { "name": "GoReleaser clean build", "max_score": 6, "description": "GoReleaser runs release --clean from a full-SHA-pinned goreleaser-action." },
     { "name": "Tap naming", "max_score": 6, "description": "The cross-repository tap uses a homebrew- prefixed repository name." },
     { "name": "Scoped App token", "max_score": 8, "description": "A short-lived GitHub App token is scoped explicitly to the source and tap repositories; no broad PAT is introduced." },
-    { "name": "Attestation permissions", "max_score": 6, "description": "The release job grants id-token: write and attestations: write." },
+    { "name": "Attestation permissions", "max_score": 6, "description": "The release job grants id-token: write, attestations: write, and artifact-metadata: write for actions/attest." },
     { "name": "Attest before publish", "max_score": 8, "description": "Release assets are attested while the release is draft, before explicit publication." },
     { "name": "Current cask publisher", "max_score": 8, "description": ".goreleaser.yaml uses homebrew_casks rather than deprecated brews and targets the tap repository." },
     { "name": "Native signed tap commit", "max_score": 12, "description": "The cask sets commit_author.use_github_app_token: true and does not set custom author/committer identity fields." },
@@ -16,6 +16,6 @@
     { "name": "Full history", "max_score": 4, "description": "Verify and release checkouts use fetch-depth: 0." },
     { "name": "Release concurrency", "max_score": 4, "description": "Release has a job-level non-cancellable concurrency group." },
     { "name": "Step-scoped tokens", "max_score": 4, "description": "The App token is passed to GoReleaser as GITHUB_TOKEN and HOMEBREW_TAP_TOKEN at step scope." },
-    { "name": "Publish and prove", "max_score": 6, "description": "The workflow explicitly publishes the draft, runs gh release verify, and reads back the tap commit signature after the release." }
+    { "name": "Publish and prove", "max_score": 6, "description": "The workflow explicitly publishes the draft, reads back draft: false and immutable: true, runs gh release verify, checks expected asset names/digests, and verifies the tap commit signature." }
   ]
 }

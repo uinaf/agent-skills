@@ -1,8 +1,14 @@
 # Publish Targets
 
-Use this reference when wiring the publish step. The verify→release shape stays identical across targets; only the publish plumbing and secrets change.
+Use this reference when wiring the publish step. Verification and completion
+invariants stay consistent across targets; each target may need a different
+publication transaction, owner, trigger, and credential boundary.
 
-Before picking an action, inspect the repo's current release files and at least one known-good sibling repo when the organization has one. Release and tap actions have subtle defaults around forks, direct pushes, generated formulae, and token scopes; copying the nearest working pattern is usually safer than inventing a new one.
+Before picking an action, inspect the repo's current release files and at least
+one sibling repo when the organization has one. Use the sibling to discover
+local contracts, not as authority: validate its action, options, signing,
+publication order, and retry behavior against current upstream documentation
+and a real release before reusing it.
 
 ## npm (Library or CLI)
 
@@ -85,6 +91,11 @@ repo script.
 - `publish-cocoapods.sh` runs `pod trunk push <podname>.podspec --allow-warnings`.
 - Secrets: `COCOAPODS_TRUNK_TOKEN` exported as env on the publish step. Generate the trunk token with `pod trunk register` once, then store it as a `release` Environment secret by default. Use a repository secret only when the repo has an explicit reason not to use a release Environment.
 - SwiftPM consumers pull from the git tag — no separate publish step needed.
+- Treat CocoaPods and GitHub as separate immutable boundaries. If the tag
+  exists and only one publication succeeded, run an exact-tag backfill for the
+  missing boundary and reread podspec, tag, default-branch version, signature,
+  and GitHub Release parity. Do not rely on a normal semantic-release rerun or
+  create another version bump.
 - Cache download artifacts only inside a single trust class. Regenerate or verify generated dependency trees such as full `Pods/` inside signed or publishing jobs before signing or publishing.
 
 ## Go (GoReleaser)
@@ -139,8 +150,25 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     GH_TOKEN: ${{ steps.release-bot.outputs.token }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
   run: |
-    is_draft="$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)"
-    echo "published=$([[ "$is_draft" == "false" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+    endpoint="repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}"
+    error_file="${RUNNER_TEMP}/release-state-error"
+    if release_json="$(gh api "$endpoint" 2>"$error_file")"; then
+      echo "exists=true" >> "$GITHUB_OUTPUT"
+      echo "published=$(jq -r '(.draft == false)' <<<"$release_json")" >> "$GITHUB_OUTPUT"
+    elif grep -q '(HTTP 404)' "$error_file"; then
+      echo "exists=false" >> "$GITHUB_OUTPUT"
+      echo "published=false" >> "$GITHUB_OUTPUT"
+    else
+      cat "$error_file" >&2
+      exit 1
+    fi
+
+- name: Backfill missing draft for the trusted tag
+  if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.exists == 'false'
+  env:
+    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+  run: gh release create "$RELEASE_TAG" --draft --verify-tag --generate-notes
 
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   uses: goreleaser/goreleaser-action@<full-sha> # v7.2.3
@@ -152,7 +180,7 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     HOMEBREW_TAP_TOKEN: ${{ steps.release-bot.outputs.token }}
 
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
-  uses: actions/attest-build-provenance@<full-sha> # v4.1.0
+  uses: actions/attest@<full-sha> # v4.2.2
   with:
     subject-path: 'dist/*.tar.gz,dist/*.zip'
 
@@ -166,39 +194,65 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   env:
     GH_TOKEN: ${{ steps.release-bot.outputs.token }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
-  run: gh release verify "$RELEASE_TAG"
+  run: |
+    release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}")"
+    jq -e '.draft == false and .immutable == true' <<<"$release_json"
+    gh release verify "$RELEASE_TAG"
 ```
 
 - Prefer an org-owned release GitHub App over a long-lived `TAP_GITHUB_TOKEN` PAT when publishing to a sibling Homebrew tap.
 - For every `homebrew_casks` entry that writes to the tap, set
-  `commit_author.use_github_app_token: true`. GoReleaser then omits custom
-  author and committer fields so GitHub signs the commit as the App. Do not set
-  bot name/email fields; attribution is not a signature.
-- Add `id-token: write` and `attestations: write` to the job's `permissions:` for the attestation step.
+  `commit_author.use_github_app_token: true`. GoReleaser then omits the
+  committer field so GitHub signs the commit as the App. Do not set custom bot
+  identity fields; attribution is not a signature.
+- Add `id-token: write`, `attestations: write`, and `artifact-metadata: write`
+  to the job's `permissions:` for new `actions/attest` integrations.
 - `--clean` wipes `dist/` before building so a previous run cannot poison the new release.
 - Configure GoReleaser's `release` block with `draft: true`,
   `use_existing_draft: true`, `mode: keep-existing`, and
   `replace_existing_artifacts: true`. Resolve `steps.tag` and
-  `steps.release-state` from the exact tag at `HEAD` plus `gh release view`;
-  this makes draft recovery and already-published retries explicit.
+  `steps.release-state` from the exact tag at `HEAD` plus a Releases API probe
+  that distinguishes a confirmed 404 from other failures; this makes draft
+  recovery and already-published retries explicit.
+- Gate downstream tap, deployment, and parity work on that durable exact-tag
+  state, not only a transient publisher output. A later recovery run must be
+  able to reconcile missing downstream state without mutating the published
+  immutable Release.
 - Build and upload release artifacts from the release tag or verified release commit. If a workflow intentionally promotes an existing artifact, require recorded provenance: source commit, tag, build number/version, artifact digest, and producing workflow run.
 - If a later deploy job needs the released bits, download them from the published GitHub Release, registry, image digest, or provider-native package. Do not re-upload the release payload as a GitHub Actions artifact just to bridge release and deploy jobs.
 
 ## Rust
 
-Two flavors depending on whether you publish to crates.io. Both pair with **[`cargo-dist`](https://opensource.axo.dev/cargo-dist/)** for cross-platform binaries + Homebrew formula generation (cargo-dist is GoReleaser's Rust equivalent).
+Two flavors depending on whether you publish to crates.io. Both pair with
+**[`cargo-dist`](https://axodotdev.github.io/cargo-dist/)** for cross-platform
+binaries and installer generation.
 
 ### Flavor A — CLI without crates.io (Homebrew/binaries only)
 
-Mirrors the Go/GoReleaser shape at the release boundary, but let cargo-dist own the binary distribution workflow. Keep semantic-release as the version-decider (tag-only, no source bump), then let the cargo-dist generated tag workflow build, host, publish, and announce the artifacts.
+Let semantic-release decide the version and create a signed manifest update plus
+tag. Let cargo-dist's generated tag workflow be the **only** GitHub Release and
+asset owner. If semantic-release publishes the GitHub Release first, immutable
+release policy prevents cargo-dist from uploading its binaries.
 
-Plugins (no `@semantic-release/git`):
+Plugins:
 
 ```json
 "@semantic-release/commit-analyzer",
 "@semantic-release/release-notes-generator",
-"@semantic-release/github"
+["@semantic-release/exec", {
+  "prepareCmd": "./scripts/prepare-release.sh ${nextRelease.version}"
+}],
+["@jno21/semantic-release-github-commit", {
+  "files": ["Cargo.toml", "Cargo.lock"],
+  "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
+}]
 ```
+
+Do not add `@semantic-release/github`: semantic-release core creates the tag,
+then cargo-dist creates the GitHub Release with its complete artifact set.
+`prepare-release.sh` must update the applicable Cargo package/workspace version
+and lockfile deterministically; use release-plz instead when independent
+workspace versions make that script ambiguous.
 
 Semantic-release job:
 
@@ -206,34 +260,87 @@ Semantic-release job:
 - uses: dtolnay/rust-toolchain@<full-sha> # stable
 - uses: cycjimmy/semantic-release-action@<full-sha> # v6.0.0
   id: release
+  with:
+    extra_plugins: |
+      @semantic-release/exec@<exact-version>
+      @jno21/semantic-release-github-commit@1.0.1
   env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
 ```
 
 - No `CARGO_REGISTRY_TOKEN` needed — nothing publishes to crates.io.
 - `cargo-dist` is a CLI and generated workflow system, not a maintained GitHub Action. Do not use stale `axodotdev/cargo-dist-action` snippets.
-- Run `cargo dist init` or `dist generate` in the repo so cargo-dist owns the tag-triggered workflow. That generated workflow should cover the plan, build, host, publish, and announce phases; do not replace it with only `cargo dist build`, which leaves artifacts local to the runner.
-- `cargo dist init` writes `[workspace.metadata.dist]` in `Cargo.toml`. Set `tap = "<org>/homebrew-tap"` and `installers = ["shell", "powershell", "homebrew"]`.
+- Run `dist init` or `dist generate` so cargo-dist owns the tag-triggered
+  workflow. That generated workflow should cover plan, build, host, publish,
+  and announce; do not replace it with only `dist build`, which leaves
+  artifacts local to the runner.
+- `dist init` writes the current dist configuration. Set
+  `tap = "<org>/homebrew-tap"` and include `"homebrew"` in `installers`.
+- Cargo-dist's built-in `publish-jobs = ["homebrew"]` currently ends with an
+  ordinary local `git commit` and `git push`. When the tap requires verified
+  commits, keep Homebrew installer generation, disable that publisher, and add
+  a custom reusable job such as
+  `post-announce-jobs = ["./publish-homebrew"]`. Post-announce jobs are
+  guaranteed to run after cargo-dist has created the complete GitHub Release.
+  The custom job must verify that exact Release is published and immutable,
+  download its formula/assets, and use the narrow signed API fallback. Give the
+  reusable workflow a validated `workflow_dispatch` recovery path so a missing
+  tap update can be repaired without rerunning or mutating the Release.
 - Default targets: `x86_64-unknown-linux-gnu`, `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-pc-windows-msvc`. Add `x86_64-unknown-linux-musl` for static Linux; `aarch64-unknown-linux-gnu` for ARM64 Linux.
 - `cargo-binstall` works out of the box — cargo-dist follows binstall's naming conventions.
 - Simpler alternative if you don't need installers or Homebrew: `taiki-e/upload-rust-binary-action@<full-sha> # v1.30.2` in a matrix job.
 
 ### Flavor B — Library or dual-distribution (crates.io)
 
-When you do publish to crates.io, swap semantic-release for **[`release-plz`](https://release-plz.dev/)**. It understands `Cargo.toml`, handles workspaces, runs `cargo publish` in dependency order, and generates `CHANGELOG.md`.
+When you do publish to crates.io, swap semantic-release for
+**[`release-plz`](https://release-plz.dev/)**. It understands `Cargo.toml`,
+handles workspaces, runs `cargo publish` in dependency order, and generates
+`CHANGELOG.md`.
 
 ```yaml
+permissions:
+  contents: write
+  id-token: write
+
+- uses: actions/create-github-app-token@<full-sha> # v3.2.0
+  id: release-bot
+  with:
+    client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+    private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+    owner: <org>
+    repositories: <repo>
+    permission-contents: write
+    permission-pull-requests: write
+
 - uses: dtolnay/rust-toolchain@<full-sha> # stable
 - uses: release-plz/action@<full-sha> # v0.5.129
   env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
 ```
 
-- Default mode opens a "Release PR" that bumps `Cargo.toml` + `CHANGELOG.md`. Merging the PR triggers tag + crates.io publish. Replaces the `[skip ci]` bump-back loop with an explicit-merge gate.
-- For the auto-push variant (matching the semantic-release `[skip ci]` shape), set `git_release_enable = true` in `release-plz.toml` only when the repo can push through branch rules with `GITHUB_TOKEN`, a dedicated release bot, or a narrowly scoped GitHub App token that is explicitly allowed for release pushback. If no narrow release actor can be allowed, keep the default Release PR flow.
-- Workspace repos: release-plz handles per-crate independent versioning natively via `[[package]]` blocks in `release-plz.toml`.
-- For dual-distribution (crates.io + binaries), pair release-plz with cargo-dist exactly as in Flavor A — release-plz creates the tag, cargo-dist builds binaries on it.
+- Prefer crates.io trusted publishing: configure this repository/workflow as a
+  trusted publisher, grant `id-token: write`, and omit
+  `CARGO_REGISTRY_TOKEN`. Use a narrowly scoped registry token only when the
+  target registry cannot use trusted publishing.
+- Default mode opens a Release PR that bumps `Cargo.toml`, `Cargo.lock`, and
+  changelogs. Merging it lets `release-plz release` publish the checked-in
+  crate version and create the tag; it does not push another version commit to
+  the default branch.
+- A library-only release may keep the default `git_release_enable = true` when
+  release-plz is the sole owner of a metadata-only GitHub Release.
+- For dual distribution, set `git_release_enable = false` and keep
+  `git_tag_enable = true` in `release-plz.toml`. Release-plz publishes crates.io
+  and creates the tag; cargo-dist alone creates the GitHub Release and uploads
+  binary assets. Leaving GitHub Release creation enabled in both tools is
+  incompatible with immutable releases.
+- Workspace repos: release-plz handles per-crate independent versioning
+  natively via `[[package]]` blocks in `release-plz.toml`.
+- Pass the scoped App token to both the Release PR and release jobs when their
+  PR, push, release, or tag events must start another workflow. Events created
+  with the repository's default `GITHUB_TOKEN` do not start those runs; in a
+  dual-distribution flow that would publish crates.io and the tag without ever
+  starting cargo-dist. Scope the App to this repository and the minimum
+  Contents/Pull requests permissions required by the enabled release-plz jobs.
 
 ### Caveats
 
@@ -370,10 +477,10 @@ Plugins:
 "@semantic-release/commit-analyzer",
 "@semantic-release/release-notes-generator",
 ["@semantic-release/exec", {
-  "prepareCmd": "npm run build"
+  "prepareCmd": "./scripts/prepare-release.sh ${nextRelease.version}"
 }],
 ["@jno21/semantic-release-github-commit", {
-  "files": ["package.json", "dist/**"],
+  "files": ["package.json", "package-lock.json"],
   "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
 }],
 "@semantic-release/github"
@@ -381,8 +488,15 @@ Plugins:
 
 - Pin `@jno21/semantic-release-github-commit@1.0.1` in the workflow, provide
   the App token as `GITHUB_TOKEN`, and omit custom author/committer fields so
-  GitHub signs the source writeback. Include only files the release actually
-  updates; omit `package.json` if the action has no checked-in version bump.
+  GitHub signs the source writeback. Version files must already exist and be
+  regular non-executable files.
+- Do not use a generated-tree glob such as `dist/**` with plugin v1.0.1. It
+  cannot record deleted paths and writes every matched path as mode `100644`,
+  which can retain removed bundles or corrupt executable/symlink modes. Build
+  and commit `dist/` during the pull request, and make verification rebuild it
+  and require `git diff --exit-code -- dist`. If release-time generation truly
+  changes a tree, use a reviewed API commit implementation that preserves
+  deletions and Git modes.
 - A moving major tag (`@v1`) is intentionally mutable and separate from the
   immutable release tag (`v1.2.3`). Updating the major tag still needs a scoped
   release credential permitted by tag rules; commit-signature enforcement does
@@ -390,15 +504,22 @@ Plugins:
 - For a moving major tag (`@v1` always pointing at the latest `v1.x.y`), use a maintained semantic-release plugin or a tiny repo-owned release action. Do not paste tag parsing and force-push shell into workflow YAML.
 
   ```yaml
-  - if: steps.release.outputs.new_release_published == 'true'
+  - if: steps.release-state.outputs.published == 'true'
     uses: ./.github/actions/update-major-action-tag
     with:
-      version: ${{ steps.release.outputs.new_release_version }}
+      version: ${{ steps.release-state.outputs.version }}
   ```
 
-  The local action should do one thing: update `v<major>` to the release commit and push it with the release token. If a maintained semantic-release major-tag plugin fits the repo, prefer that.
+  Derive `release-state` from the exact trusted tag and GitHub Release, not only
+  semantic-release's transient output. The local action should idempotently
+  update `v<major>` to the release commit and push it with the release token. A
+  recovery run must repair a missing major tag after publication. If a
+  maintained semantic-release major-tag plugin fits the repo, prefer that.
 
-- The action's `action.yml` `runs:` block must reference the **bundled** entrypoint (`dist/index.js`), not a TS source file. Build it in the verify path and either commit `dist/` or rebuild in the release job.
+- The action's `action.yml` `runs:` block must reference the **bundled**
+  entrypoint (`dist/index.js`), not a TypeScript source file. Build and commit
+  `dist/` during the pull request; verification must rebuild it and fail on a
+  diff before the release tag is created.
 
 ## Monorepo (Node)
 

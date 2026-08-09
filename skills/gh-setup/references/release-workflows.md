@@ -7,7 +7,11 @@ Use when aligning GitHub Actions release workflow files.
 - Default: a single `.github/workflows/ci.yml` with verification and release jobs.
 - Split into `verify.yml` + `release.yml` only when verification must run on a different cadence (e.g., scheduled) or when release needs a runner the verification path does not.
 - Keep a single release workflow by default. Add a third "tag-driven backstop" workflow only with a documented reason, because two active release paths make provenance and retry behavior harder to reason about.
-- Before changing layout, read existing workflows and any same-org repo that already publishes the same artifact type. Keep its action choice, token naming, and tap handling when the target matches.
+- Before changing layout, read existing workflows and any same-org repo that
+  already publishes the same artifact type. Treat sibling choices as evidence,
+  then validate them against current upstream contracts, branch policy, and a
+  real release. Do not preserve an unsigned or deprecated action merely because
+  it already exists nearby.
 
 ## Triggers
 
@@ -55,11 +59,16 @@ Use when aligning GitHub Actions release workflow files.
     contents: write
   ```
 
-- Add `id-token: write` only when the job uses npm trusted publishing, provider OIDC, or keyless provenance. Add `issues: write` and `pull-requests: write` only when semantic-release is configured to comment on issues or pull requests. Add `attestations: write` only when producing GitHub build provenance:
+- Add `id-token: write` only when the job uses npm trusted publishing,
+  provider OIDC, or keyless provenance. Add `issues: write` and
+  `pull-requests: write` only when semantic-release is configured to comment on
+  issues or pull requests. New `actions/attest` integrations also require
+  `attestations: write` and `artifact-metadata: write`:
 
   ```yaml
   id-token: write
   attestations: write
+  artifact-metadata: write
   ```
 
 ## Runners
@@ -166,10 +175,15 @@ token authenticates the operation; it does not sign a local `git commit`.
 Prefer a release tool that deliberately omits author/committer fields from a
 GitHub API commit so GitHub can sign it as the App.
 
+Before version analysis or writeback, discard a superseded push run when the
+live default-branch head no longer equals `github.sha`; the newest queued run
+will analyze the full commit set. Release-job concurrency serializes workflows
+but does not stop another direct push from advancing the branch.
+
 ### semantic-release version files
 
 Replace `@semantic-release/git` with
-[`@jno21/semantic-release-github-commit`](https://github.com/Jno21/semantic-release-github-commit).
+[`@jno21/semantic-release-github-commit@1.0.1`](https://github.com/Jno21/semantic-release-github-commit/blob/v1.0.1/README.md).
 The plugin runs in `prepare`, commits only its `files` through GitHub's API,
 updates the local checkout to that commit, and lets semantic-release tag the
 signed version commit. Pin the plugin to an exact version in `extra_plugins`.
@@ -194,6 +208,14 @@ signed version commit. Pin the plugin to an exact version in `extra_plugins`.
   `committerEmail`; custom identity disables GitHub App auto-signing.
 - Let the publish or exec prepare plugin write the version files before this
   plugin. List only those deterministic files.
+- In v1.0.1, list only existing regular non-executable files. The plugin does
+  not emit deletions and creates every tree entry with mode `100644`; do not
+  pass generated trees, executables, or symlinks.
+- The plugin reads the live branch head during `prepare` and does not expose an
+  atomic expected-head precondition. Require the superseded-run head gate and
+  do not use v1.0.1 where unmanaged writers may advance the default branch
+  during release preparation. That stronger concurrency model needs an API
+  commit implementation that rejects any head other than the analyzed SHA.
 - Pass the App installation token as step-scoped `GITHUB_TOKEN` or `GH_TOKEN`.
   Do not configure a GPG key or add an extra Linux writeback job.
 - The plugin commits during `prepare`, before registry and GitHub publication.
@@ -236,6 +258,26 @@ evidence:
 
 A no-release run cannot prove writeback, immutable publication, or downstream
 parity. Record any unexercised boundary as unverified rather than complete.
+
+## Partial-failure Recovery
+
+Semantic-release is not a transaction manager, and a plain rerun is not a
+universal recovery mechanism. Reconcile durable state first, then run the
+smallest trusted backfill for the missing boundary:
+
+| Durable state | Recovery |
+| --- | --- |
+| signed prepare commit, no tag, nothing published | validate that commit's parent, tree, version, signature, and expected tag, then create the tag directly on it and run only the missing publishers; do not rerun normal prepare/writeback from the original SHA |
+| tag exists, GitHub Release missing | create the release from that trusted tag; for assets, assemble a draft from the tag and publish after verification |
+| registry version exists, GitHub Release missing | never republish the registry version; backfill the GitHub Release from the matching tag |
+| tag exists, registry version missing | publish the exact tagged package through a validated backfill job; do not create another bump |
+| draft exists with partial assets | resume that draft, replace only draft assets, verify, then publish once |
+| immutable Release exists, downstream tap/tag/deploy missing | run an idempotent downstream reconciliation job keyed by the exact release tag |
+
+Backfill workflows may use `workflow_dispatch`, but must validate the tag before
+loading secrets and must read the release, registry, and default-branch state
+again afterward. Downstream repair must not depend solely on wrapper outputs
+such as `new_release_published`; those are false on a later recovery run.
 
 ## Caches
 
