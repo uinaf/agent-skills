@@ -123,3 +123,8 @@ commits. Publish and verify first, then sync prepared version files back to the
 default branch with the GitHub-signed API commit pattern in the release
 workflow reference. Validate that path with a real release; a no-release run
 never reaches the commit boundary.
+
+For metadata-only GitHub Releases, verify the Releases API reports
+`immutable: true`. Do not run `gh release verify`: with no assets there are no
+artifact attestations, so that command fails with `no attestations` even though
+the release itself is immutable.

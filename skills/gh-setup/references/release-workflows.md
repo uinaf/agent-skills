@@ -115,8 +115,11 @@ create draft -> attach every asset -> verify manifest/signatures -> publish once
 - Validate the exact expected asset names/count before publication. Verify
   checksums, code signatures, notarization, and provenance against the files
   being published.
-- After publication, run `gh release verify TAG`; consumers can additionally
-  use `gh release verify-asset TAG PATH`.
+- After artifact publication, run `gh release verify TAG`; consumers can
+  additionally use `gh release verify-asset TAG PATH`. A metadata-only release
+  has no artifact attestations, so `gh release verify` correctly reports
+  `no attestations`; verify that shape through the Releases API's
+  `immutable: true` field instead.
 - Update Homebrew taps, deployment pointers, and other downstream consumers
   only after the immutable release verifies, unless the distributor is
   intentionally part of a draft transaction with documented recovery.
