@@ -87,7 +87,7 @@ Plugins (tag-only — no `@semantic-release/git`, no source bump):
 ```json
 "@semantic-release/commit-analyzer",
 "@semantic-release/release-notes-generator",
-"@semantic-release/github"
+["@semantic-release/github", { "draftRelease": true }]
 ```
 
 Two-step release job (mint a short-lived GitHub App installation token first; see Homebrew Tap):
@@ -130,7 +130,29 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     GIT_COMMITTER_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
     GIT_COMMITTER_EMAIL: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
 
-- if: steps.release.outputs.new_release_published == 'true'
+- run: git fetch --tags --force
+
+- name: Detect release tag at HEAD
+  id: tag
+  run: |
+    if tag="$(git describe --exact-match --tags HEAD 2>/dev/null)"; then
+      echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      echo "present=true" >> "$GITHUB_OUTPUT"
+    else
+      echo "present=false" >> "$GITHUB_OUTPUT"
+    fi
+
+- name: Inspect GitHub Release state
+  if: steps.tag.outputs.present == 'true'
+  id: release-state
+  env:
+    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+  run: |
+    is_draft="$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)"
+    echo "published=$([[ "$is_draft" == "false" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+- if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   uses: goreleaser/goreleaser-action@<full-sha> # v7.2.2
   with:
     version: v2.15.4
@@ -139,15 +161,32 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
     HOMEBREW_TAP_TOKEN: ${{ steps.release-bot.outputs.token }}
 
-- if: steps.release.outputs.new_release_published == 'true'
+- if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   uses: actions/attest-build-provenance@<full-sha> # v4.1.0
   with:
     subject-path: 'dist/*.tar.gz,dist/*.zip'
+
+- if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
+  env:
+    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+  run: gh release edit "$RELEASE_TAG" --draft=false
+
+- if: steps.tag.outputs.present == 'true'
+  env:
+    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+  run: gh release verify "$RELEASE_TAG"
 ```
 
 - Prefer an org-owned release GitHub App over a long-lived `TAP_GITHUB_TOKEN` PAT when publishing to a sibling Homebrew tap.
 - Add `id-token: write` and `attestations: write` to the job's `permissions:` for the attestation step.
 - `--clean` wipes `dist/` before building so a previous run cannot poison the new release.
+- Configure GoReleaser's `release` block with `draft: true`,
+  `use_existing_draft: true`, `mode: keep-existing`, and
+  `replace_existing_artifacts: true`. Resolve `steps.tag` and
+  `steps.release-state` from the exact tag at `HEAD` plus `gh release view`;
+  this makes draft recovery and already-published retries explicit.
 - Build and upload release artifacts from the release tag or verified release commit. If a workflow intentionally promotes an existing artifact, require recorded provenance: source commit, tag, build number/version, artifact digest, and producing workflow run.
 - If a later deploy job needs the released bits, download them from the published GitHub Release, registry, image digest, or provider-native package. Do not re-upload the release payload as a GitHub Actions artifact just to bridge release and deploy jobs.
 
@@ -247,6 +286,12 @@ brews:
 ```
 
 Pass the minted App token as `HOMEBREW_TAP_TOKEN` (and usually also as `GITHUB_TOKEN`) in the GoReleaser step. GoReleaser commits the updated `Formula/<cli-name>.rb` straight to the tap's default branch on every release. No extra workflow step needed.
+
+With immutable GitHub releases, keep GoReleaser's release as a draft until its
+artifact and tap publishers finish, verify the generated artifacts, then
+publish explicitly. A rerun after publication must skip GoReleaser and resume
+only downstream smoke checks; otherwise it will attempt to replace immutable
+assets.
 
 ### Flow B — Non-Go CLI (Node, Ruby, etc.)
 

@@ -86,6 +86,56 @@ Use when aligning GitHub Actions release workflow files.
 - When a release action installs plugins at runtime, pin each requested plugin to an exact version in jobs with registry, signing, or repository-write secrets.
 - Keep CI/CD-only release tooling out of the repo dependency graph by default. Use action inputs such as `extra_plugins` for workflow-owned release plugins, and reserve `devDependencies` for tooling the repo intentionally exposes through local scripts or lockfile-owned release wrappers.
 
+## Immutable GitHub Releases
+
+Audit publication order before enabling immutable releases. A published
+release locks its assets and associated tag; release notes remain editable.
+The safe transaction is:
+
+```text
+create draft -> attach every asset -> verify manifest/signatures -> publish once
+```
+
+- Prefer one release-state owner. Do not publish through semantic-release and
+  then append binaries to the published release.
+- `gh release create TAG assets...` natively creates a temporary draft,
+  uploads every asset, publishes only after successful uploads, and cleans up
+  its draft on failure. Use it when all artifacts can be built first.
+- When semantic-release must own version selection and notes, configure
+  `@semantic-release/github` with `draftRelease: true`. A downstream publisher
+  may mutate only that draft; publish explicitly after verification.
+- For GoReleaser adopting semantic-release's draft, set
+  `release.use_existing_draft: true`, `release.draft: true`, and
+  `release.mode: keep-existing`. Enable artifact replacement only for retrying
+  the mutable draft.
+- Gate retries on durable GitHub state. If the release is already published,
+  skip every asset mutation and resume only downstream checks or distribution.
+- Remove `--clobber` from published-release paths. It is acceptable only for
+  repair of an unpublished draft.
+- Validate the exact expected asset names/count before publication. Verify
+  checksums, code signatures, notarization, and provenance against the files
+  being published.
+- After publication, run `gh release verify TAG`; consumers can additionally
+  use `gh release verify-asset TAG PATH`.
+- Update Homebrew taps, deployment pointers, and other downstream consumers
+  only after the immutable release verifies, unless the distributor is
+  intentionally part of a draft transaction with documented recovery.
+
+Probe repository and organization policy before writes:
+
+```bash
+gh api repos/{owner}/{repo}/immutable-releases
+gh api orgs/{org}/settings/immutable-releases
+```
+
+Enable repository policy with
+`gh api --method PUT repos/{owner}/{repo}/immutable-releases`. For an audited
+organization-wide rollout, set `enforced_repositories` to `all` through
+`PUT orgs/{org}/settings/immutable-releases`, then read back both the org policy
+and representative repository enforcement. Existing published releases are
+not rewritten; prove the workflow with a real patch release because dry-run
+cannot exercise GitHub's immutable publication boundary.
+
 ## Checkout
 
 - Both jobs: `actions/checkout@<full-sha> # v6.0.2` with `fetch-depth: 0`. Semantic-release walks history to compute the next version; a shallow clone breaks it.

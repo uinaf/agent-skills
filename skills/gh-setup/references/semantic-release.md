@@ -95,3 +95,25 @@ Use `cycjimmy/semantic-release-action@<full-sha>` with an exact same-line versio
 - `semantic_version` — pin the semantic-release major to keep release behavior reproducible.
 
 Keep semantic-release dependencies in `package.json` only when the repo intentionally owns local release execution, such as a documented `release` script developers run or a lockfile-owned release wrapper. For normal GitHub Actions release jobs, keep release-only plugins in the action's `extra_plugins` input and pin them there.
+
+## Immutable GitHub Releases
+
+`@semantic-release/github` must not publish a GitHub Release before another
+step uploads binaries. Configure it to create a mutable draft instead:
+
+```json
+[
+  "@semantic-release/github",
+  { "draftRelease": true }
+]
+```
+
+Build and verify every asset before explicitly publishing that draft. A retry
+must discover the existing tag/draft from GitHub state rather than depend only
+on the wrapper's `new_release_published` output. If the release is already
+published, skip mutation and resume downstream work.
+
+Semantic-release does not provide an atomic transaction across GitHub and an
+independent immutable registry such as npm or crates.io. Do not enable GitHub
+immutable releases blindly for those multi-registry workflows: choose the
+registry publication boundary and document partial-failure recovery first.

@@ -143,6 +143,12 @@ Read only the target-specific references needed:
 - [semantic-release](references/semantic-release.md) - semantic-release config and dry-run checks
 - [release troubleshooting](references/release-troubleshooting.md) - common release failures
 
+Before enabling immutable releases at repository or organization scope, audit
+every workflow that creates a GitHub Release. Metadata-only releases are
+usually compatible; workflows that upload or replace assets after publication
+must move to a draft-first transaction described in the release workflow
+reference.
+
 ## Deploy Route
 
 Use this route for running apps and services: static sites, SST apps, Cloudflare, containers, APIs, and hosted frontends.
