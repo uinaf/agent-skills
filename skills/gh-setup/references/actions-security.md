@@ -27,6 +27,8 @@ Set workflow permissions to `contents: read` or `{}` by default, then grant per 
 - `contents: write` only for release notes, tags, release assets, or bump commits.
 - `id-token: write` only for OIDC, trusted publishing, or keyless provenance.
 - `attestations: write` only when producing GitHub build attestations.
+- `artifact-metadata: write` only when the attestation integration actually
+  creates an artifact storage record; ordinary file attestations do not need it.
 - `pull-requests: write` only when posting PR comments or checks that require it.
 - Monitoring, incident, or notification jobs stay read-only and receive no provider credentials.
 
@@ -114,9 +116,9 @@ If a cache is unavoidable, namespace it by workflow, event/trust level, platform
 
 GitHub Actions artifacts are temporary CI scratch storage. They are acceptable for same-run handoff when retention and quota are understood, but they are a weak durable boundary.
 
-Prefer durable publish/deploy inputs:
+Use same-job tested output only for a same-run deploy. Recovery and later runs
+must use durable publish/deploy inputs:
 
-- same-job tested output for simple static deploys
 - GitHub Release asset
 - package registry version
 - container image digest

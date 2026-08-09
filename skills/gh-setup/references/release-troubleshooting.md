@@ -42,16 +42,26 @@ Common failure modes when standing up or operating this pipeline. Check here bef
   registry, asset, or release publication step failed.
 - Verify the exact tag, GitHub Release state, registry/tap state, default-branch
   version, and commit signature before retrying.
-- Fix the failed boundary and rerun the same release safely. Do not create a
-  second version bump or delete an immutable release to make the run look clean.
-  A correct retry recognizes already-completed boundaries and resumes the
-  missing publication or verification work.
+- Do not assume a normal semantic-release rerun will resume publication after a
+  tag exists. Use the state-specific backfill in
+  [release workflows](release-workflows.md#partial-failure-recovery). Do not
+  create a second version bump or delete an immutable release to make the run
+  look clean.
 
 ## Tag created but no GitHub Release / no published artifact
 
-- Cause: `@semantic-release/github` or the publish plugin ran without the credential it expected.
-- Verify: action logs show "no GH token" or "ENEEDAUTH" near the publish step.
-- Fix: declare `GITHUB_TOKEN` on the semantic-release step. For npm, prefer trusted publishing: configure npm, grant `id-token: write`, and remove `NPM_TOKEN`; use a step-scoped `NPM_TOKEN` only when trusted publishing is unavailable.
+- Cause: the GitHub Release or registry publisher failed after the tag was
+  created, often because its credential was missing or rejected.
+- Verify the exact peeled tag target, commit signature, version files read from
+  that commit, containment in the live default branch, GitHub Release state,
+  and registry state. Action logs may show "no GH token" or "ENEEDAUTH", but
+  durable state decides recovery.
+- Fix the credential for future releases, then run the state-specific backfill
+  from [release workflows](release-workflows.md#partial-failure-recovery).
+  Do not assume semantic-release will publish after it sees the existing tag.
+  For npm, prefer trusted publishing: configure npm, grant `id-token: write`,
+  and remove `NPM_TOKEN`; use a step-scoped `NPM_TOKEN` only when trusted
+  publishing is unavailable.
 
 ## Release published but deploy is blocked by artifact quota
 
@@ -114,7 +124,15 @@ Common failure modes when standing up or operating this pipeline. Check here bef
 ## Marketplace consumers pinning `@v1` see no updates
 
 - The moving major tag was not force-updated after the release.
-- Fix: use a maintained semantic-release major-tag plugin, or a small repo-owned `update-major-action-tag` action/script with tests (see [release-targets.md](release-targets.md) -> GitHub Action). Verify by clicking the tag on the GitHub release page — it should match the latest `v1.x.y`.
+- Fix: use a maintained semantic-release major-tag plugin, or a small tested
+  repo-owned `update-major-action-tag` action (see
+  [release-targets.md](release-targets.md) -> GitHub Action). Require the
+  candidate to be the highest eligible published stable SemVer in that major
+  line from peeled Git ref OIDs, reject an unknown or newer pointer, and update
+  the raw major-tag ref with an expected-old-OID compare-and-swap (including an
+  expected-absence precondition). Reread the remote ref and require its commit
+  OID to equal the candidate tag's peeled commit; a GitHub Release field is not
+  the commit source of truth.
 
 ## "GH_TOKEN env or githubToken provided" with semantic-release action v6
 

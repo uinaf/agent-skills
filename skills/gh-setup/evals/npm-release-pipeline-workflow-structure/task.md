@@ -10,14 +10,27 @@ The organization requires verified signatures on `main`. The release
 Environment provides `RELEASE_APP_CLIENT_ID` and `RELEASE_APP_PRIVATE_KEY` for
 an installed GitHub App that can write this repository. The source writeback
 must use GitHub's App-signed commit path; a configured bot name or noreply email
-is not a signature.
+is not a signature. A superseded-run preflight and Actions concurrency are not
+an atomic branch lock. Use plugin v1.0.1 only if the solution also names and
+uses a concrete external branch lease that blocks every merge and direct push
+from before semantic-release starts release analysis through the plugin's API
+ref update. Otherwise use a full-SHA-pinned App-signed API integration that
+sends the analyzed SHA as its expected head and fails closed on mismatch. If
+plugin v1.0.1 is selected, immediately restore `origin` to a credential-free
+URL in an `if: always()` step.
 
 The organization also enforces immutable GitHub Releases. This package has no
 post-publication release assets, so semantic-release may publish the metadata-
 only release directly. The workflow must then prove `immutable: true`, run
-`gh release verify`, and confirm the npm version and live default-branch files
-match. Retries must inspect the existing release and registry state instead of
-creating another bump or trying to mutate a published release.
+`gh release verify`, resolve and peel the remote release tag, and require that
+commit to be the verified App-signed writeback. Read `package.json` and
+`CHANGELOG.md` from that immutable commit for npm parity; check the live default
+branch separately only to prove it contains the writeback commit. Retries must
+inspect the existing release and registry state instead of
+creating another bump or trying to mutate a published release. Include a
+validated backfill path for an existing trusted tag when npm or the GitHub
+Release was published but the other boundary is missing; a normal
+semantic-release rerun is not sufficient recovery.
 
 ## Output Specification
 
@@ -59,6 +72,14 @@ The following files represent the current state of the repository. Extract them 
     "access": "public"
   }
 }
+=============== END FILE ===============
+
+=============== FILE: CHANGELOG.md ===============
+# Changelog
+
+## 2.3.1
+
+- Existing release history.
 =============== END FILE ===============
 
 =============== FILE: .node-version ===============

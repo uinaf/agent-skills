@@ -70,7 +70,13 @@ Default posture (pair each change with a live probe or write):
   path so GitHub signs the commit. Use the semantic-release GitHub commit
   plugin for prepared version files and GoReleaser's
   `commit_author.use_github_app_token` for Homebrew updates. Use a generic API
-  commit action only when the release tool has no native signed path.
+  commit action only when the release tool has no native signed path. Before a
+  source writeback, reject superseded runs whose analyzed SHA is no longer the
+  live default-branch head. That check narrows stale runs but is not atomic:
+  require either a concrete external branch lease that blocks every merge and
+  direct push from before release analysis through the API ref update, or an
+  App-signed API implementation with the analyzed SHA as an expected-head
+  precondition. Actions concurrency and a preflight check are not that lease.
 
 ## Templates
 
@@ -152,8 +158,10 @@ every workflow that creates a GitHub Release. Metadata-only releases are
 usually compatible; workflows that upload or replace assets after publication
 must move to a draft-first transaction described in the release workflow
 reference. Do not call a rollout complete from a green workflow alone: require
-one real release and read back immutability, release attestation, signed
-writebacks, default-branch version files, and downstream registry or tap state.
+one real release for every distinct release shape, exercising each applicable
+package, version-file, registry, and tap path. Read back immutability, release
+attestation, signed writebacks, default-branch containment, and downstream
+state for every surface that applies to that repository.
 
 ## Deploy Route
 

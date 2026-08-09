@@ -8,10 +8,24 @@ The big challenge is distribution: users of GitHub Actions typically pin to a ma
 
 Additionally, the action is written in TypeScript, but GitHub only runs JavaScript — so the compiled output needs to be what the action actually executes. The team needs the CI pipeline to handle both the verification of the TypeScript source and the proper handoff to the marketplace runtime.
 
-The organization requires verified commits on `main`. The release Environment
-provides `RELEASE_APP_CLIENT_ID` and `RELEASE_APP_PRIVATE_KEY` for an installed
-GitHub App. The bundled `dist/` and any version file must be written back using
-GitHub's App-signed commit path without custom author/committer fields.
+The organization requires verified commits on `main`. Pull requests must build
+the checked-in `dist/` bundle and fail when rebuilding changes it. The release
+Environment provides `RELEASE_APP_CLIENT_ID` and
+`RELEASE_APP_PRIVATE_KEY` for an installed GitHub App. Release-time writeback
+is limited to existing regular version manifests that a deterministic prepare
+step actually updates, through GitHub's App-signed commit path and without
+custom author/committer fields; do not pass `dist/**` to a plugin that cannot
+preserve deletions and Git modes. A preflight head check and Actions concurrency
+are not an atomic branch lock. Use plugin v1.0.1 only if a concrete external
+branch lease blocks every merge and direct push from before semantic-release
+starts release analysis through the plugin's API ref update. Otherwise use a
+full-SHA-pinned App-signed API integration with the analyzed SHA as its expected
+head. If plugin v1.0.1 is selected, restore a credential-free `origin`
+immediately afterward in an `if: always()` step.
+
+Bundle verification must remove `dist/`, rebuild it, and require an empty
+`git status --porcelain=v1 --untracked-files=all -- dist` result so changed,
+missing, stale, and newly generated outputs all fail the gate.
 
 The organization enforces immutable GitHub Releases. Because the compiled
 bundle is committed before tagging and no asset is appended after publication,
@@ -19,7 +33,16 @@ semantic-release may publish this metadata-only release directly. The workflow
 must read back `immutable: true`, run `gh release verify`, and prove the exact
 release tag, signed default-branch writeback, bundled runtime, and moving major
 tag all resolve to the intended release. A retry must inspect existing state and
-must not mutate the published release.
+must not mutate the published release. A later recovery run must also backfill
+a missing metadata-only GitHub Release or repair the moving major tag from the
+existing trusted tag even though semantic-release no longer reports a new
+release. Before moving `v<major>`, prove the candidate is the highest eligible
+published stable SemVer in that major line, reject an unknown or newer current
+pointer, and resolve the candidate's peeled Git ref commit OID. Observe the raw
+`refs/tags/v<major>` OID, update it with an atomic expected-old-OID
+compare-and-swap (including an expected-absence precondition), then reread the
+remote ref and require it to equal the candidate commit OID. GitHub Release
+fields are not the commit source of truth.
 
 ## Output Specification
 

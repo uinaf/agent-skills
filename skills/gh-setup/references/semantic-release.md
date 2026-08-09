@@ -11,7 +11,10 @@ Semantic-release derives the next version from commit messages. The repo must co
 - `feat!:` / `fix!:` / `BREAKING CHANGE:` footer → major bump
 - `chore:`, `docs:`, `refactor:`, `test:`, `build:`, `ci:` → no release (unless flagged via release rules)
 
-Enforce locally with a commit-msg hook (`commitlint` for Node, `convco` for Go, etc.) so PRs cannot land non-conforming subjects. The release pipeline assumes the convention; it does not enforce it.
+Use a local commit-msg hook (`commitlint` for Node, `convco` for Go, etc.) for
+fast feedback, but do not treat a bypassable local hook as enforcement. Validate
+direct-push subjects in CI. In squash-merge repositories, validate the PR title
+because that normally becomes the release-driving commit subject.
 
 ## Plugin Order
 
@@ -54,11 +57,27 @@ Mismatched presets produce inconsistent version decisions and notes.
 - `files` is the explicit list of prepared files to commit. Add
   `pnpm-lock.yaml`, `Cargo.lock`, `Package.swift`, a podspec, or other manifests
   only when the prepare step updates them deterministically.
+- Plugin v1.0.1 is suitable only for existing regular non-executable files. It
+  does not emit deletions and writes matched paths as mode `100644`; do not use
+  it for generated trees, executable files, or symlinks. Preserve those through
+  the pull-request build or a reviewed API implementation with full Git tree
+  semantics.
+- A preflight comparison between the live release branch and the workflow SHA
+  skips superseded queued runs but is not atomic. Plugin v1.0.1 bases its commit
+  on whatever branch head it reads during `prepare` and has no expected-head
+  option. Use it only with a concrete external branch lease that blocks every
+  merge and direct push from before semantic-release starts release analysis
+  through the plugin's API ref update. Actions concurrency serializes release
+  jobs but is not a branch lease. Without that control plane, use an App-signed
+  API implementation that rejects a head different from the analyzed SHA.
 - The option is `commitMessage`, not `message`. Keep `[skip ci]` in its subject
   so the writeback does not retrigger verification or release.
 - Pass a short-lived GitHub App installation token to semantic-release. Do not
   set the plugin's author or committer overrides; GitHub signs the commit only
   when those fields are omitted.
+- Immediately after semantic-release, restore `origin` to a credential-free
+  URL in an `if: always()` step. Plugin v1.0.1 temporarily places its App token
+  in that remote URL to fetch the new commit and does not restore it itself.
 - The App must be allowed to update the default branch. Required-signature rules
   can remain enforced; PR-required or restricted-push rules still need an
   explicit compatible actor policy.
@@ -135,10 +154,15 @@ Semantic-release does not provide an atomic transaction across GitHub and an
 independent immutable registry such as npm or crates.io. The GitHub commit
 plugin also runs during `prepare`, before publication. Document and exercise
 partial-failure recovery for each registry instead of assuming one transaction.
+A normal semantic-release rerun may stop after discovering the existing tag and
+never invoke the failed publisher. Use the durable-state recovery table in
+[release workflows](release-workflows.md#partial-failure-recovery); do not
+promise automatic resume without an implemented backfill path.
 
-Validate the signed writeback with a real release. Require the tag to resolve
-to the signed version commit, the live default-branch files to equal the release
-version, the registry to publish that version, and the GitHub Release to report
-`immutable: true`. Run `gh release verify` for both asset-bearing and
-metadata-only immutable releases; the release attestation exists even when the
-asset list is empty.
+Validate the signed writeback with a real release. Require the peeled remote tag
+to resolve to the signed version commit, read the released version files from
+that commit, and separately prove the live default branch contains it; later
+unreleased commits may legitimately advance those files. Require the registry
+to publish that version and the GitHub Release to report `immutable: true`. Run
+`gh release verify` for both asset-bearing and metadata-only immutable releases;
+the release attestation exists even when the asset list is empty.
