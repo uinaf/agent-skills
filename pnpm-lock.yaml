@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  adm-zip@<0.6.0: ^0.6.0
+  adm-zip@<0.6.0: 0.6.0
 
 importers:
 
