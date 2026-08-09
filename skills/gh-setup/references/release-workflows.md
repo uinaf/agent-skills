@@ -160,6 +160,14 @@ writes. For commits, use a full-SHA-pinned API commit action backed by GraphQL
 signs it. This avoids storing a signing key and lets the App obey
 required-signature rules without a bypass.
 
+For semantic-release version writeback, remove `@semantic-release/git`.
+Let the npm or exec prepare plugin update the working tree, publish and verify
+the registry plus GitHub Release first, then stage only the released version
+files and create the signed API commit. The tag intentionally remains on the
+released source commit; the `[skip ci]` version-sync commit follows it on
+`main`. Where reruns must recover after publication, reconstruct those version
+files deterministically from the verified release tag before staging them.
+
 Use the current non-deprecated inputs declared by the pinned action version.
 
 ```yaml
@@ -194,6 +202,10 @@ Use the current non-deprecated inputs declared by the pinned action version.
   actually require Git transport.
 - If a third-party action commits internally and cannot use this API, document
   the incompatibility before granting the App an Integration bypass.
+- A green push where semantic-release decides “no release” does not validate
+  version writeback. Require one real patch/minor release and read back the
+  resulting commit's `verification.verified` state before calling the path
+  proven.
 - Org-specific Environment variable/secret names (`RELEASE_APP_*` above) are examples — keep whatever naming contract the owning org documents.
 
 ## Caches

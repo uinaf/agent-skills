@@ -117,3 +117,9 @@ Semantic-release does not provide an atomic transaction across GitHub and an
 independent immutable registry such as npm or crates.io. Do not enable GitHub
 immutable releases blindly for those multi-registry workflows: choose the
 registry publication boundary and document partial-failure recovery first.
+
+Do not use `@semantic-release/git` for a repository that requires verified
+commits. Publish and verify first, then sync prepared version files back to the
+default branch with the GitHub-signed API commit pattern in the release
+workflow reference. Validate that path with a real release; a no-release run
+never reaches the commit boundary.
