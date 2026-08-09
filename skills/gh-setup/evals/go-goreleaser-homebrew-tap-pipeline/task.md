@@ -27,8 +27,9 @@ OID to equal `HEAD` before any backfill or build, and reread the same remote OID
 immediately before immutable publication and again at completion. Protect the
 release-tag namespace against updates/deletion and restrict creation to the
 release actor. Resolve the remote ref through a tested repo-owned helper using
-the read-only source token and authenticated GitHub Git Refs/Tags APIs; the
-checkout keeps persisted credentials disabled.
+the source-repository workflow token and authenticated GitHub Git Refs/Tags
+APIs; the checkout keeps persisted credentials disabled. The separate tap App
+token must never be used for source reads or writes.
 Because the REST by-tag endpoint omits drafts, inspect an authenticated,
 paginated Releases listing before deciding the exact tag is absent; API failure
 or duplicate exact-tag state must fail closed. Reject a prerelease for the
@@ -43,6 +44,7 @@ Produce the following files:
 - `.github/workflows/ci.yml` — complete GitHub Actions workflow with verify and release jobs
 - `.releaserc.json` — semantic-release configuration
 - `.goreleaser.yaml` — GoReleaser configuration including Homebrew cask automation
+- `scripts/resolve-remote-tag-oid` and focused tests — authenticated annotated-tag peeling with fail-closed errors
 
 Include a brief `SETUP.md` at the repo root documenting the release Environment App credentials (`RELEASE_APP_CLIENT_ID` / `RELEASE_APP_PRIVATE_KEY`) and the explicit repository scope required for the minted token.
 
