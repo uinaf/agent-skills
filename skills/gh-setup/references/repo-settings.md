@@ -77,7 +77,7 @@ Branch protection with only conversation resolution is often a better fit than a
 ### PR And Required-CI Layering
 
 Running checks on pull requests does not enforce them. Read the effective rules
-for the default branch before calling CI required:
+for the default branch before enabling required checks:
 
 ```bash
 gh api repos/{owner}/{repo}/rules/branches/{default_branch}
@@ -97,9 +97,9 @@ For an organization with multiple repository shapes:
   false greens. The gate must run with `always()`, aggregate every voting job,
   and fail closed when a required job is unexpectedly skipped. Pin any gate
   action to a full commit SHA.
-- Use loose status checks by default so an already-green PR does not rerun only
-  because `main` advanced. Enable strict up-to-date checks or merge queue only
-  when integration risk justifies the extra runs.
+- Use non-strict required status checks by default so an already-green PR does
+  not rerun only because `main` advanced. Require branches to be up to date or
+  enable merge queue only when integration risk justifies the extra runs.
 
 Before activating a PR-required or required-check rule, inventory every default
 branch writer: maintainers, release version bumps, dependency bots, generated
