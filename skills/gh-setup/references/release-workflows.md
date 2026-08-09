@@ -71,7 +71,12 @@ Use when aligning GitHub Actions release workflow files.
 
 - Check live settings before severity or remediation calls: `main` rules, allowed push actors, release tag rules, Actions permission policy, Environment reviewers/branch policy, and publish secret location.
 - Continuous releases should use Environment-scoped secrets without approval gates. Use separate reviewer-gated environments only when a human must approve signing, production promotion, or store submission.
-- Package/library/CLI/marketplace release jobs may use an approval-free `release` Environment to read publish secrets and vars. GitHub creates deployment records for jobs that declare an Environment; there is no supported `deployment: false` key. If deployment records are unacceptable, use trusted publishing/OIDC without a GitHub Environment or another narrowly scoped secret boundary the repo can justify.
+- Package/library/CLI/marketplace release jobs may use an approval-free `release`
+  Environment to read publish secrets and vars. Set `deployment: false` in the
+  job's `environment` mapping when the Environment is a credential boundary
+  rather than a deployment target; secrets, variables, branch/tag policies,
+  wait timers, and required reviewers still apply without creating a deployment
+  record.
 - Keep deployment records enabled for running-service/app deploys and for Environments that use custom deployment protection rules.
 - Do not add CODEOWNERS as a blanket default for small repos. Use it only when the repo's maintainers explicitly want owner-gated workflow or release-file review.
 

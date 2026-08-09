@@ -119,8 +119,14 @@ Use GitHub Environments as secret and policy boundaries:
 
 - `release` for package/library/CLI/marketplace publishing secrets.
 - `staging`, `production`, or provider-specific environment names for running app deploys.
-- Publish-only release jobs may use an approval-free `release` Environment for secret scoping, but GitHub will create deployment records for jobs that declare an Environment. There is no supported `deployment: false` workflow key.
+- Publish-only release jobs may use an approval-free `release` Environment for
+  secret scoping without creating deployment records by setting
+  `environment.deployment: false`. Environment secrets, variables, branch/tag
+  policies, wait timers, and required reviewers still apply.
 - Running-service deploy jobs should keep deployment records enabled.
 - Reviewer-gated Environments are for human-approved production promotion, signing, store submission, or other intentional manual gates.
+- Do not set `deployment: false` on an Environment that uses a custom deployment
+  protection rule app; those rules require a deployment object and GitHub will
+  fail the job.
 
 Environment branch/tag policies constrain the workflow run ref. They do not prove a later manually checked-out ref is safe.
