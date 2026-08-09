@@ -356,8 +356,9 @@ For a signature-enforced tap, use a dependent Linux job after the release is pub
   `version`, which GitHub release URLs already encode, and `--strict` rejects
   that as redundant.
 - Pin the tap to a release branch only if you need staged rollouts. Default to publishing straight to `main`.
-- A tap update commit is itself a release event for users — verified signature
-  and `[skip ci]` semantics apply there too if the tap repo has its own CI.
+- A tap update commit is itself a release event for users. Let the tap's audit
+  CI run by default. Add `[skip ci]` only when the tap's push workflow would
+  recurse and skipping it does not suppress useful package verification.
 
 ## GitHub Action (Marketplace)
 

@@ -12,6 +12,13 @@ an installed GitHub App that can write this repository. The source writeback
 must use GitHub's App-signed commit path; a configured bot name or noreply email
 is not a signature.
 
+The organization also enforces immutable GitHub Releases. This package has no
+post-publication release assets, so semantic-release may publish the metadata-
+only release directly. The workflow must then prove `immutable: true`, run
+`gh release verify`, and confirm the npm version and live default-branch files
+match. Retries must inspect the existing release and registry state instead of
+creating another bump or trying to mutate a published release.
+
 ## Output Specification
 
 Produce the following files in the workspace:
