@@ -120,18 +120,13 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
     owner: <org>
     repositories: |
-      <repo>
       homebrew-tap
     permission-contents: write
-    permission-issues: write
-    permission-pull-requests: write
 
 - uses: cycjimmy/semantic-release-action@<full-sha> # v6.0.0
   id: release
   env:
-    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
-
-- run: git fetch --tags --force
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 - name: Detect release tag at HEAD
   id: tag
@@ -147,7 +142,7 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   if: steps.tag.outputs.present == 'true'
   id: release-state
   env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
   run: |
     endpoint="repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}"
@@ -166,7 +161,7 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 - name: Backfill missing draft for the trusted tag
   if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.exists == 'false'
   env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
   run: gh release create "$RELEASE_TAG" --draft --verify-tag --generate-notes
 
@@ -176,7 +171,7 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     version: v2.17.1
     args: release --clean
   env:
-    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     HOMEBREW_TAP_TOKEN: ${{ steps.release-bot.outputs.token }}
 
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
@@ -186,13 +181,13 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
   env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
   run: gh release edit "$RELEASE_TAG" --draft=false
 
 - if: steps.tag.outputs.present == 'true'
   env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
   run: |
     release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}")"
@@ -200,7 +195,10 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     gh release verify "$RELEASE_TAG"
 ```
 
-- Prefer an org-owned release GitHub App over a long-lived `TAP_GITHUB_TOKEN` PAT when publishing to a sibling Homebrew tap.
+- Prefer an org-owned release GitHub App over a long-lived `TAP_GITHUB_TOKEN`
+  PAT when publishing to a sibling Homebrew tap. Mint this token for the tap
+  repository only; use the workflow's source-repository token for source
+  Release operations and readback.
 - For every `homebrew_casks` entry that writes to the tap, set
   `commit_author.use_github_app_token: true`. GoReleaser then omits the
   committer field so GitHub signs the commit as the App. Do not set custom bot
@@ -299,7 +297,7 @@ handles workspaces, runs `cargo publish` in dependency order, and generates
 
 ```yaml
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 - uses: actions/create-github-app-token@<full-sha> # v3.2.0
@@ -310,6 +308,7 @@ permissions:
     owner: <org>
     repositories: <repo>
     permission-contents: write
+    # Release PR job only; omit from the release-only job.
     permission-pull-requests: write
 
 - uses: dtolnay/rust-toolchain@<full-sha> # stable
@@ -340,7 +339,10 @@ permissions:
   with the repository's default `GITHUB_TOKEN` do not start those runs; in a
   dual-distribution flow that would publish crates.io and the tag without ever
   starting cargo-dist. Scope the App to this repository and the minimum
-  Contents/Pull requests permissions required by the enabled release-plz jobs.
+  permissions required by each release-plz job. Keep the workflow's default
+  token read-only. The Release PR job needs App Contents and Pull requests
+  write; the release-only job needs App Contents write but no Pull requests
+  permission.
 
 ### Caveats
 
@@ -362,7 +364,11 @@ Preferred setup:
 - Store `RELEASE_APP_CLIENT_ID` as a `release` Environment variable and
   `RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
 - Mint a short-lived installation token with SHA-pinned `actions/create-github-app-token`.
-- Pass explicit `owner`, `repositories` (source repo + `homebrew-tap`), and least permissions (`permission-contents: write`; add Issues/PRs write only when `@semantic-release/github` side effects stay enabled).
+- Mint separate installation tokens per write destination. A tap publisher's
+  token names only `homebrew-tap` with `permission-contents: write`; source
+  release state is read with the workflow's source-repository token. When a
+  source write truly needs the App, mint a separate source-only token with only
+  the permissions required by that source job.
 - Let GoReleaser sign its own tap commit with
   `commit_author.use_github_app_token: true`. For a publisher without a native
   signed-commit path, generate the file without committing it, then use the
@@ -394,12 +400,12 @@ homebrew_casks:
       verified: "github.com/<org>/<repo>/"
 ```
 
-Pass the same minted App token as `HOMEBREW_TAP_TOKEN` and `GITHUB_TOKEN`.
-GoReleaser v2.13 or newer then creates the tap commit through GitHub without
-custom identity fields, allowing GitHub to sign it as the App. No extra runner,
-formula renderer, or commit action is needed. Migrate existing `brews`
-configurations using GoReleaser's deprecation guidance instead of copying them
-into new repos.
+Pass the source repository's workflow token as `GITHUB_TOKEN` and a separately
+minted tap-only App token as `HOMEBREW_TAP_TOKEN`. GoReleaser v2.13 or newer
+then creates the tap commit through GitHub without custom identity fields,
+allowing GitHub to sign it as the App. No extra runner, formula renderer, or
+commit action is needed. Migrate existing `brews` configurations using
+GoReleaser's deprecation guidance instead of copying them into new repos.
 
 With immutable GitHub releases, keep GoReleaser's release as a draft until its
 artifact and tap publishers finish, verify the generated artifacts, then
@@ -421,7 +427,6 @@ For a signature-enforced tap, use a dependent Linux job after the release is pub
     private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
     owner: <org>
     repositories: |
-      <repo>
       homebrew-tap
     permission-contents: write
 

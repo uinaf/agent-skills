@@ -15,8 +15,10 @@ Environment provides `RELEASE_APP_CLIENT_ID` and
 is limited to existing regular version manifests that a deterministic prepare
 step actually updates, through GitHub's App-signed commit path and without
 custom author/committer fields; do not pass `dist/**` to a plugin that cannot
-preserve deletions and Git modes. Reject a superseded release run when the live
-`main` head differs from the analyzed workflow SHA.
+preserve deletions and Git modes. Because plugin v1.0.1 has no atomic
+expected-head precondition, use it only with an exclusive-writer policy for the
+full prepare interval; a preflight head check alone is insufficient. Restore a
+credential-free `origin` immediately afterward in an `if: always()` step.
 
 The organization enforces immutable GitHub Releases. Because the compiled
 bundle is committed before tagging and no asset is appended after publication,

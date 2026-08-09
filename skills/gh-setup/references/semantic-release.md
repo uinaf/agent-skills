@@ -62,17 +62,20 @@ Mismatched presets produce inconsistent version decisions and notes.
   it for generated trees, executable files, or symlinks. Preserve those through
   the pull-request build or a reviewed API implementation with full Git tree
   semantics.
-- Before semantic-release starts, require the live release branch head to equal
-  the workflow's analyzed `github.sha`; skip superseded queued runs. Plugin
-  v1.0.1 otherwise bases its commit on whatever branch head it reads during
-  `prepare`, and it has no atomic expected-head option. If unmanaged writers can
-  race that prepare window, use an implementation that rejects a head different
-  from the analyzed SHA.
+- A preflight comparison between the live release branch and the workflow SHA
+  skips superseded queued runs but is not atomic. Plugin v1.0.1 bases its commit
+  on whatever branch head it reads during `prepare` and has no expected-head
+  option. Use it only under an exclusive-writer policy covering the full
+  prepare interval; otherwise use an implementation that rejects a head
+  different from the analyzed SHA.
 - The option is `commitMessage`, not `message`. Keep `[skip ci]` in its subject
   so the writeback does not retrigger verification or release.
 - Pass a short-lived GitHub App installation token to semantic-release. Do not
   set the plugin's author or committer overrides; GitHub signs the commit only
   when those fields are omitted.
+- Immediately after semantic-release, restore `origin` to a credential-free
+  URL in an `if: always()` step. Plugin v1.0.1 temporarily places its App token
+  in that remote URL to fetch the new commit and does not restore it itself.
 - The App must be allowed to update the default branch. Required-signature rules
   can remain enforced; PR-required or restricted-push rules still need an
   explicit compatible actor policy.

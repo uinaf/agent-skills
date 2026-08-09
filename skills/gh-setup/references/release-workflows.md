@@ -177,8 +177,9 @@ GitHub API commit so GitHub can sign it as the App.
 
 Before version analysis or writeback, discard a superseded push run when the
 live default-branch head no longer equals `github.sha`; the newest queued run
-will analyze the full commit set. Release-job concurrency serializes workflows
-but does not stop another direct push from advancing the branch.
+will analyze the full commit set. This narrows stale runs but is not an atomic
+lock. Release-job concurrency serializes workflows but does not stop another
+direct push from advancing the branch.
 
 ### semantic-release version files
 
@@ -212,12 +213,22 @@ signed version commit. Pin the plugin to an exact version in `extra_plugins`.
   not emit deletions and creates every tree entry with mode `100644`; do not
   pass generated trees, executables, or symlinks.
 - The plugin reads the live branch head during `prepare` and does not expose an
-  atomic expected-head precondition. Require the superseded-run head gate and
-  do not use v1.0.1 where unmanaged writers may advance the default branch
-  during release preparation. That stronger concurrency model needs an API
-  commit implementation that rejects any head other than the analyzed SHA.
+  atomic expected-head precondition. Use v1.0.1 only when repository policy
+  prevents every other writer from advancing the default branch throughout
+  release preparation. Otherwise use an API commit implementation that rejects
+  any head other than the analyzed SHA; a preflight check alone is insufficient.
 - Pass the App installation token as step-scoped `GITHUB_TOKEN` or `GH_TOKEN`.
   Do not configure a GPG key or add an extra Linux writeback job.
+- Plugin v1.0.1 writes the App token into the checkout's `origin` URL while it
+  fetches the new commit. Immediately after semantic-release, run an
+  `if: always()` cleanup that restores a credential-free remote before any
+  parity, packaging, or diagnostic step:
+
+  ```yaml
+  - name: Restore credential-free origin
+    if: always()
+    run: git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+  ```
 - The plugin commits during `prepare`, before registry and GitHub publication.
   Treat registry publication as a separate immutable boundary and verify the
   repo's retry behavior when a later publish step fails.
@@ -234,8 +245,10 @@ custom author fields. See [release targets](release-targets.md#flow-a--gorelease
 Use a full-SHA-pinned GitHub API commit action only for a generated file in a
 repository that has no release-tool-native signed path. Keep that fallback
 narrow: one deterministic file set, one explicit repository and branch, and no
-custom author/committer. Do not grant an Integration bypass merely to preserve
-an unsigned local-commit action.
+custom author/committer. Read source Release state with the source workflow
+token, then mint a separate App token naming only the destination repository
+for the write. Do not grant an Integration bypass merely to preserve an
+unsigned local-commit action.
 
 ## Release Completion Proof
 

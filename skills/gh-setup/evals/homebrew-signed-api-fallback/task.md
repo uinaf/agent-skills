@@ -9,9 +9,10 @@ name and noreply email are insufficient.
 
 The generator has no native GitHub App-signed commit mode. Preserve its useful
 formula-generation behavior, but prevent it from committing. After a release is
-published, a dependent Linux job must mint a short-lived App token scoped only
-to the source and tap repositories, deterministically prepare only
-`Formula/envctl.rb`, and commit that path with the full-SHA-pinned
+published, a dependent Linux job reads source state with the source
+repository's read-only workflow token, then mints a separate short-lived App
+token scoped only to the tap. It deterministically prepares only
+`Formula/envctl.rb` and commits that path with the full-SHA-pinned
 `planetscale/ghcommit-action`. Read back the resulting tap commit and fail if
 GitHub does not report `verification.verified: true`.
 
@@ -24,7 +25,7 @@ later recovery run. Do not gate repair solely on semantic-release's
 
 Update `.github/workflows/release.yml` and write a short `SETUP.md`. Document
 the release Environment's `RELEASE_APP_CLIENT_ID` variable and
-`RELEASE_APP_PRIVATE_KEY` secret, the two-repository installation scope, and
+`RELEASE_APP_PRIVATE_KEY` secret, the tap-only token scope, and
 `contents: write`. Do not add a PAT, custom bot identity, ordinary `git push`,
 or a manual tap PR.
 

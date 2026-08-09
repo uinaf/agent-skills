@@ -17,8 +17,10 @@ publisher uses an ordinary local commit. Configure a custom reusable
 post-announce job that commits the generated formula through a full-SHA-pinned
 signed API action with a short-lived GitHub App token. The recovery path must
 reconcile an existing immutable release and missing tap update by exact tag.
-Reject a superseded semantic-release run when the live default-branch head no
-longer equals the analyzed workflow SHA.
+Because plugin v1.0.1 has no atomic expected-head precondition, enforce an
+exclusive-writer policy for the default branch throughout release preparation;
+a superseded-run preflight alone is insufficient. Restore a credential-free
+`origin` immediately after semantic-release in an `if: always()` step.
 
 ## Output Specification
 
@@ -29,7 +31,8 @@ Produce:
 - `dist-workspace.toml` and the generated cargo-dist release workflow
 - `.github/workflows/publish-homebrew.yml` as the custom post-announce signed
   tap publisher, callable by cargo-dist and manual recovery
-- `SETUP.md` documenting `RELEASE_APP_CLIENT_ID`, `RELEASE_APP_PRIVATE_KEY`, source/tap repository scope, and least permissions
+- `SETUP.md` documenting `RELEASE_APP_CLIENT_ID`,
+  `RELEASE_APP_PRIVATE_KEY`, tap-only write-token scope, and least permissions
 
 The workflows must prove the tag points to the signed Cargo manifest commit,
 cargo-dist publishes the complete immutable release, release assets/digests

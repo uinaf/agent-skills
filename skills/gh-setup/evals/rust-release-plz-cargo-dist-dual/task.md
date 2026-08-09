@@ -33,7 +33,8 @@ Produce:
 - `dist-workspace.toml` and cargo-dist's generated tag workflow
 - `.github/workflows/publish-homebrew.yml` with workflow-call and validated
   manual recovery entrypoints
-- `SETUP.md` documenting trusted publishing and App scope for source/tap
+- `SETUP.md` documenting trusted publishing plus separately minted source-only
+  release-plz and tap-only Homebrew App tokens
 
 ## Input Files
 

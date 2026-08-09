@@ -10,10 +10,12 @@ App-signed API path, create the tag on that verified commit, push the podspec to
 CocoaPods trunk, and publish a metadata-only immutable GitHub Release.
 
 The `release` Environment holds `RELEASE_APP_CLIENT_ID`,
-`RELEASE_APP_PRIVATE_KEY`, and `COCOAPODS_TRUNK_TOKEN`. Before analysis and
-writeback, reject a superseded run when the live `main` head differs from the
-workflow SHA. The commit plugin may receive only existing regular version
-files and no custom author or committer identity.
+`RELEASE_APP_PRIVATE_KEY`, and `COCOAPODS_TRUNK_TOKEN`. Plugin v1.0.1 has no
+atomic expected-head precondition, so enforce an exclusive-writer policy for
+`main` throughout release preparation; a preflight head check alone is
+insufficient. The plugin may receive only existing regular version files and
+no custom identity, and an `if: always()` step must immediately restore a
+credential-free `origin` afterward.
 
 CocoaPods trunk and GitHub Releases are separate immutable boundaries. Provide
 a validated exact-tag recovery path for either `tag + pod, no GitHub Release`
