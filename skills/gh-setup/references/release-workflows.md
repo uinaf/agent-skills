@@ -115,11 +115,10 @@ create draft -> attach every asset -> verify manifest/signatures -> publish once
 - Validate the exact expected asset names/count before publication. Verify
   checksums, code signatures, notarization, and provenance against the files
   being published.
-- After artifact publication, run `gh release verify TAG`; consumers can
-  additionally use `gh release verify-asset TAG PATH`. A metadata-only release
-  has no artifact attestations, so `gh release verify` correctly reports
-  `no attestations`; verify that shape through the Releases API's
-  `immutable: true` field instead.
+- After publication, require both `gh release verify TAG` and the Releases
+  API's `immutable: true` field. Immutable metadata-only releases still have a
+  release attestation; an empty asset list is valid. Consumers can additionally
+  use `gh release verify-asset TAG PATH` for downloaded assets.
 - Update Homebrew taps, deployment pointers, and other downstream consumers
   only after the immutable release verifies, unless the distributor is
   intentionally part of a draft transaction with documented recovery.
@@ -135,14 +134,19 @@ Enable repository policy with
 `gh api --method PUT repos/{owner}/{repo}/immutable-releases`. For an audited
 organization-wide rollout, set `enforced_repositories` to `all` through
 `PUT orgs/{org}/settings/immutable-releases`, then read back both the org policy
-and representative repository enforcement. Existing published releases are
-not rewritten; prove the workflow with a real patch release because dry-run
-cannot exercise GitHub's immutable publication boundary.
+and every current repository's `enabled` / `enforced_by_owner` state. The org
+policy covers future repositories. Existing published releases are not
+rewritten; prove each distinct workflow shape with a real patch release because
+dry-run cannot exercise GitHub's immutable publication boundary.
 
 ## Checkout
 
 - Both jobs: `actions/checkout@<full-sha> # v6.0.2` with `fetch-depth: 0`. Semantic-release walks history to compute the next version; a shallow clone breaks it.
-- Keep `persist-credentials: false` through checkout, install, build, and pack steps whenever possible, especially before package-manager lifecycle scripts run. If `@semantic-release/git` must push a bump commit, add write credentials only at the narrow release boundary: use a release bot or GitHub App token that branch rules explicitly allow, configure the git remote or credential helper immediately before semantic-release, and avoid exposing that token to dependency install steps.
+- Keep `persist-credentials: false` through checkout, install, build, and pack
+  steps, especially before package-manager lifecycle scripts run. Introduce a
+  short-lived GitHub App token only at the release boundary. Prefer API-backed
+  writeback that consumes the token directly; configure Git transport only for
+  tag or ref operations that actually need it.
 - Do not assume a later `GITHUB_TOKEN` or `GH_TOKEN` environment variable overrides checkout authentication. With persisted credentials, Git can keep using checkout's default token and push as `github-actions[bot]` even after a GitHub App token is minted. Disable credential persistence at checkout, then configure Git authentication with the intended token at the release boundary.
 
 ## `[skip ci]` Gate
@@ -157,68 +161,81 @@ Apply on **both** verification and release jobs. Skipping it on verification mea
 
 ## Signed Bot Commits
 
-Prefer a narrowly scoped GitHub App installation token for release GitHub
-writes. For commits, use a full-SHA-pinned API commit action backed by GraphQL
-`createCommitOnBranch`: GitHub authors the commit as the authenticated App and
-signs it. This avoids storing a signing key and lets the App obey
-required-signature rules without a bypass.
+Use a narrowly scoped GitHub App installation token for release writes. An App
+token authenticates the operation; it does not sign a local `git commit`.
+Prefer a release tool that deliberately omits author/committer fields from a
+GitHub API commit so GitHub can sign it as the App.
 
-For semantic-release version writeback, remove `@semantic-release/git`.
-Let the npm or exec prepare plugin update the working tree, publish and verify
-the registry plus GitHub Release first, then stage only the released version
-files and create the signed API commit. The tag intentionally remains on the
-released source commit; the `[skip ci]` version-sync commit follows it on
-`main`. Where reruns must recover after publication, reconstruct those version
-files deterministically from the verified release tag before staging them.
+### semantic-release version files
 
-Use the current non-deprecated inputs declared by the pinned action version.
+Replace `@semantic-release/git` with
+[`@jno21/semantic-release-github-commit`](https://github.com/Jno21/semantic-release-github-commit).
+The plugin runs in `prepare`, commits only its `files` through GitHub's API,
+updates the local checkout to that commit, and lets semantic-release tag the
+signed version commit. Pin the plugin to an exact version in `extra_plugins`.
 
-```yaml
-- name: Create release bot token
-  id: release-bot
-  uses: actions/create-github-app-token@<full-sha> # v3.2.0
-  with:
-    client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
-    private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-    owner: ${{ github.repository_owner }}
-    repositories: ${{ github.event.repository.name }}
-    permission-contents: write
-
-- name: Stage version file
-  run: git add -- package.json
-
-- name: Create signed version commit
-  uses: planetscale/ghcommit-action@a6b150b81dca5dd027baa898604418eec9e11465 # v0.2.22
-  with:
-    commit_message: "chore: sync version [skip ci]"
-    repo: ${{ github.repository }}
-    branch: main
-    file_pattern: package.json
-  env:
-    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
+```json
+[
+  "@semantic-release/npm",
+  [
+    "@jno21/semantic-release-github-commit",
+    {
+      "files": ["package.json"],
+      "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
+    }
+  ],
+  "@semantic-release/github"
+]
 ```
 
-`planetscale/ghcommit-action` is Docker-based and therefore requires a Linux
-job. If release assembly must run on macOS, expose the verified release version
-as a job output and perform only the deterministic version-file writeback in a
-dependent Ubuntu job. Pass `repo` and `branch` explicitly; do not infer them
-from checkout state.
+- The plugin options are `files` and `commitMessage`. `assets` and `message`
+  belong to `@semantic-release/git` and are ignored here.
+- Do not set `authorName`, `authorEmail`, `committerName`, or
+  `committerEmail`; custom identity disables GitHub App auto-signing.
+- Let the publish or exec prepare plugin write the version files before this
+  plugin. List only those deterministic files.
+- Pass the App installation token as step-scoped `GITHUB_TOKEN` or `GH_TOKEN`.
+  Do not configure a GPG key or add an extra Linux writeback job.
+- The plugin commits during `prepare`, before registry and GitHub publication.
+  Treat registry publication as a separate immutable boundary and verify the
+  repo's retry behavior when a later publish step fails.
 
-- Stage only the intended generated paths; leave `stage-all-files` disabled.
-- Pin the commit action to a reviewed full SHA, not a mutable tag.
-- Keep required-signature enforcement active with no App bypass so an unsigned
-  writeback is rejected by the branch rule.
-- Do not provide custom author, committer, or signature fields; that disables
-  GitHub's authenticated bot-signing path.
-- Use `gh auth setup-git` only for remaining tag, ref, or asset operations that
-  actually require Git transport.
-- If a third-party action commits internally and cannot use this API, document
-  the incompatibility before granting the App an Integration bypass.
-- A green push where semantic-release decides “no release” does not validate
-  version writeback. Require one real patch/minor release and read back the
-  resulting commit's `verification.verified` state before calling the path
-  proven.
-- Org-specific Environment variable/secret names (`RELEASE_APP_*` above) are examples — keep whatever naming contract the owning org documents.
+### GoReleaser Homebrew updates
+
+Use GoReleaser's native `commit_author.use_github_app_token: true` under the
+Homebrew publisher. GoReleaser omits the committer from its API request and
+GitHub signs the tap commit as the App. Do not add a second commit action or
+custom author fields. See [release targets](release-targets.md#flow-a--goreleaser-auto-update).
+
+### Generic fallback
+
+Use a full-SHA-pinned GitHub API commit action only for a generated file in a
+repository that has no release-tool-native signed path. Keep that fallback
+narrow: one deterministic file set, one explicit repository and branch, and no
+custom author/committer. Do not grant an Integration bypass merely to preserve
+an unsigned local-commit action.
+
+## Release Completion Proof
+
+Do not infer completion from a green workflow or a tag alone. For every
+distinct release shape, perform one real release and require all applicable
+evidence:
+
+- The release is published (`draft: false`) and `immutable: true`.
+- `gh release verify TAG` succeeds; asset names and digests match the manifest.
+- The release tag resolves to the intended commit. When semantic-release writes
+  a version file, the tag resolves to that GitHub-signed version commit.
+- Every protected-branch writeback reports
+  `commit.verification.verified: true` with `reason: valid`.
+- Version-bearing files on the live default branch equal the published
+  version, including lockfiles when the release contract updates them.
+- Registries, Homebrew formulae/casks, moving action tags, and deployment
+  pointers reference that same version and artifact digest.
+- A retry after publication performs no asset mutation and reaches the same
+  verified state.
+
+A no-release run cannot prove writeback, immutable publication, or downstream
+parity. Record any unexercised boundary as unverified rather than complete.
 
 ## Caches
 

@@ -65,11 +65,13 @@ Baseline checks:
 - Require signed commits on protected/default branches unless release, deploy,
   or merge automation has a documented incompatible path.
 - Merge queue requires workflows to include `merge_group` for required checks.
-- Release bump commits need an actor that branch rules allow. Prefer a narrowly
-  scoped GitHub App token with a full-SHA-pinned API commit action backed by
-  GraphQL `createCommitOnBranch`; this creates a GitHub-signed commit without
-  storing a signing key. Use a bypass only when a documented writeback path
-  cannot produce verified commits.
+- Release bump commits need an actor that branch rules allow. Prefer the
+  release tool's native GitHub App path: the semantic-release GitHub commit
+  plugin for source writebacks, or GoReleaser's
+  `commit_author.use_github_app_token` for tap updates. Use a full-SHA-pinned
+  GitHub API commit action only when the publisher has no native signed path,
+  and use a bypass only when a documented writeback path cannot produce
+  verified commits.
 - If a ruleset requires pull requests on `main`, automated push-back release jobs will fail unless the actor is exempted or the release tool opens PRs.
 
 Branch protection with only conversation resolution is often a better fit than a full PR-required ruleset when maintainers intentionally keep direct pushes available.
