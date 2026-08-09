@@ -6,6 +6,19 @@ The team at Fieldstone Labs has been maintaining `@fieldstone/form-validator`, a
 
 The team wants to automate this using GitHub Actions and semantic-release, so that every conventional commit pushed to `main` that warrants a release (feat, fix, or breaking change) automatically: runs the test suite, bumps the version, updates the changelog, publishes to npm through npm Trusted Publishing/OIDC, creates a GitHub Release, and commits the version bump back to the repo. They want protection against two releases accidentally racing each other, and they want the version bump commit to never retrigger CI.
 
+The organization requires verified signatures on `main`. The release
+Environment provides `RELEASE_APP_CLIENT_ID` and `RELEASE_APP_PRIVATE_KEY` for
+an installed GitHub App that can write this repository. The source writeback
+must use GitHub's App-signed commit path; a configured bot name or noreply email
+is not a signature.
+
+The organization also enforces immutable GitHub Releases. This package has no
+post-publication release assets, so semantic-release may publish the metadata-
+only release directly. The workflow must then prove `immutable: true`, run
+`gh release verify`, and confirm the npm version and live default-branch files
+match. Retries must inspect the existing release and registry state instead of
+creating another bump or trying to mutate a published release.
+
 ## Output Specification
 
 Produce the following files in the workspace:

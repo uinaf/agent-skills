@@ -30,7 +30,10 @@ Plugins:
 
 ```json
 "@semantic-release/npm",
-"@semantic-release/git",
+["@jno21/semantic-release-github-commit", {
+  "files": ["package.json"],
+  "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
+}],
 "@semantic-release/github"
 ```
 
@@ -43,8 +46,12 @@ Workflow step:
     package-manager-cache: false
 - run: npm ci
 - uses: cycjimmy/semantic-release-action@<full-sha> # v6.0.0
+  with:
+    extra_plugins: |
+      @semantic-release/npm@<exact-version>
+      @jno21/semantic-release-github-commit@1.0.1
   env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
 ```
 
 - For npm package repos, check in `.node-version` with the latest active LTS line, currently Node 24.x. Migrate Node version-file examples and workflow setup to `.node-version`.
@@ -58,16 +65,18 @@ Workflow step:
 
 ## CocoaPods + SwiftPM
 
-Semantic-release tags via `@semantic-release/git`; CocoaPods publish runs via `@semantic-release/exec` shelling out to a repo script.
+Semantic-release prepares Swift/CocoaPods version files with
+`@semantic-release/exec`, commits them through GitHub's API, then publishes via a
+repo script.
 
 ```json
 ["@semantic-release/exec", {
   "prepareCmd": "./scripts/prepare-release.sh ${nextRelease.version}",
   "publishCmd": "./scripts/publish-cocoapods.sh"
 }],
-["@semantic-release/git", {
-  "assets": ["Package.swift", "<podname>.podspec"],
-  "message": "chore(release): ${nextRelease.version} [skip ci]"
+["@jno21/semantic-release-github-commit", {
+  "files": ["Package.swift", "<podname>.podspec"],
+  "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
 }],
 "@semantic-release/github"
 ```
@@ -96,8 +105,8 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 - uses: actions/create-github-app-token@<full-sha> # v3.2.0
   id: release-bot
   with:
-    client-id: ${{ vars.UINAF_RELEASE_APP_CLIENT_ID }}
-    private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
+    client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+    private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
     owner: <org>
     repositories: |
       <repo>
@@ -106,29 +115,10 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     permission-issues: write
     permission-pull-requests: write
 
-- name: Resolve release bot identity
-  id: release-bot-identity
-  shell: bash
-  env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-    APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
-  run: |
-    set -euo pipefail
-    user_id="$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)"
-    if [[ ! "$user_id" =~ ^[0-9]+$ ]]; then
-      echo "failed to resolve numeric bot user id for ${APP_SLUG}[bot]" >&2
-      exit 1
-    fi
-    echo "user_id=${user_id}" >> "$GITHUB_OUTPUT"
-
 - uses: cycjimmy/semantic-release-action@<full-sha> # v6.0.0
   id: release
   env:
     GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
-    GIT_AUTHOR_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-    GIT_AUTHOR_EMAIL: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
-    GIT_COMMITTER_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-    GIT_COMMITTER_EMAIL: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
 
 - run: git fetch --tags --force
 
@@ -153,9 +143,9 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     echo "published=$([[ "$is_draft" == "false" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
 - if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.published != 'true'
-  uses: goreleaser/goreleaser-action@<full-sha> # v7.2.2
+  uses: goreleaser/goreleaser-action@<full-sha> # v7.2.3
   with:
-    version: v2.15.4
+    version: v2.17.1
     args: release --clean
   env:
     GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
@@ -180,6 +170,10 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 ```
 
 - Prefer an org-owned release GitHub App over a long-lived `TAP_GITHUB_TOKEN` PAT when publishing to a sibling Homebrew tap.
+- For every `homebrew_casks` entry that writes to the tap, set
+  `commit_author.use_github_app_token: true`. GoReleaser then omits custom
+  author and committer fields so GitHub signs the commit as the App. Do not set
+  bot name/email fields; attribution is not a signature.
 - Add `id-token: write` and `attestations: write` to the job's `permissions:` for the attestation step.
 - `--clean` wipes `dist/` before building so a previous run cannot poison the new release.
 - Configure GoReleaser's `release` block with `draft: true`,
@@ -243,27 +237,29 @@ When you do publish to crates.io, swap semantic-release for **[`release-plz`](ht
 
 ### Caveats
 
-- Do **not** mix `release-plz` with `@semantic-release/git` — pick one version manager. Semantic-release does not understand `Cargo.toml` lockfile semantics.
+- Do **not** mix `release-plz` with a semantic-release writeback plugin — pick one version manager. Semantic-release does not understand `Cargo.toml` lockfile semantics.
 - Commit `Cargo.lock` for CLI repos (reproducible binary builds); keep it ignored only for pure libraries that explicitly need it.
 - crates.io publishes are immutable — a botched version cannot be re-pushed, only yanked. Validate via `release-plz update --dry-run` on a topic branch before the first release.
 
 ## Homebrew Tap
 
-A Homebrew tap is just a separate GitHub repo named `homebrew-<tap>` (the `homebrew-` prefix is required) containing one Ruby formula per CLI under `Formula/<name>.rb`. End users install with `brew tap <org>/<tap>` then `brew install <name>`. The release pipeline's job is to keep the formula in the tap repo current.
+A Homebrew tap is a separate GitHub repo named `homebrew-<tap>` (the `homebrew-` prefix is required) containing Ruby casks under `Casks/` or legacy/source formulae under `Formula/`. End users install with `brew tap <org>/<tap>` then `brew install <name>`. The release pipeline keeps that package definition current.
 
 ### Cross-repo token
 
 Whichever flow you pick, you need a token that can push to the tap repo from the source repo's release workflow. The default `GITHUB_TOKEN` is scoped to the source repo only.
 
-Default for Uinaf (and preferred elsewhere):
+Preferred setup:
 
-- Use an org-owned release GitHub App (`uinaf-releaser` for Uinaf).
-- Store `UINAF_RELEASE_APP_CLIENT_ID` as a `release` Environment variable and `UINAF_RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
+- Use an organization-owned release GitHub App.
+- Store `RELEASE_APP_CLIENT_ID` as a `release` Environment variable and
+  `RELEASE_APP_PRIVATE_KEY` as a `release` Environment secret.
 - Mint a short-lived installation token with SHA-pinned `actions/create-github-app-token`.
 - Pass explicit `owner`, `repositories` (source repo + `homebrew-tap`), and least permissions (`permission-contents: write`; add Issues/PRs write only when `@semantic-release/github` side effects stay enabled).
-- For a tap with required signatures, generate the formula or cask without
-  committing it, then use the signed API commit pattern from
-  `release-workflows.md`. A bot name and noreply email do not sign a commit.
+- Let GoReleaser sign its own tap commit with
+  `commit_author.use_github_app_token: true`. For a publisher without a native
+  signed-commit path, generate the file without committing it, then use the
+  narrow signed API fallback from `release-workflows.md`.
 - Use `gh auth setup-git` only for tag or ref operations that still require Git
   transport; the signed API commit does not need it.
 
@@ -271,29 +267,32 @@ Do not introduce org-wide long-lived `TAP_GITHUB_TOKEN` PATs for new work. Retir
 
 ### Flow A — GoReleaser auto-update
 
-GoReleaser can write the formula directly. Add a `brews:` block in `.goreleaser.yaml` only when the tap does not require verified signatures:
+GoReleaser can write and sign the tap update directly. For new configurations,
+use `homebrew_casks`; `brews` is deprecated.
 
 ```yaml
-brews:
+homebrew_casks:
   - name: <cli-name>
     repository:
       owner: <org>
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Formula
+    commit_author:
+      use_github_app_token: true
+    commit_msg_template: "chore(<cli-name>): update to {{ .Tag }}"
     homepage: "https://github.com/<org>/<repo>"
     description: "<one-line description>"
     license: "MIT"
-    test: |
-      system "#{bin}/<cli-name>", "--version"
+    url:
+      verified: "github.com/<org>/<repo>/"
 ```
 
-Pass the minted App token as `HOMEBREW_TAP_TOKEN` (and usually also as `GITHUB_TOKEN`) in the GoReleaser step. GoReleaser commits the updated `Formula/<cli-name>.rb` straight to the tap's default branch on every release. No extra workflow step needed.
-
-That direct Git commit is not cryptographically signed merely because it uses
-an App token. If the tap requires verified signatures, generate the formula
-without pushing or render the same deterministic formula in a dependent Linux
-job, then commit only that path with `planetscale/ghcommit-action`.
+Pass the same minted App token as `HOMEBREW_TAP_TOKEN` and `GITHUB_TOKEN`.
+GoReleaser v2.13 or newer then creates the tap commit through GitHub without
+custom identity fields, allowing GitHub to sign it as the App. No extra runner,
+formula renderer, or commit action is needed. Migrate existing `brews`
+configurations using GoReleaser's deprecation guidance instead of copying them
+into new repos.
 
 With immutable GitHub releases, keep GoReleaser's release as a draft until its
 artifact and tap publishers finish, verify the generated artifacts, then
@@ -311,8 +310,8 @@ For a signature-enforced tap, use a dependent Linux job after the release is pub
 - uses: actions/create-github-app-token@<full-sha> # v3.2.0
   id: release-bot
   with:
-    client-id: ${{ vars.UINAF_RELEASE_APP_CLIENT_ID }}
-    private-key: ${{ secrets.UINAF_RELEASE_APP_PRIVATE_KEY }}
+    client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+    private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
     owner: <org>
     repositories: |
       <repo>
@@ -344,19 +343,22 @@ For a signature-enforced tap, use a dependent Linux job after the release is pub
 
 - Compute checksums from the exact immutable release assets consumed by the formula or cask.
 - For a Node CLI distributed via npm rather than a GitHub release archive, write a custom formula that uses `Language::Node::Shebang` and a `resource` block.
-- Formula-generation actions such as `Justintime50/homebrew-releaser`, `brew bump-cask-pr --commit`, and direct-push GoReleaser flows must not own the final commit on a signature-enforced tap unless their exact pinned implementation creates a verified signature.
+- Formula-generation actions and commands that end with ordinary `git commit`
+  and `git push` must not own the final commit on a signature-enforced tap.
 - Read back the tap's new default-branch commit and require `verification.verified: true`; checking only the source repository's release run is incomplete.
 
 ### Tap repo conventions
 
-- Keep formulae under `Formula/`. Homebrew also accepts repo root, but `Formula/` scales when you add more CLIs.
+- Keep casks under `Casks/` and legacy/source formulae under `Formula/`.
 - Add a CI job to the tap repo that runs `brew audit --online --formula …` and
   `brew audit --online --cask …` (casks need `--cask`). Prefer not to use
   `--strict` for GoReleaser-generated formulae: the generator always emits
   `version`, which GitHub release URLs already encode, and `--strict` rejects
   that as redundant.
 - Pin the tap to a release branch only if you need staged rollouts. Default to publishing straight to `main`.
-- A formula update commit on the tap is itself a release event for users — bot identity and `[skip ci]` semantics apply there too if the tap repo has its own CI.
+- A tap update commit is itself a release event for users. Let the tap's audit
+  CI run by default. Add `[skip ci]` only when the tap's push workflow would
+  recurse and skipping it does not suppress useful package verification.
 
 ## GitHub Action (Marketplace)
 
@@ -365,11 +367,26 @@ A composite or JS action is "published" by tagging — the marketplace pulls fro
 Plugins:
 
 ```json
-"@semantic-release/git",
+"@semantic-release/commit-analyzer",
+"@semantic-release/release-notes-generator",
+["@semantic-release/exec", {
+  "prepareCmd": "npm run build"
+}],
+["@jno21/semantic-release-github-commit", {
+  "files": ["package.json", "dist/**"],
+  "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
+}],
 "@semantic-release/github"
 ```
 
-- The `git` plugin commits the bump (typically just `package.json` for a JS action) so consumers pinning to `@v1` follow the moving major tag.
+- Pin `@jno21/semantic-release-github-commit@1.0.1` in the workflow, provide
+  the App token as `GITHUB_TOKEN`, and omit custom author/committer fields so
+  GitHub signs the source writeback. Include only files the release actually
+  updates; omit `package.json` if the action has no checked-in version bump.
+- A moving major tag (`@v1`) is intentionally mutable and separate from the
+  immutable release tag (`v1.2.3`). Updating the major tag still needs a scoped
+  release credential permitted by tag rules; commit-signature enforcement does
+  not sign or freeze that tag.
 - For a moving major tag (`@v1` always pointing at the latest `v1.x.y`), use a maintained semantic-release plugin or a tiny repo-owned release action. Do not paste tag parsing and force-push shell into workflow YAML.
 
   ```yaml

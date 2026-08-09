@@ -66,9 +66,11 @@ Default posture (pair each change with a live probe or write):
 - Prefer signed-commit requirements on protected/default branches when the plan and automation path support them.
 - Treat running CI and enforcing green CI as separate states. Prefer an organization ruleset for common PR policy and repository rules for checks whose names legitimately differ; read [repo settings](references/repo-settings.md) before rollout.
 - If direct pushes to `main` must remain allowed, prefer branch protection with conversation resolution rather than forcing all default-branch changes through PRs by accident. A no-bypass PR or required-check rule is incompatible with arbitrary direct pushes; inventory every human and automated writer first.
-- For release bump commits, prefer a full-SHA-pinned API commit action with a
-  GitHub App token so GitHub signs the commit; confirm the token actor and
-  branch/ruleset policy before relying on writeback automation.
+- For release writeback, prefer the release tool's native GitHub App commit
+  path so GitHub signs the commit. Use the semantic-release GitHub commit
+  plugin for prepared version files and GoReleaser's
+  `commit_author.use_github_app_token` for Homebrew updates. Use a generic API
+  commit action only when the release tool has no native signed path.
 
 ## Templates
 
@@ -133,12 +135,14 @@ Core shape:
 
 ```text
 pull request -> verification
-push to main -> verification -> release/publish -> version bump or release PR
+push to main -> verification -> prepare signed version commit when needed
+             -> assemble and verify release -> publish immutable
+             -> verify registry/tap/default-branch parity
 ```
 
 Read only the target-specific references needed:
 
-- [release workflows](references/release-workflows.md) - workflow layout, triggers, checkout, permissions, caches, skip-CI, bot identity, and trusted refs
+- [release workflows](references/release-workflows.md) - workflow layout, triggers, checkout, permissions, caches, skip-CI, signed writebacks, and trusted refs
 - [release targets](references/release-targets.md) - npm, Swift, GoReleaser, Rust, GitHub Action, and Homebrew target shapes
 - [semantic-release](references/semantic-release.md) - semantic-release config and dry-run checks
 - [release troubleshooting](references/release-troubleshooting.md) - common release failures
@@ -147,7 +151,9 @@ Before enabling immutable releases at repository or organization scope, audit
 every workflow that creates a GitHub Release. Metadata-only releases are
 usually compatible; workflows that upload or replace assets after publication
 must move to a draft-first transaction described in the release workflow
-reference.
+reference. Do not call a rollout complete from a green workflow alone: require
+one real release and read back immutability, release attestation, signed
+writebacks, default-branch version files, and downstream registry or tap state.
 
 ## Deploy Route
 

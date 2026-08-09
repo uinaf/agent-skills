@@ -1,0 +1,16 @@
+{
+  "context": "Tests the narrow signed-API fallback for a non-Go Homebrew publisher that lacks native GitHub App commit signing.",
+  "type": "weighted_checklist",
+  "checklist": [
+    { "name": "Dependent release gate", "max_score": 10, "description": "The tap job depends on release and runs only when a new release was published." },
+    { "name": "Scoped App token", "max_score": 12, "description": "The job mints a short-lived App token explicitly scoped to envctl and homebrew-tap with contents: write." },
+    { "name": "Safe tap checkout", "max_score": 8, "description": "The tap checkout targets main, uses the App token, and sets persist-credentials: false." },
+    { "name": "Narrow deterministic generation", "max_score": 12, "description": "Generation updates only Formula/envctl.rb from the exact published version/assets and does not commit or push." },
+    { "name": "Pinned signed commit action", "max_score": 15, "description": "planetscale/ghcommit-action is pinned to a full commit SHA with an exact version comment and receives the App token." },
+    { "name": "Commit path boundary", "max_score": 8, "description": "The signed commit action's file pattern is restricted to Formula/envctl.rb on the tap's main branch." },
+    { "name": "No unsigned escape", "max_score": 10, "description": "There is no ordinary git commit/push, custom author/committer identity, or generator-owned final commit." },
+    { "name": "Signature readback", "max_score": 10, "description": "The workflow reads the new tap default-branch commit and fails unless verification.verified is true." },
+    { "name": "Setup contract", "max_score": 8, "description": "SETUP.md documents RELEASE_APP_CLIENT_ID, RELEASE_APP_PRIVATE_KEY, both repository scopes, and contents: write." },
+    { "name": "No broad credential", "max_score": 7, "description": "No classic PAT or long-lived organization-wide tap token is recommended." }
+  ]
+}

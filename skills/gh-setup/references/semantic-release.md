@@ -21,10 +21,13 @@ Order matters — semantic-release runs plugins in declaration order. Canonical 
 2. `@semantic-release/release-notes-generator` — builds the release notes body
 3. `@semantic-release/changelog` — writes/updates `CHANGELOG.md` (optional)
 4. Publish plugin(s) — `@semantic-release/npm`, `@semantic-release/exec`, etc.
-5. `@semantic-release/git` — commits version-bumped files back with `[skip ci]`
+5. `@jno21/semantic-release-github-commit` — commits prepared version files
+   through GitHub's API when the default branch requires verified signatures
 6. `@semantic-release/github` — creates the GitHub Release and uploads assets
 
-Place `@semantic-release/git` **before** `@semantic-release/github` so the bump commit exists when the GitHub Release is created (the Release points at that commit's tag).
+Place the GitHub commit plugin after every plugin that prepares files and before
+`@semantic-release/github`. It updates the checkout to the GitHub-signed commit,
+so semantic-release tags that commit.
 
 ## Preset
 
@@ -37,18 +40,33 @@ Always pass the same preset to both analyzer and notes generator:
 
 Mismatched presets produce inconsistent version decisions and notes.
 
-## `@semantic-release/git` Configuration
+## GitHub-signed writeback
 
 ```json
-["@semantic-release/git", {
-  "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
-  "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+["@jno21/semantic-release-github-commit", {
+  "files": ["package.json", "package-lock.json", "CHANGELOG.md"],
+  "commitMessage": "chore(release): ${nextRelease.version} [skip ci]"
 }]
 ```
 
-- `assets` is the explicit list of files the bump commit includes. Add `pnpm-lock.yaml`, `Package.swift`, `<podname>.podspec`, or other manifests as needed.
-- Keep the `[skip ci]` token in the message; it gates re-triggering.
-- For a tag-only release (no source bump — see GoReleaser flows), omit this plugin entirely.
+- Pin `@jno21/semantic-release-github-commit` to an exact version in the release
+  action's `extra_plugins` input.
+- `files` is the explicit list of prepared files to commit. Add
+  `pnpm-lock.yaml`, `Cargo.lock`, `Package.swift`, a podspec, or other manifests
+  only when the prepare step updates them deterministically.
+- The option is `commitMessage`, not `message`. Keep `[skip ci]` in its subject
+  so the writeback does not retrigger verification or release.
+- Pass a short-lived GitHub App installation token to semantic-release. Do not
+  set the plugin's author or committer overrides; GitHub signs the commit only
+  when those fields are omitted.
+- The App must be allowed to update the default branch. Required-signature rules
+  can remain enforced; PR-required or restricted-push rules still need an
+  explicit compatible actor policy.
+- For a tag-only release with no source bump, omit the commit plugin entirely.
+
+`@semantic-release/git` creates an ordinary local commit. An App token and bot
+noreply email provide attribution, not a cryptographic signature; do not use it
+on a branch that requires verified commits.
 
 ## Branch Configuration
 
@@ -91,7 +109,7 @@ The dry-run prints the computed version and notes without tagging or publishing.
 Use `cycjimmy/semantic-release-action@<full-sha>` with an exact same-line version comment, preserving the repo's current major unless there is a concrete migration reason. For new workflows, start from the current major and keep it on Dependabot. Inputs worth knowing:
 
 - `working_directory` — for monorepo packages.
-- `extra_plugins` — install CI/CD-only release plugins without polluting the repo's runtime or dev dependency graph. Pin every entry to an exact version such as `@semantic-release/npm@13.1.5`; use exact package specs in secret-bearing release jobs.
+- `extra_plugins` — install CI/CD-only release plugins without polluting the repo's runtime or dev dependency graph. Pin every entry to an exact version such as `@semantic-release/npm@13.1.5` and `@jno21/semantic-release-github-commit@1.0.1`; use exact package specs in secret-bearing release jobs.
 - `semantic_version` — pin the semantic-release major to keep release behavior reproducible.
 
 Keep semantic-release dependencies in `package.json` only when the repo intentionally owns local release execution, such as a documented `release` script developers run or a lockfile-owned release wrapper. For normal GitHub Actions release jobs, keep release-only plugins in the action's `extra_plugins` input and pin them there.
@@ -114,17 +132,13 @@ on the wrapper's `new_release_published` output. If the release is already
 published, skip mutation and resume downstream work.
 
 Semantic-release does not provide an atomic transaction across GitHub and an
-independent immutable registry such as npm or crates.io. Do not enable GitHub
-immutable releases blindly for those multi-registry workflows: choose the
-registry publication boundary and document partial-failure recovery first.
+independent immutable registry such as npm or crates.io. The GitHub commit
+plugin also runs during `prepare`, before publication. Document and exercise
+partial-failure recovery for each registry instead of assuming one transaction.
 
-Do not use `@semantic-release/git` for a repository that requires verified
-commits. Publish and verify first, then sync prepared version files back to the
-default branch with the GitHub-signed API commit pattern in the release
-workflow reference. Validate that path with a real release; a no-release run
-never reaches the commit boundary.
-
-For metadata-only GitHub Releases, verify the Releases API reports
-`immutable: true`. Do not run `gh release verify`: with no assets there are no
-artifact attestations, so that command fails with `no attestations` even though
-the release itself is immutable.
+Validate the signed writeback with a real release. Require the tag to resolve
+to the signed version commit, the live default-branch files to equal the release
+version, the registry to publish that version, and the GitHub Release to report
+`immutable: true`. Run `gh release verify` for both asset-bearing and
+metadata-only immutable releases; the release attestation exists even when the
+asset list is empty.

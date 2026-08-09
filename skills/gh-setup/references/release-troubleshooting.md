@@ -13,16 +13,39 @@ Common failure modes when standing up or operating this pipeline. Check here bef
 - Cause: the `[skip ci]` guard is missing on the release job's `if:`, or the bump message no longer contains `[skip ci]`.
 - Check: open the bump commit on `main`. Message must contain `[skip ci]`. Workflow must have `if: ${{ … !contains(github.event.head_commit.message, '[skip ci]') }}` on **both** verification and release jobs.
 
-## "fatal: could not read Username for 'https://github.com'" during `@semantic-release/git` push
+## GitHub commit plugin cannot write the release bump
 
-- Cause: semantic-release reached the push-back step without a git credential that branch rules allow.
-- Fix: keep checkout credentials unpersisted through install/build, then configure a release-bot or GitHub App token immediately before semantic-release and grant the release job `contents: write`. Do not fix this by exposing a write token to dependency install steps.
+- Cause: the semantic-release step has no App token, the App lacks `contents:
+  write`, or branch rules do not allow the App to update the default branch.
+- Verify: confirm `@jno21/semantic-release-github-commit@1.0.1` is installed,
+  its options are `files` and `commitMessage`, and `GITHUB_TOKEN` on the release
+  step is the minted App token.
+- Fix: correct the App installation/repository scope or branch actor policy.
+  Do not add Git credentials, a signing key, or a second commit job; this plugin
+  writes through GitHub's API.
 
-## GitHub App token minted, but push is denied to `github-actions[bot]`
+## A release path still pushes as `github-actions[bot]`
 
-- Cause: `actions/checkout` persisted the job's default token before the App token was minted. Setting `GITHUB_TOKEN` or `GH_TOKEN` on the release step does not necessarily replace Git's configured checkout credential, so the push still authenticates as `github-actions[bot]` and may fail with `EGITNOPERMISSION` or HTTP 403.
-- Verify: the App-token step succeeded, but the failed push names `github-actions[bot]`; checkout logs show `persist-credentials: true` or omit the input.
-- Fix: set `persist-credentials: false` on release-job checkout, then configure Git with the minted App token immediately before semantic-release, for example with `GH_TOKEN` and `gh auth setup-git`.
+- Cause: a legacy local `git commit`/`git push` path remains, and checkout
+  persisted the job's default token. Setting `GITHUB_TOKEN` later does not
+  replace Git's configured credential.
+- Verify: the failed operation is an actual Git push and names
+  `github-actions[bot]`.
+- Fix: replace source writebacks with the semantic-release GitHub commit plugin
+  and GoReleaser tap updates with `use_github_app_token: true`. If a tag/ref
+  operation still requires Git transport, set `persist-credentials: false` and
+  configure only that operation with the scoped App token.
+
+## Release bump exists but publication failed
+
+- Cause: semantic-release completed its prepare/writeback phase, then a
+  registry, asset, or release publication step failed.
+- Verify the exact tag, GitHub Release state, registry/tap state, default-branch
+  version, and commit signature before retrying.
+- Fix the failed boundary and rerun the same release safely. Do not create a
+  second version bump or delete an immutable release to make the run look clean.
+  A correct retry recognizes already-completed boundaries and resumes the
+  missing publication or verification work.
 
 ## Tag created but no GitHub Release / no published artifact
 
@@ -69,6 +92,24 @@ Common failure modes when standing up or operating this pipeline. Check here bef
 
 - Generated files (`dist/`, `Package.swift` rewrite) leak into the working tree before goreleaser runs.
 - Fix: ensure `goreleaser release --clean` flag is set, and that any pre-release script writes its output outside the working tree or stages it before goreleaser starts.
+
+## GoReleaser tap commit is unsigned
+
+- Cause: the `homebrew_casks` publisher omitted
+  `commit_author.use_github_app_token: true`, used a pre-v2.13 GoReleaser, or
+  supplied custom author/committer fields that prevented GitHub App signing.
+- Fix: use a current GoReleaser, enable the native App-token option, remove
+  custom identity fields, and read back the tap commit's
+  `verification.verified` value after a real release.
+
+## A rerun tries to replace immutable release assets
+
+- Cause: the first run already published the release, but the retry entered the
+  build/upload phase again.
+- Fix: inspect the exact tag's release state before GoReleaser or any uploader.
+  If it is already published, skip mutation and resume only registry, tap,
+  deployment, smoke, and parity checks. Never delete or recreate the release as
+  a retry mechanism.
 
 ## Marketplace consumers pinning `@v1` see no updates
 
