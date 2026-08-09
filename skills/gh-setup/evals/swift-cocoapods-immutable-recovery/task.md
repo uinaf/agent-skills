@@ -12,8 +12,9 @@ CocoaPods trunk, and publish a metadata-only immutable GitHub Release.
 The `release` Environment holds `RELEASE_APP_CLIENT_ID`,
 `RELEASE_APP_PRIVATE_KEY`, and `COCOAPODS_TRUNK_TOKEN`. Plugin v1.0.1 has no
 atomic expected-head precondition, so enforce an exclusive-writer policy for
-`main` throughout release preparation; a preflight head check alone is
-insufficient. The plugin may receive only existing regular version files and
+`main` from before semantic-release starts release analysis through the
+plugin's API ref update; a preflight head check alone is insufficient. The
+plugin may receive only existing regular version files and
 no custom identity, and an `if: always()` step must immediately restore a
 credential-free `origin` afterward.
 

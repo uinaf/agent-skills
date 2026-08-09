@@ -12,9 +12,10 @@ an installed GitHub App that can write this repository. The source writeback
 must use GitHub's App-signed commit path; a configured bot name or noreply email
 is not a signature. A superseded-run preflight is not an atomic lock: because
 plugin v1.0.1 has no expected-head precondition, document and enforce an
-exclusive-writer policy for `main` throughout release preparation. Immediately
-after semantic-release, restore `origin` to a credential-free URL in an
-`if: always()` step.
+exclusive-writer policy for `main` from before semantic-release starts release
+analysis through the plugin's API ref update. Immediately after
+semantic-release, restore `origin` to a credential-free URL in an `if: always()`
+step.
 
 The organization also enforces immutable GitHub Releases. This package has no
 post-publication release assets, so semantic-release may publish the metadata-

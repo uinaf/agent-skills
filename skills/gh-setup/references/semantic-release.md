@@ -65,9 +65,10 @@ Mismatched presets produce inconsistent version decisions and notes.
 - A preflight comparison between the live release branch and the workflow SHA
   skips superseded queued runs but is not atomic. Plugin v1.0.1 bases its commit
   on whatever branch head it reads during `prepare` and has no expected-head
-  option. Use it only under an exclusive-writer policy covering the full
-  prepare interval; otherwise use an implementation that rejects a head
-  different from the analyzed SHA.
+  option. Use it only when repository policy prevents every other writer from
+  advancing the branch from before semantic-release starts release analysis
+  through the plugin's API ref update; otherwise use an implementation that
+  rejects a head different from the analyzed SHA.
 - The option is `commitMessage`, not `message`. Keep `[skip ci]` in its subject
   so the writeback does not retrigger verification or release.
 - Pass a short-lived GitHub App installation token to semantic-release. Do not

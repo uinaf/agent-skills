@@ -203,8 +203,9 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
   `commit_author.use_github_app_token: true`. GoReleaser then omits the
   committer field so GitHub signs the commit as the App. Do not set custom bot
   identity fields; attribution is not a signature.
-- Add `id-token: write`, `attestations: write`, and `artifact-metadata: write`
-  to the job's `permissions:` for new `actions/attest` integrations.
+- Add `id-token: write` and `attestations: write` to the job's `permissions:`
+  for file attestations. Add `artifact-metadata: write` only when the selected
+  integration creates an artifact storage record.
 - `--clean` wipes `dist/` before building so a previous run cannot poison the new release.
 - Configure GoReleaser's `release` block with `draft: true`,
   `use_existing_draft: true`, `mode: keep-existing`, and
@@ -502,10 +503,13 @@ Plugins:
 - Do not use a generated-tree glob such as `dist/**` with plugin v1.0.1. It
   cannot record deleted paths and writes every matched path as mode `100644`,
   which can retain removed bundles or corrupt executable/symlink modes. Build
-  and commit `dist/` during the pull request, and make verification rebuild it
-  and require `git diff --exit-code -- dist`. If release-time generation truly
-  changes a tree, use a reviewed API commit implementation that preserves
-  deletions and Git modes.
+  and commit `dist/` during the pull request. Verification must remove `dist/`,
+  rebuild it, then require an empty scoped porcelain status, including
+  untracked files (for example,
+  `test -z "$(git status --porcelain=v1 --untracked-files=all -- dist)"`). This
+  catches changed, missing, stale, and newly generated outputs. If release-time
+  generation truly changes a tree, use a reviewed API commit implementation
+  that preserves deletions and Git modes.
 - A moving major tag (`@v1`) is intentionally mutable and separate from the
   immutable release tag (`v1.2.3`). Updating the major tag still needs a scoped
   release credential permitted by tag rules; commit-signature enforcement does

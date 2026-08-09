@@ -16,9 +16,14 @@ is limited to existing regular version manifests that a deterministic prepare
 step actually updates, through GitHub's App-signed commit path and without
 custom author/committer fields; do not pass `dist/**` to a plugin that cannot
 preserve deletions and Git modes. Because plugin v1.0.1 has no atomic
-expected-head precondition, use it only with an exclusive-writer policy for the
-full prepare interval; a preflight head check alone is insufficient. Restore a
+expected-head precondition, use it only with an exclusive-writer policy that
+starts before semantic-release release analysis and lasts through the plugin's
+API ref update; a preflight head check alone is insufficient. Restore a
 credential-free `origin` immediately afterward in an `if: always()` step.
+
+Bundle verification must remove `dist/`, rebuild it, and require an empty
+`git status --porcelain=v1 --untracked-files=all -- dist` result so changed,
+missing, stale, and newly generated outputs all fail the gate.
 
 The organization enforces immutable GitHub Releases. Because the compiled
 bundle is committed before tagging and no asset is appended after publication,

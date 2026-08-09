@@ -62,14 +62,16 @@ Use when aligning GitHub Actions release workflow files.
 - Add `id-token: write` only when the job uses npm trusted publishing,
   provider OIDC, or keyless provenance. Add `issues: write` and
   `pull-requests: write` only when semantic-release is configured to comment on
-  issues or pull requests. New `actions/attest` integrations also require
-  `attestations: write` and `artifact-metadata: write`:
+  issues or pull requests. Ordinary file attestations with `actions/attest`
+  also require `attestations: write`:
 
   ```yaml
   id-token: write
   attestations: write
-  artifact-metadata: write
   ```
+
+  Add `artifact-metadata: write` only when the integration actually creates an
+  artifact storage record, such as the applicable OCI registry flow.
 
 ## Runners
 
@@ -219,9 +221,10 @@ signed version commit. Pin the plugin to an exact version in `extra_plugins`.
   pass generated trees, executables, or symlinks.
 - The plugin reads the live branch head during `prepare` and does not expose an
   atomic expected-head precondition. Use v1.0.1 only when repository policy
-  prevents every other writer from advancing the default branch throughout
-  release preparation. Otherwise use an API commit implementation that rejects
-  any head other than the analyzed SHA; a preflight check alone is insufficient.
+  prevents every other writer from advancing the default branch from before
+  semantic-release starts release analysis through the plugin's API ref update.
+  Otherwise use an API commit implementation that rejects any head other than
+  the analyzed SHA; a preflight check alone is insufficient.
 - Pass the App installation token as step-scoped `GITHUB_TOKEN` or `GH_TOKEN`.
   Do not configure a GPG key or add an extra Linux writeback job.
 - Plugin v1.0.1 writes the App token into the checkout's `origin` URL while it

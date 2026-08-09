@@ -73,8 +73,9 @@ Default posture (pair each change with a live probe or write):
   commit action only when the release tool has no native signed path. Before a
   source writeback, reject superseded runs whose analyzed SHA is no longer the
   live default-branch head. That check narrows stale runs but is not atomic:
-  require either an exclusive-writer policy for the full prepare interval or an
-  API implementation with an expected-head precondition.
+  require either an exclusive-writer policy that starts before release analysis
+  and lasts through the API ref update, or an API implementation with an
+  expected-head precondition.
 
 ## Templates
 

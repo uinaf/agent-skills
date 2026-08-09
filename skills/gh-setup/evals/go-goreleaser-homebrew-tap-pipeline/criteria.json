@@ -8,7 +8,7 @@
     { "name": "GoReleaser clean build", "max_score": 6, "description": "GoReleaser runs release --clean from a full-SHA-pinned goreleaser-action." },
     { "name": "Tap naming", "max_score": 6, "description": "The cross-repository tap uses a homebrew- prefixed repository name." },
     { "name": "Scoped App token", "max_score": 8, "description": "Source Release operations use the source-repository workflow token; a separate short-lived App token names only the tap repository with Contents write. No combined source/tap write token or broad PAT is introduced." },
-    { "name": "Attestation permissions", "max_score": 6, "description": "The release job grants id-token: write, attestations: write, and artifact-metadata: write for actions/attest." },
+    { "name": "Attestation permissions", "max_score": 6, "description": "The release job grants id-token: write and attestations: write for file attestations, and does not grant artifact-metadata: write unless it creates an artifact storage record." },
     { "name": "Attest before publish", "max_score": 8, "description": "Release assets are attested while the release is draft, before explicit publication." },
     { "name": "Current cask publisher", "max_score": 8, "description": ".goreleaser.yaml uses homebrew_casks rather than deprecated brews and targets the tap repository." },
     { "name": "Native signed tap commit", "max_score": 12, "description": "The cask sets commit_author.use_github_app_token: true and does not set custom author/committer identity fields." },
