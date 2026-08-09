@@ -63,9 +63,9 @@ Default posture (pair each change with a live probe or write):
 - Preserve existing approval, status-check, signed-commit, actor, and tag restrictions unless the user explicitly asks to change them (`gh api repos/{owner}/{repo}/rulesets`).
 - Prefer signed-commit requirements on protected/default branches when the plan and automation path support them.
 - If direct pushes to `main` must remain allowed, prefer branch protection with conversation resolution rather than forcing all default-branch changes through PRs by accident.
-- For release bump commits, prefer a GitHub App-authenticated
-  `createCommitOnBranch` mutation so GitHub signs the commit; confirm the token
-  actor and branch/ruleset policy before relying on writeback automation.
+- For release bump commits, prefer a full-SHA-pinned API commit action with a
+  GitHub App token so GitHub signs the commit; confirm the token actor and
+  branch/ruleset policy before relying on writeback automation.
 
 ## Templates
 
