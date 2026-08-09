@@ -8,9 +8,8 @@ repo's collaboration model.
 
 ## Organization Defaults
 
-For repositories owned by an organization or personal account, inspect the
-public `<owner>/.github` repository before treating a missing local community
-file as a gap. GitHub's
+When the repository owner has a public `<owner>/.github` defaults repository,
+inspect it before treating a missing local community file as a gap. GitHub's
 [default community-health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file)
 act as fallbacks only when the target repository has no file of the same type;
 repository-local files take precedence. Defaults are not copied into target

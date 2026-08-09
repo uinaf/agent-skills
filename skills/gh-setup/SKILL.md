@@ -21,8 +21,8 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
    - `.github/ISSUE_TEMPLATE/`
    - `SECURITY.md`
    - `CONTRIBUTING.md`
-   - public `<owner>/.github` default community-health files when the repository
-     is organization- or account-owned
+   - the repository owner's public `<owner>/.github` default community-health
+     files, when that defaults repository exists
    - `docs/`
    - package, build, release, deploy, and verification scripts
 2. Check live GitHub settings before recommending changes: default branch, merge methods, branch/ruleset policy, Actions permissions, allowed GitHub Actions, Environments, Environment protection rules, secrets/vars locations, protected tags, and allowed push actors.
