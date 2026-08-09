@@ -97,9 +97,13 @@ if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
 
 Apply on **both** verification and release jobs. Skipping it on verification means the bump commit re-runs the verification suite for nothing; skipping it on release means the bump commit recursively triggers a new release.
 
-## Bot Identity
+## Signed Bot Commits
 
-Prefer a narrowly scoped GitHub App installation token for release GitHub writes. Mint it in the `release` Environment, authorize git with `gh auth setup-git`, then resolve the bot user id at runtime so noreply emails stay linked if the App is recreated:
+Prefer a narrowly scoped GitHub App installation token for release GitHub
+writes. For commits, use GraphQL `createCommitOnBranch`: GitHub authors the
+commit as the authenticated App, signs it, and returns signature metadata that
+the workflow can assert. This avoids storing a signing key and lets the App
+obey required-signature rules without a bypass.
 
 Use the current non-deprecated inputs declared by the pinned action version.
 
@@ -114,43 +118,25 @@ Use the current non-deprecated inputs declared by the pinned action version.
     repositories: ${{ github.event.repository.name }}
     permission-contents: write
 
-- name: Authorize release writes
+- name: Create signed version commit
   env:
     GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-  run: gh auth setup-git
-
-# GitHub links bot commits when the noreply email uses `<user-id>+<app-slug>[bot]@…`.
-- name: Resolve release bot identity
-  id: release-bot-identity
-  shell: bash
-  env:
-    GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-    APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
-  run: |
-    set -euo pipefail
-    user_id="$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)"
-    if [[ ! "$user_id" =~ ^[0-9]+$ ]]; then
-      echo "failed to resolve numeric bot user id for ${APP_SLUG}[bot]" >&2
-      exit 1
-    fi
-    echo "user_id=${user_id}" >> "$GITHUB_OUTPUT"
+  run: node scripts/create-signed-commit.ts "chore: sync version [skip ci]" package.json
 ```
 
-Set author metadata on the release step only (not job-wide):
-
-```yaml
-env:
-  GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
-  GIT_AUTHOR_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-  GIT_AUTHOR_EMAIL: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
-  GIT_COMMITTER_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-  GIT_COMMITTER_EMAIL: ${{ steps.release-bot-identity.outputs.user_id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
-```
-
-- The token actor and commit identity must agree. `GIT_AUTHOR_*`/`GIT_COMMITTER_*` with `GITHUB_TOKEN` still writes as `github-actions[bot]`.
-- When branch push restrictions or required signed commits block writeback, allow the App as an Integration bypass rather than disabling those rules for humans.
-- Do not hard-code a bot numeric user id in the workflow; resolve it from `/users/<app-slug>%5Bbot%5D`.
-- If a third-party action commits internally, verify it accepts author/committer inputs or honors `GIT_AUTHOR_*`/`GIT_COMMITTER_*`. Checkout tokens do not override hardcoded metadata.
+- Keep the mutation in a small repo-owned script with tests; workflow YAML
+  should only provide the App token, commit message, and intended paths.
+- Set `expectedHeadOid` to the checked-out HEAD so concurrent default-branch
+  updates fail closed instead of being overwritten.
+- Pass only intended additions/deletions and reject unexpected generated paths.
+- Query `signature { isValid wasSignedByGitHub signer { login } }` and fail the
+  job unless GitHub confirms a valid GitHub signature.
+- Do not provide custom author, committer, or signature fields; that disables
+  GitHub's authenticated bot-signing path.
+- Use `gh auth setup-git` only for remaining tag, ref, or asset operations that
+  actually require Git transport.
+- If a third-party action commits internally and cannot use this API, document
+  the incompatibility before granting the App an Integration bypass.
 - Org-specific Environment variable/secret names (`RELEASE_APP_*` above) are examples — keep whatever naming contract the owning org documents.
 
 ## Caches

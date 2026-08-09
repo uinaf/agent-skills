@@ -91,26 +91,6 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           permission-contents: write
 
-      - name: Authorize version-bump pushes
-        env:
-          GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-        run: gh auth setup-git
-
-      # GitHub links bot commits when the noreply email uses `{user-id}+{slug}[bot]@…`.
-      - name: Resolve release bot identity
-        id: release-bot-identity
-        env:
-          GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-          APP_SLUG: ${{ steps.release-bot.outputs.app-slug }}
-        run: |
-          set -euo pipefail
-          user_id="$(gh api "/users/${APP_SLUG}[bot]" --jq .id)"
-          if [[ ! "$user_id" =~ ^[0-9]+$ ]]; then
-            echo "failed to resolve numeric bot user id for ${APP_SLUG}[bot]" >&2
-            exit 1
-          fi
-          echo "user-id=${user_id}" >> "$GITHUB_OUTPUT"
-
       - name: Publish changed plugins
         env:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
@@ -122,16 +102,9 @@ jobs:
       - name: Commit published plugin versions
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         env:
+          EXPECTED_COMMIT_AUTHOR: ${{ steps.release-bot.outputs.app-slug }}[bot]
           GH_TOKEN: ${{ steps.release-bot.outputs.token }}
-          RELEASE_BOT_NAME: ${{ steps.release-bot.outputs.app-slug }}[bot]
-          RELEASE_BOT_EMAIL: ${{ steps.release-bot-identity.outputs.user-id }}+${{ steps.release-bot.outputs.app-slug }}[bot]@users.noreply.github.com
-        run: |
-          if git diff --quiet -- skills; then
-            exit 0
-          fi
-
-          git config user.name "${RELEASE_BOT_NAME}"
-          git config user.email "${RELEASE_BOT_EMAIL}"
-          git add skills
-          git commit -m "chore: sync published plugin versions [skip ci]"
-          git push
+        run: >-
+          node scripts/create-signed-commit.ts
+          "chore: sync published plugin versions [skip ci]"
+          skills
