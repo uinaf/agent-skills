@@ -1,6 +1,6 @@
 ---
 name: gh-setup
-description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch/ruleset policy, PR and security templates, Actions hardening, GitHub Environments, release workflows, and deploy workflows. Use when standardizing GitHub setup for repos, CI/CD, GitHub Actions, branch protection, release or publish pipelines, publishing versioned packages, or deploying running apps; route app deploy details to deploy references and package publish details to release references."
+description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch/ruleset policy, PR and security templates, Dependabot, Actions hardening, GitHub Environments, release workflows, and deploy workflows. Use when standardizing GitHub setup for repos, dependency updates, CI/CD, GitHub Actions, branch protection, release or publish pipelines, publishing versioned packages, or deploying running apps; route app deploy details to deploy references and package publish details to release references."
 disable-model-invocation: true
 ---
 
@@ -31,6 +31,8 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
    - `gh repo view --json defaultBranchRef,mergeCommitAllowed,rebaseMergeAllowed,squashMergeAllowed,deleteBranchOnMerge`
    - `gh api repos/{owner}/{repo}/actions/permissions`
    - `gh api repos/{owner}/{repo}/private-vulnerability-reporting`
+   - `gh api repos/{owner}/{repo}/vulnerability-alerts`
+   - `gh api repos/{owner}/{repo}/automated-security-fixes`
    - `gh api repos/{owner}/{repo}/environments`
    - `gh api repos/{owner}/{repo}/rulesets`
 3. Classify the repo:
@@ -107,6 +109,21 @@ Hard defaults:
 - Run repository-history secret detection in a dedicated GitHub Actions workflow.
 - Keep workflow YAML boring: prefer maintained actions and repo-owned commands over large inline shell/JavaScript blocks.
 - Keep untrusted PR caches separate from privileged push, release, deploy, signing, or publish caches.
+
+## Dependency Updates
+
+- Enable vulnerability alerts and automatic Dependabot security updates broadly; they do not require a `dependabot.yml`:
+
+  ```bash
+  gh api --method PUT repos/{owner}/{repo}/vulnerability-alerts
+  gh api --method PUT repos/{owner}/{repo}/automated-security-fixes
+  ```
+
+- Add `.github/dependabot.yml` only when the repository contains a supported package manifest, lockfile, or GitHub Actions workflow. Do not add inert boilerplate to content-only or empty repositories.
+- Match each update entry to the actual ecosystem and manifest directory. Include `github-actions` only when workflows exist.
+- Prefer a low-noise default for scheduled version updates: monthly cadence, one-day cooldown, and separate patch/minor and major groups. Preserve repo-specific release or compatibility constraints.
+- Treat Dependabot PRs like ordinary advisory maintenance unless the repository already requires PR checks. Do not introduce PR-only rules or mandatory checks merely to enable dependency updates.
+- Read back both settings after writes and confirm the config exists on the default branch. Run the repository's normal validation when adding or changing the config.
 
 ## Release Route
 
