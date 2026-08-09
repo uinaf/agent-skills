@@ -21,6 +21,8 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
    - `.github/ISSUE_TEMPLATE/`
    - `SECURITY.md`
    - `CONTRIBUTING.md`
+   - public `<owner>/.github` default community-health files when the repository
+     is organization- or account-owned
    - `docs/`
    - package, build, release, deploy, and verification scripts
 2. Check live GitHub settings before recommending changes: default branch, merge methods, branch/ruleset policy, Actions permissions, allowed GitHub Actions, Environments, Environment protection rules, secrets/vars locations, protected tags, and allowed push actors.
@@ -69,6 +71,8 @@ Read [templates](references/templates.md) when creating or aligning PR templates
 
 Default posture:
 
+- Prefer public `<owner>/.github` fallback files for genuinely shared community
+  policy; keep visibility-specific or repository-specific guidance local.
 - PR templates should ask for summary, changed surfaces, risks, verification, and complexity.
 - `SECURITY.md` should be private-first and avoid public issue reporting for vulnerabilities.
 - On public repos, enable GitHub private vulnerability reporting before (or with) shipping that `SECURITY.md`, so the documented route works.

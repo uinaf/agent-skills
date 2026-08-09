@@ -6,6 +6,38 @@ This reference owns baseline existence and shape. General docs cleanup may keep
 these files accurate, but the decision to introduce them should follow the
 repo's collaboration model.
 
+## Organization Defaults
+
+For repositories owned by an organization or personal account, inspect the
+public `<owner>/.github` repository before treating a missing local community
+file as a gap. GitHub's
+[default community-health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file)
+act as fallbacks only when the target repository has no file of the same type;
+repository-local files take precedence. Defaults are not copied into target
+repositories or included in their clones, packages, or downloads.
+
+Use shared defaults only for policy that is true across every target
+repository. A conservative starting set is:
+
+- `SECURITY.md`
+- `CONTRIBUTING.md`
+- `PULL_REQUEST_TEMPLATE.md`
+
+Keep these constraints explicit:
+
+- Creating `<owner>/.github` is a public change; obtain authorization before
+  creating it or changing shared policy.
+- A shared `SECURITY.md` must work for both public and private repositories.
+  Prefer GitHub private vulnerability reporting when the target exposes it and
+  fall back to an existing private maintainer channel otherwise.
+- Any local issue-template file or config disables the shared issue-template
+  set for that repository. Add shared issue templates only when the triage
+  contract is truly universal.
+- Do not use the defaults repository for licenses; licenses must remain in each
+  repository so clones and packages include them.
+- Do not add a default code of conduct without an actual enforcement and
+  contact owner.
+
 ## Pull Request Template
 
 Use a compact template for non-trivial repos:
