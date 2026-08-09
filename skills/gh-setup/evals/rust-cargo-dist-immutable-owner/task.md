@@ -16,12 +16,14 @@ Cargo-dist may generate the Homebrew formula, but its built-in Homebrew
 publisher uses an ordinary local commit. Configure a custom reusable
 post-announce job that commits the generated formula through a full-SHA-pinned
 signed API action with a short-lived GitHub App token. The recovery path must
-reconcile an existing immutable release and missing tap update by exact tag.
-Because plugin v1.0.1 has no atomic expected-head precondition, enforce an
-exclusive-writer policy for the default branch from before semantic-release
-starts release analysis through the plugin's API ref update; a superseded-run
-preflight alone is insufficient. Restore a credential-free `origin` immediately
-after semantic-release in an `if: always()` step.
+reconcile an existing immutable release and missing tap update by exact tag. A
+superseded-run preflight and Actions concurrency are not an atomic branch lock.
+Use plugin v1.0.1 only if a concrete external branch lease blocks every merge
+and direct push from before semantic-release starts release analysis through
+the plugin's API ref update. Otherwise use a full-SHA-pinned App-signed API
+integration with the analyzed SHA as its expected head. If plugin v1.0.1 is
+selected, restore a credential-free `origin` immediately after semantic-release
+in an `if: always()` step.
 Use a repo-owned `[skip release]` marker and branch-job guards for the version
 commit; GitHub's recognized `[skip ci]` would also suppress cargo-dist's tag
 workflow.

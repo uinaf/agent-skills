@@ -18,6 +18,12 @@ Release recovery must be state-specific: create or resume the mutable draft for
 the exact trusted tag when publication is incomplete, but skip every asset
 mutation when that Release is already published and immutable. A missing draft
 must not make an existing tag unrecoverable, and every recovery rereads parity.
+Enumerate every tag pointing at `HEAD`, filter by the configured stable release
+tag format, and require exactly one eligible tag; do not let `git describe`
+choose among multiple tags.
+Because the REST by-tag endpoint omits drafts, inspect an authenticated,
+paginated Releases listing before deciding the exact tag is absent; API failure
+or duplicate exact-tag state must fail closed.
 
 ## Output Specification
 

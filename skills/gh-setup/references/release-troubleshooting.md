@@ -123,7 +123,13 @@ Common failure modes when standing up or operating this pipeline. Check here bef
 ## Marketplace consumers pinning `@v1` see no updates
 
 - The moving major tag was not force-updated after the release.
-- Fix: use a maintained semantic-release major-tag plugin, or a small repo-owned `update-major-action-tag` action/script with tests (see [release-targets.md](release-targets.md) -> GitHub Action). Verify by clicking the tag on the GitHub release page — it should match the latest `v1.x.y`.
+- Fix: use a maintained semantic-release major-tag plugin, or a small tested
+  repo-owned `update-major-action-tag` action (see
+  [release-targets.md](release-targets.md) -> GitHub Action). Require the
+  candidate to be the highest eligible published stable SemVer in that major
+  line, reject an unknown or newer pointer, and update against the observed
+  pointer. Verify that the moving tag resolves to the same commit as the latest
+  eligible `v1.x.y` Release.
 
 ## "GH_TOKEN env or githubToken provided" with semantic-release action v6
 

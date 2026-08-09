@@ -220,10 +220,11 @@ signed version commit. Pin the plugin to an exact version in `extra_plugins`.
   not emit deletions and creates every tree entry with mode `100644`; do not
   pass generated trees, executables, or symlinks.
 - The plugin reads the live branch head during `prepare` and does not expose an
-  atomic expected-head precondition. Use v1.0.1 only when repository policy
-  prevents every other writer from advancing the default branch from before
+  atomic expected-head precondition. Use v1.0.1 only with a concrete external
+  branch lease that blocks every merge and direct push from before
   semantic-release starts release analysis through the plugin's API ref update.
-  Otherwise use an API commit implementation that rejects any head other than
+  Actions concurrency serializes release jobs but is not that lease. Otherwise
+  use an App-signed API commit implementation that rejects any head other than
   the analyzed SHA; a preflight check alone is insufficient.
 - Pass the App installation token as step-scoped `GITHUB_TOKEN` or `GH_TOKEN`.
   Do not configure a GPG key or add an extra Linux writeback job.

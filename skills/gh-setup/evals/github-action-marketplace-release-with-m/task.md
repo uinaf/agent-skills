@@ -15,11 +15,13 @@ Environment provides `RELEASE_APP_CLIENT_ID` and
 is limited to existing regular version manifests that a deterministic prepare
 step actually updates, through GitHub's App-signed commit path and without
 custom author/committer fields; do not pass `dist/**` to a plugin that cannot
-preserve deletions and Git modes. Because plugin v1.0.1 has no atomic
-expected-head precondition, use it only with an exclusive-writer policy that
-starts before semantic-release release analysis and lasts through the plugin's
-API ref update; a preflight head check alone is insufficient. Restore a
-credential-free `origin` immediately afterward in an `if: always()` step.
+preserve deletions and Git modes. A preflight head check and Actions concurrency
+are not an atomic branch lock. Use plugin v1.0.1 only if a concrete external
+branch lease blocks every merge and direct push from before semantic-release
+starts release analysis through the plugin's API ref update. Otherwise use a
+full-SHA-pinned App-signed API integration with the analyzed SHA as its expected
+head. If plugin v1.0.1 is selected, restore a credential-free `origin`
+immediately afterward in an `if: always()` step.
 
 Bundle verification must remove `dist/`, rebuild it, and require an empty
 `git status --porcelain=v1 --untracked-files=all -- dist` result so changed,
@@ -34,7 +36,10 @@ tag all resolve to the intended release. A retry must inspect existing state and
 must not mutate the published release. A later recovery run must also backfill
 a missing metadata-only GitHub Release or repair the moving major tag from the
 existing trusted tag even though semantic-release no longer reports a new
-release.
+release. Before moving `v<major>`, prove the candidate is the highest eligible
+published stable SemVer in that major line, reject an unknown or newer current
+pointer, and update against the observed pointer so stale recovery cannot roll
+consumers backward.
 
 ## Output Specification
 

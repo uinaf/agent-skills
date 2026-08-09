@@ -131,12 +131,24 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 - name: Detect release tag at HEAD
   id: tag
   run: |
-    if tag="$(git describe --exact-match --tags HEAD 2>/dev/null)"; then
-      echo "tag=$tag" >> "$GITHUB_OUTPUT"
-      echo "present=true" >> "$GITHUB_OUTPUT"
-    else
+    mapfile -t release_tags < <(
+      git tag --points-at HEAD |
+        grep -E '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' || true
+    )
+    case "${#release_tags[@]}" in
+    0)
       echo "present=false" >> "$GITHUB_OUTPUT"
-    fi
+      ;;
+    1)
+      echo "tag=${release_tags[0]}" >> "$GITHUB_OUTPUT"
+      echo "present=true" >> "$GITHUB_OUTPUT"
+      ;;
+    *)
+      printf 'multiple stable release tags point at HEAD: %s\n' \
+        "${release_tags[*]}" >&2
+      exit 1
+      ;;
+    esac
 
 - name: Inspect GitHub Release state
   if: steps.tag.outputs.present == 'true'
@@ -145,18 +157,29 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     RELEASE_TAG: ${{ steps.tag.outputs.tag }}
   run: |
-    endpoint="repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}"
-    error_file="${RUNNER_TEMP}/release-state-error"
-    if release_json="$(gh api "$endpoint" 2>"$error_file")"; then
-      echo "exists=true" >> "$GITHUB_OUTPUT"
-      echo "published=$(jq -r '(.draft == false)' <<<"$release_json")" >> "$GITHUB_OUTPUT"
-    elif grep -q '(HTTP 404)' "$error_file"; then
+    releases_json="$(
+      gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" |
+        jq -s 'add'
+    )"
+    matches="$(
+      jq -c --arg tag "$RELEASE_TAG" \
+        '[.[] | select(.tag_name == $tag)]' <<<"$releases_json"
+    )"
+    case "$(jq 'length' <<<"$matches")" in
+    0)
       echo "exists=false" >> "$GITHUB_OUTPUT"
       echo "published=false" >> "$GITHUB_OUTPUT"
-    else
-      cat "$error_file" >&2
+      ;;
+    1)
+      release_json="$(jq -c '.[0]' <<<"$matches")"
+      echo "exists=true" >> "$GITHUB_OUTPUT"
+      echo "published=$(jq -r '(.draft == false)' <<<"$release_json")" >> "$GITHUB_OUTPUT"
+      ;;
+    *)
+      echo "multiple Releases use ${RELEASE_TAG}" >&2
       exit 1
-    fi
+      ;;
+    esac
 
 - name: Backfill missing draft for the trusted tag
   if: steps.tag.outputs.present == 'true' && steps.release-state.outputs.exists == 'false'
@@ -210,9 +233,16 @@ Two-step release job (mint a short-lived GitHub App installation token first; se
 - Configure GoReleaser's `release` block with `draft: true`,
   `use_existing_draft: true`, `mode: keep-existing`, and
   `replace_existing_artifacts: true`. Resolve `steps.tag` and
-  `steps.release-state` from the exact tag at `HEAD` plus a Releases API probe
-  that distinguishes a confirmed 404 from other failures; this makes draft
-  recovery and already-published retries explicit.
+  `steps.release-state` from the exact tag at `HEAD` plus an authenticated,
+  paginated Releases listing filtered to the exact tag. The by-tag REST
+  endpoint omits drafts, so it cannot decide whether to backfill. Listing
+  failures stop the job; zero exact matches means absent, one means resume or
+  skip by its draft state, and duplicates are inconsistent.
+- Match the tag filter to the repository's configured semantic-release
+  `tagFormat`. Enumerate every tag at `HEAD` and require exactly one eligible
+  stable release tag before lookup or backfill; `git describe` is ambiguous
+  when multiple tags share a commit. A manual recovery input must be validated
+  against the same format and checked out at that exact tag.
 - Gate downstream tap, deployment, and parity work on that durable exact-tag
   state, not only a transient publisher output. A later recovery run must be
   able to reconcile missing downstream state without mutating the published
@@ -524,10 +554,13 @@ Plugins:
   ```
 
   Derive `release-state` from the exact trusted tag and GitHub Release, not only
-  semantic-release's transient output. The local action should idempotently
-  update `v<major>` to the release commit and push it with the release token. A
-  recovery run must repair a missing major tag after publication. If a
-  maintained semantic-release major-tag plugin fits the repo, prefer that.
+  semantic-release's transient output. Before updating `v<major>`, prove the
+  candidate is the highest eligible published stable SemVer in that major line.
+  The local action must fail closed if the existing pointer is unknown or newer,
+  and update with a lease against the observed pointer so a stale recovery run
+  cannot roll consumers backward. A recovery run may repair a missing or older
+  pointer after publication. If a maintained semantic-release major-tag plugin
+  enforces the same monotonic contract, prefer that.
 
 - The action's `action.yml` `runs:` block must reference the **bundled**
   entrypoint (`dist/index.js`), not a TypeScript source file. Build and commit
