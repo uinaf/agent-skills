@@ -11,7 +11,7 @@ beside the product.
 | `uinaf/skills` | `skills/*` | `.github/workflows/publish-skills.yml` (lint gate, then publish) |
 | `uinaf/attach` | `skills/attach-cli` | `.github/workflows/publish-skill.yml` via `tessl-publish-action` (`review-mode: lint`) |
 | `uinaf/autoreview` | `skills/autoreview` | same pattern |
-| `uinaf/slopomatic` | `skills/slopomatic` | same pattern |
+| `uinaf/slopshipper` | `skills/slopshipper` | same pattern |
 | `uinaf/intake` | `skills/uinaf-intake` | PR lint via `lint-skill.yml`; publish via `publish-skill.yml` + `tessl-publish-action` (`review-mode: lint`) |
 
 Do not treat harness-local copies under `~/.agents` or consumer
