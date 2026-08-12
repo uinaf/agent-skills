@@ -18,8 +18,8 @@ importers:
         specifier: 1.7.12
         version: 1.7.12
       tessl:
-        specifier: 0.94.0
-        version: 0.94.0
+        specifier: 0.95.0
+        version: 0.95.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -178,8 +178,8 @@ packages:
     resolution: {integrity: sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==}
     engines: {node: '>=18'}
 
-  tessl@0.94.0:
-    resolution: {integrity: sha512-4l45DkL8UO8usIjOeERKJ93KVihin8hTFRIsT93A4RZB6/jzmiNpR/2KIHj80q7UqN0rBCOPMZ6uAPkNIwkTgQ==}
+  tessl@0.95.0:
+    resolution: {integrity: sha512-UMl8bZnQagejPL8rrTWCvXHo42fyLFFkgJJl+BQ4MdJOF/hZ7cpZyMop3pWkphmde+6d16il1UJM4gMYKWH53g==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -288,7 +288,7 @@ snapshots:
       minizlib: 3.1.0
       yallist: 5.0.0
 
-  tessl@0.94.0: {}
+  tessl@0.95.0: {}
 
   typescript@7.0.2:
     optionalDependencies:

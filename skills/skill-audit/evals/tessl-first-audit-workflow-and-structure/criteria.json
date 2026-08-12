@@ -10,7 +10,7 @@
     {
       "name": "Correct single-skill command",
       "max_score": 10,
-      "description": "audit-log.sh contains a repository-local locked Tessl invocation targeting the single skill folder: at least `pnpm exec tessl plugin lint`, and for this score-seeking formal audit also `pnpm exec tessl review run` with `--json`"
+      "description": "audit-log.sh records `pnpm exec tessl --version` and uses the repository-owned Tessl launcher against the single skill folder: at least `pnpm exec tessl plugin lint`, and for this score-seeking formal audit also `pnpm exec tessl review run` with `--json`"
     },
     {
       "name": "Score reported",

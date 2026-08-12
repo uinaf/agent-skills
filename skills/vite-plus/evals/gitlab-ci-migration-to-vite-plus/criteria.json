@@ -40,12 +40,12 @@
     {
       "name": "Template refs aligned",
       "max_score": 10,
-      "description": "The remote template ref and `setup-ref` input are the same release or commit, including when both use the template's `v1` default"
+      "description": "The remote template URL and `setup-ref` input are both pinned to exact `v1.17.0`; the solution does not use the frozen moving `v1` ref"
     },
     {
       "name": "Responsibility boundary documented",
       "max_score": 10,
-      "description": "Migration notes explain that setup-vp owns Vite+ and dependency installation while the GitLab job owns Node and cache configuration"
+      "description": "The include sets `node-manager` to `false`, and migration notes explain that setup-vp owns Vite+ and dependency installation while the GitLab image owns Node and the job owns cache configuration"
     }
   ]
 }

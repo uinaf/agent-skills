@@ -152,7 +152,7 @@ dry-run cannot exercise GitHub's immutable publication boundary.
 
 ## Checkout
 
-- Both jobs: `actions/checkout@<full-sha> # v6.0.2` with `fetch-depth: 0`. Semantic-release walks history to compute the next version; a shallow clone breaks it.
+- Both jobs: `actions/checkout@<full-sha> # v7.0.1` with `fetch-depth: 0`. Semantic-release walks history to compute the next version; a shallow clone breaks it.
 - Keep `persist-credentials: false` through checkout, install, build, and pack
   steps, especially before package-manager lifecycle scripts run. Introduce a
   short-lived GitHub App token only at the release boundary. Prefer API-backed
@@ -356,21 +356,21 @@ For Node / TypeScript workflows, check in `.node-version` with the latest active
 
 ```yaml
 # Node / TypeScript
-- uses: actions/setup-node@<full-sha> # v6.4.0
+- uses: actions/setup-node@<full-sha> # v7.0.0
   with: { node-version-file: ".node-version" }
 - run: npm ci
 ```
 
 ```yaml
 # Node via the Vite+ toolchain
-- uses: voidzero-dev/setup-vp@<full-sha> # v1.10.0
+- uses: voidzero-dev/setup-vp@<full-sha> # v1.17.0
   with: { node-version-file: ".node-version", cache: false, run-install: false }
 - run: vp install
 ```
 
 ```yaml
 # Go CLI
-- uses: jdx/mise-action@<full-sha> # v4.0.1
+- uses: jdx/mise-action@<full-sha> # v4.2.4
 - run: mise run verify
 ```
 
@@ -378,6 +378,6 @@ For Node / TypeScript workflows, check in `.node-version` with the latest active
 # Swift (CocoaPods + SwiftPM)
 - uses: maxim-lobanov/setup-xcode@<full-sha> # v1.7.0
   with: { xcode-version: latest-stable }
-- uses: ruby/setup-ruby@<full-sha> # v1.310.0
+- uses: ruby/setup-ruby@<full-sha> # v1.321.0
   with: { bundler-cache: false }
 ```

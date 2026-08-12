@@ -39,7 +39,7 @@ Pin high-trust release, publish, upload, signing, and deploy actions to full com
 Example:
 
 ```yaml
-- uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+- uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
 ```
 
 Before committing a pin, verify the SHA resolves upstream. Dependabot can update SHA-pinned GitHub Actions when the version comment is accurate.

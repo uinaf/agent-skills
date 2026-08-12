@@ -79,9 +79,9 @@ workflow-hardening:
   permissions:
     contents: read
   steps:
-    - uses: actions/checkout@<full-sha> # v6.0.2
+    - uses: actions/checkout@<full-sha> # v7.0.1
     - run: actionlint
-    - uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+    - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
       with:
         advanced-security: false
         annotations: true
@@ -129,7 +129,7 @@ jobs:
       sha: ${{ steps.resolve.outputs.sha }}
       environment: ${{ steps.resolve.outputs.environment }}
     steps:
-      - uses: actions/checkout@<full-sha> # v6.0.2
+      - uses: actions/checkout@<full-sha> # v7.0.1
         with:
           fetch-depth: 0
       - id: resolve
@@ -200,7 +200,7 @@ jobs:
 ## Checkout
 
 ```yaml
-- uses: actions/checkout@<full-sha> # v6.0.2
+- uses: actions/checkout@<full-sha> # v7.0.1
   with:
     fetch-depth: 0      # required for paths-filter and turbo --affected
     persist-credentials: false  # add write credentials only at the exact push step, if one exists
@@ -218,7 +218,7 @@ Two patterns; pick by repo shape.
 
 ```yaml
 - id: filter
-  uses: dorny/paths-filter@<full-sha> # v4.0.1
+  uses: dorny/paths-filter@<full-sha> # v4.0.3
   with:
     filters: |
       web:
@@ -333,7 +333,7 @@ For Node deploy workflows, check in `.node-version` with the latest active LTS l
 For a workspace using the Vite+ toolchain:
 
 ```yaml
-- uses: voidzero-dev/setup-vp@<full-sha> # v1.10.0
+- uses: voidzero-dev/setup-vp@<full-sha> # v1.17.0
   with:
     version: ${{ env.VITE_PLUS_VERSION }}
     node-version-file: .node-version
@@ -341,30 +341,33 @@ For a workspace using the Vite+ toolchain:
 - run: vp env current
 ```
 
-For a plain pnpm + Node workspace:
+For a plain pnpm 11+ workspace, let `packageManager` and
+`devEngines.runtime` in `package.json` own the pnpm and Node versions. The
+successor action installs both and can cache and install in one step:
 
 ```yaml
-- uses: pnpm/action-setup@<full-sha> # v6.0.8
-  with: { run_install: false }
-- uses: actions/setup-node@<full-sha> # v6.4.0
+- uses: pnpm/setup@<full-sha> # v2.0.2
   with:
-    node-version-file: .node-version
-    cache: pnpm
+    cache: true
+    install: false
 - run: pnpm install --frozen-lockfile
 ```
 
-Install pnpm before asking `setup-node` to cache its store; the cache integration invokes the selected package manager to discover that store.
+`pnpm/setup` supports pnpm 11 and newer and can install Node, Bun, or Deno from
+`devEngines.runtime`. For pnpm 10 and older, keep `pnpm/action-setup` followed by
+`actions/setup-node` when setup-node owns the pnpm-store cache; pnpm must be on
+`PATH` before setup-node asks it for the store directory.
 
 For a container build (api/backend lane), push to the repo's chosen registry with the narrowest write token or OIDC-supported identity available:
 
 ```yaml
-- uses: docker/setup-buildx-action@<full-sha> # v4.1.0
-- uses: docker/login-action@<full-sha> # v4.2.0
+- uses: docker/setup-buildx-action@<full-sha> # v4.2.0
+- uses: docker/login-action@<full-sha> # v4.6.0
   with:
     registry: ${{ vars.CONTAINER_REGISTRY }}
     username: ${{ vars.CONTAINER_REGISTRY_USER }}
     password: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
-- uses: docker/build-push-action@<full-sha> # v7.2.0
+- uses: docker/build-push-action@<full-sha> # v7.3.0
   with:
     context: .
     push: true

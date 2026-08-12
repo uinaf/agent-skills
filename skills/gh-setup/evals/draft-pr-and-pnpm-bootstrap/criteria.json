@@ -1,5 +1,5 @@
 {
-  "context": "Tests whether the agent correctly distinguishes pull-request activity types from draft state and orders pnpm setup before setup-node's pnpm cache integration.",
+  "context": "Tests whether the agent correctly distinguishes pull-request activity types from draft state and replaces a legacy pnpm 11 bootstrap with the pnpm/setup successor that owns the declared package manager, runtime, install, and cache.",
   "type": "weighted_checklist",
   "checklist": [
     {
@@ -23,14 +23,14 @@
       "description": "The trigger still handles opened, synchronize, and reopened pull-request activity"
     },
     {
-      "name": "pnpm installed first",
+      "name": "Current pnpm setup action",
       "max_score": 20,
-      "description": "pnpm/action-setup runs before actions/setup-node when setup-node is configured with `cache: pnpm`"
+      "description": "The workflow replaces both pnpm/action-setup and actions/setup-node with pnpm/setup pinned to full commit `84cb39b217b10273981911c288cd62326dc7c6d2` and the same-line v2.0.2 version comment"
     },
     {
-      "name": "pnpm cache retained",
+      "name": "Declared runtime and cache retained",
       "max_score": 10,
-      "description": "actions/setup-node still configures the Node version and enables the pnpm store cache after pnpm is available"
+      "description": "pnpm/setup resolves pnpm from packageManager and Node from devEngines.runtime without duplicating those versions in the workflow, and enables its pnpm store cache"
     },
     {
       "name": "Frozen install",
@@ -45,7 +45,7 @@
     {
       "name": "Minimal correction",
       "max_score": 5,
-      "description": "The solution changes only the draft gate and pnpm bootstrap order without unrelated workflow redesign"
+      "description": "The solution changes only the draft gate and replaces the obsolete pnpm bootstrap with its direct successor without unrelated workflow redesign"
     }
   ]
 }

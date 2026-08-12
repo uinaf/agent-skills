@@ -56,11 +56,12 @@ pnpm exec tessl plugin lint "$skill_dir"
 
 For a **routine audit**, stop there plus the scorecard. Do not burn review credits.
 
-For a **formal audit**, when the repo owns a locked Tessl dependency and credits
-are available, run one narrow cloud review and capture score, summary, and
-suggestions before proposing edits:
+For a **formal audit**, when the repo owns a Tessl launcher or package dependency
+and credits are available, record the effective CLI version, run one narrow
+cloud review, and capture score, summary, and suggestions before proposing edits:
 
 ```bash
+pnpm exec tessl --version
 pnpm exec tessl review run --workspace uinaf --threshold 0 --json "$skill_dir"
 ```
 

@@ -13,7 +13,7 @@ Produce:
 - a complete updated `.gitlab-ci.yml`
 - `migration-notes.md` explaining which responsibilities belong to the template and which remain job-owned
 
-Keep the remote template ref and its `setup-ref` aligned. Do not add an explicit `vp install` while the template's default `run-install` remains enabled.
+Pin the remote template and its `setup-ref` to exact `v1.17.0`, set `node-manager` to `false` because the Node 24 image owns the runtime, and do not add an explicit `vp install` while the template's default `run-install` remains enabled.
 
 ## Input Files
 

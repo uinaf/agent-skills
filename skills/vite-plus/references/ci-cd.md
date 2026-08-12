@@ -27,6 +27,7 @@ Prefer the documented Vite+ action:
 | `version-file` | Resolve the Vite+ release from `package.json`, `pnpm-workspace.yaml`, or `.yarnrc.yml`; default auto-detection reads the local `vite-plus` dependency/lockfile when possible. |
 | `node-version` | Node.js version to install via `vp env use`. |
 | `node-version-file` | Read the Node.js version from `.node-version`, `.nvmrc`, `.tool-versions`, or `package.json`. Preserve the repo's existing owner. |
+| `node-manager` | Set `false` when Node is already owned by another setup action, tool manager, or runner image; leave unset to let the Vite+ installer decide. It cannot be `false` with `node-version` or `node-version-file`. |
 | `working-directory` | Project root for path resolution and lockfile detection. |
 | `run-install` | Run `vp install` after setup. Boolean or YAML config; defaults to `true`. |
 | `sfw` | Opt in to wrapping `vp install` with Socket Firewall Free. Leave disabled unless the repo intentionally adopts that supply-chain gate. |
@@ -39,6 +40,7 @@ Prefer the documented Vite+ action:
 - Prefer `voidzero-dev/setup-vp` over hand-rolled Node/Corepack bootstrapping unless the repo has a proven exception. In repos that pin Actions, use a full commit SHA with a same-line exact version comment and a `github-actions` Dependabot entry so updates stay reviewable.
 - Treat `setup-vp` as the CI `vp` provider. Do not add `GITHUB_PATH`, `node_modules/.bin`, `pnpm exec vp`, or similar PATH workarounds to prefer the project binary; if plain `vp` fails under the official action, verify against `setup-vp` or the official installer before changing workflow shape.
 - Prefer `setup-vp`'s built-in Node and package-manager bootstrap over adding separate CI-time `vp env` setup steps unless the repo has a specific environment need the action does not cover.
+- When another action, tool manager, or runner image already owns Node, set `node-manager: false` so Vite+ skips its Node shims and uses that runtime. Do not combine it with `node-version` or `node-version-file`.
 - Prefer `setup-vp`'s default install step over a separate `vp install` when Vite+ is the tool owner. Set `run-install: false` only when the workflow needs to pass custom install arguments or control install as a separate step.
 - Preserve an existing Node declaration instead of creating `.node-version` only for CI. Pass the repo-owned `.node-version`, `.nvmrc`, `.tool-versions`, or `package.json` path through `node-version-file`.
 - When neither `version` nor `version-file` is set, current `setup-vp` tries to resolve the Vite+ version from the checked-out project's `vite-plus` dependency and lockfile before falling back to `latest`; watch warnings because an unresolved range or alias means CI may not be using the intended project version.
@@ -56,7 +58,10 @@ Use the reusable `setup-vp` template instead of rebuilding its bootstrap in each
 
 ```yaml
 include:
-  - remote: "https://raw.githubusercontent.com/voidzero-dev/setup-vp/v1/gitlab/setup-vp.yml"
+  - remote: "https://raw.githubusercontent.com/voidzero-dev/setup-vp/v1.17.0/gitlab/setup-vp.yml"
+    inputs:
+      setup-ref: "v1.17.0"
+      node-manager: "false"
 
 test:
   extends: .setup-vp
@@ -67,9 +72,9 @@ test:
     - vp build
 ```
 
-- The template installs Vite+ and, by default, runs `vp install`; it does not install Node.js or configure GitLab caches. Provide Node through the job image or runner and configure cache policy in the job. Its `sfw` input is the same explicit opt-in as the GitHub Action.
+- The template installs Vite+ and, by default, runs `vp install`; it does not install Node.js or configure GitLab caches. Provide Node through the job image or runner, set `node-manager: "false"` so Vite+ uses that runtime, and configure cache policy in the job. Its `sfw` input is the same explicit opt-in as the GitHub Action.
 - The runner must be Unix-like with Bash and either `curl` or `wget`.
-- For reproducible CI, pin the remote template and its `setup-ref` input to the same release or commit instead of mixing refs.
+- The moving `v1` template ref is frozen at `v1.15.0`. For reproducible and current CI, pin the remote template and its `setup-ref` input to the same exact release or commit instead of using `v1` or mixing refs.
 - Keep registry authentication and secret-bearing release behavior scoped to the job. The GitLab template supports the same `registry-url`, `scope`, and `run-install` responsibilities, but it does not replace project-specific publish or deploy steps.
 
 ## Guardrails

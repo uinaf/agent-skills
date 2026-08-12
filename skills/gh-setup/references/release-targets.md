@@ -14,7 +14,7 @@ and a real release before reusing it.
 
 Default to npm Trusted Publishing from GitHub Actions. Configure the package on npm with the GitHub organization/repo, workflow filename, and `release` Environment when used; then grant the release job `id-token: write` and remove `NPM_TOKEN`. Trusted publishing uses short-lived OIDC credentials and automatically produces npm provenance for public packages from public repos.
 
-Use the npm CLI when enabling trusted publishing for one or many packages. `npm trust` requires npm `11.10.0` or newer; use the local npm when it meets that floor, otherwise pin the operator command with `npx -y npm@^11.10.0`. Login once with a package owner/admin account, then register each package's GitHub workflow identity:
+Use the npm CLI when enabling trusted publishing for one or many packages. The current permission-scoped `npm trust` commands require npm `11.15.0` or newer; use the local npm when it meets that floor, otherwise pin the operator command with `npx -y npm@^11.15.0`. Login once with a package owner/admin account, then register each package's GitHub workflow identity:
 
 ```bash
 npm login
@@ -46,7 +46,7 @@ Plugins:
 Workflow step:
 
 ```yaml
-- uses: actions/setup-node@<full-sha> # v6.4.0
+- uses: actions/setup-node@<full-sha> # v7.0.0
   with:
     node-version-file: ".node-version"
     package-manager-cache: false
@@ -413,7 +413,7 @@ permissions:
     permission-pull-requests: write
 
 - uses: dtolnay/rust-toolchain@<full-sha> # stable
-- uses: release-plz/action@<full-sha> # v0.5.129
+- uses: release-plz/action@<full-sha> # v0.5.131
   env:
     GITHUB_TOKEN: ${{ steps.release-bot.outputs.token }}
 ```

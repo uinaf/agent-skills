@@ -74,13 +74,13 @@ Only apply performance primitives when they map to a real bottleneck, profiler e
 Run the repo's normal guardrails first. When the optional React Doctor CLI is available, add:
 
 ```bash
-npx react-doctor@latest --verbose --diff
+npx react-doctor@latest --verbose --scope changed
 ```
 
 Use its explanation mode for unclear diagnostics or suppressions:
 
 ```bash
-npx react-doctor@latest --explain src/App.tsx:42
+npx react-doctor@latest why src/App.tsx:42
 ```
 
 Then exercise the changed component or hook. Inspect for derived-state effects, fetch-in-effect, missing cleanup, stale closure capture, async work without cleanup, exhaustive-dependency violations, and giant components created by centralizing too much orchestration.

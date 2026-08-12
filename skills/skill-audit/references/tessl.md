@@ -39,22 +39,35 @@ every skill that is reviewed.
 Use this precedence:
 
 1. repository review or validation wrapper
-2. repository package script that invokes a locked Tessl dependency
-3. locked repository-local Tessl executable
+2. repository package script that invokes its Tessl launcher
+3. repository-local Tessl launcher
 4. manual fallback
 
 Do not use `dlx`, `npx`, a global executable, or another implicit latest-version
 fallback. Do not add a dependency, configure a workspace, spend credits, or
 start an authentication flow unless the user explicitly requested setup.
 
+The npm `tessl` package is a launcher for a native CLI, and stable releases can
+update that native CLI independently. A lockfile entry therefore proves the
+launcher source, not the effective CLI version. Record `pnpm exec tessl
+--version` with every audit that depends on Tessl behavior. Set
+`TESSL_AUTO_UPDATE_INTERVAL_MINUTES=0` in reproducible CI lanes, but do not call
+that an exact binary pin: a previously updated shared installation or a fresh
+launcher bootstrap may still select a newer stable CLI. If the effective
+version is outside the repo's tested range, report the boundary instead of
+silently substituting another installer.
+
 ```bash
 # free local structure lane (also used by pnpm run verify and CI)
+pnpm exec tessl --version
 TESSL_REVIEW_MODE=lint ./scripts/review.sh
 
 # authenticated review of changed skills (100-point gate; local / intentional)
+pnpm exec tessl --version
 ./scripts/review.sh
 
 # intentional full portfolio review
+pnpm exec tessl --version
 TESSL_REVIEW_ALL=true ./scripts/review.sh
 ```
 
