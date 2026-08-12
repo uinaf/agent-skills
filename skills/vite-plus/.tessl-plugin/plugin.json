@@ -1,6 +1,6 @@
 {
   "name": "uinaf/vite-plus",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Migrate or align frontend package and monorepo repositories to Vite+, including CI, tests, packaging, hook lifecycle, toolchain diagnostics, and Vitest cleanup.",
   "private": false,
   "skills": [
