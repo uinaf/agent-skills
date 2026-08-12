@@ -42,7 +42,7 @@ Prefer the documented Vite+ action:
 - Prefer `setup-vp`'s default install step over a separate `vp install` when Vite+ is the tool owner. Set `run-install: false` only when the workflow needs to pass custom install arguments or control install as a separate step.
 - Preserve an existing Node declaration instead of creating `.node-version` only for CI. Pass the repo-owned `.node-version`, `.nvmrc`, `.tool-versions`, or `package.json` path through `node-version-file`.
 - When neither `version` nor `version-file` is set, current `setup-vp` tries to resolve the Vite+ version from the checked-out project's `vite-plus` dependency and lockfile before falling back to `latest`; watch warnings because an unresolved range or alias means CI may not be using the intended project version.
-- Prefer `vp config` when the repo wants stock hooks or agent integration instead of hand-rolled hook setup.
+- On Vite+ 0.2.9+, prefer `vp hooks` for dispatcher lifecycle and `vp config` for broader project setup or agent integration instead of hand-rolled hook setup.
 - Prefer one repo-local verify entrypoint if CI needs extra repo-specific commands.
 - Keep release orchestration in GitHub Actions when the repo has npm, GitHub Release, binary, or Homebrew automation that goes beyond stock Vite+.
 - Vite+ can run repo scripts, but it does not make runtime-installed release plugins reproducible by itself. For semantic-release jobs, keep CI/CD-only plugins in the workflow's `extra_plugins` input with exact versions instead of adding release-only packages to repo `devDependencies`.

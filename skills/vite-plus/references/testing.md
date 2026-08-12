@@ -43,11 +43,11 @@ export default defineConfig({
 +const { page } = await import('vite-plus/test/browser/context')
 ```
 
-After rewriting imports, remove the standalone `vitest` dependency for node-mode-only projects and keep only the `vite` alias pointing at `@voidzero-dev/vite-plus-core`. Leave imports from `vite-plus/test` and `vite-plus/test/*` unchanged; they are the stable public API.
+After rewriting imports, remove the standalone `vitest` dependency for node-mode-only projects, keep the `vite` alias pointing at `@voidzero-dev/vite-plus-core`, and let `vp migrate` retain an exact upstream `vitest` pin in the package-manager override. Leave imports from `vite-plus/test` and `vite-plus/test/*` unchanged; they are the stable public API.
 
 ## Vite+ 0.2.x Vitest Dependencies
 
-- Node-mode-only tests: remove `@voidzero-dev/vite-plus-test`, remove any `vitest` alias or catalog entry, and do not add a direct `vitest` dependency.
+- Node-mode-only tests: remove `@voidzero-dev/vite-plus-test` and any alias pointing `vitest` at that removed wrapper; keep the exact upstream `vitest` override or managed catalog pin written by `vp migrate`, but do not add a direct `vitest` dependency.
 - Direct Vitest usage: if source/config imports from `vitest` or `@vitest/*`, or lists packages such as `@vitest/coverage-v8` / `@vitest/ui`, pin those upstream packages to the Vitest version bundled by the installed `vite-plus` release.
 - Browser mode: install the provider package the suite actually imports (`@vitest/browser-playwright` or `@vitest/browser-webdriverio`) in the workspace package that runs the browser tests, and keep its framework peer (`playwright` or `webdriverio`) present. With pnpm, also add direct `vitest` at the bundled version if `vitest/internal/browser` cannot resolve from the browser test server.
 - Type augmentations such as `declare module 'vitest'` or `declare module '@vitest/browser*'` should still target the upstream module identity.

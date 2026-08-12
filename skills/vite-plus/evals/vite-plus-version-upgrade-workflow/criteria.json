@@ -1,11 +1,11 @@
 {
-  "context": "Tests whether the agent correctly handles a repository-local Vite+ version upgrade without a global CLI, using current vp migrate behavior, removing the obsolete test wrapper, classifying direct Vitest usage, and performing the correct end-to-end validation sequence.",
+  "context": "Tests whether the agent correctly handles an exact-target Vite+ 0.2.9 upgrade without a global CLI, using a target-pinned one-shot migrator before returning to the project CLI, removing the obsolete test wrapper, classifying direct Vitest usage, and performing the correct end-to-end validation sequence.",
   "type": "weighted_checklist",
   "checklist": [
     {
       "name": "No global CLI dependency",
       "max_score": 12,
-      "description": "The upgrade procedure does not install, inspect, or upgrade a global `vp`; every Vite+ operation resolves the repository-local CLI through `pnpm exec vp`"
+      "description": "The upgrade procedure does not install, inspect, or upgrade a global `vp`; only the exact target migration uses `pnpm --package=vite-plus@0.2.9 dlx vp`, and all post-install Vite+ operations resolve the repository-local CLI through `pnpm exec vp`"
     },
     {
       "name": "Pinned package manager bootstrap",
@@ -13,14 +13,14 @@
       "description": "The procedure starts by honoring package.json#packageManager and installing the current lockfile with `pnpm install --frozen-lockfile` before invoking Vite+"
     },
     {
-      "name": "vp migrate for local stack",
+      "name": "Exact target migrator",
       "max_score": 10,
-      "description": "The project-local upgrade uses `pnpm exec vp migrate` from the project root so Vite+ updates the local `vite-plus` package and related toolchain pins together"
+      "description": "The upgrade runs `pnpm --package=vite-plus@0.2.9 dlx vp migrate` from the project root so the approved target CLI updates local `vite-plus` and its related toolchain pins together; it names the `vp` binary explicitly and does not ask the installed 0.1.24 CLI to select a newer release"
     },
     {
-      "name": "Core alias verified",
+      "name": "Core and Vitest pins verified",
       "max_score": 15,
-      "description": "The procedure verifies that `vp migrate` updated the `vite` -> `npm:@voidzero-dev/vite-plus-core@<matching-version>` alias in the manifest, catalog or override, and lockfile importer before calling the upgrade done"
+      "description": "The procedure verifies that migration updated the `vite` -> `npm:@voidzero-dev/vite-plus-core@0.2.9` alias and exact bundled upstream Vitest pin in the manifest, catalog, override or resolution as applicable, and confirms the resulting lockfile importer before calling the upgrade done"
     },
     {
       "name": "Removed obsolete test wrapper",
@@ -28,9 +28,9 @@
       "description": "The procedure removes `@voidzero-dev/vite-plus-test` from dependencies, overrides/catalogs/resolutions, source references, and lockfile state instead of updating the removed wrapper"
     },
     {
-      "name": "vp outdated for verification",
+      "name": "Machine-readable target verification",
       "max_score": 10,
-      "description": "The procedure uses `vp outdated` to confirm that all Vite+ packages are now at the intended release (not `npm outdated`, `pnpm outdated`, or omitted entirely)"
+      "description": "The procedure uses `pnpm exec vp toolchain --json` to confirm the local report identifies vite-plus 0.2.9 and the expected bundled relationships, selects tool nodes by ID rather than position, and does not treat `vp outdated` as proof of an intentionally selected target"
     },
     {
       "name": "Direct Vitest usage classified",
@@ -40,7 +40,7 @@
     {
       "name": "Local CLI version in validation",
       "max_score": 6,
-      "description": "The end-to-end validation sequence verifies the repository-local CLI with `pnpm exec vp --version` and does not use the standalone-only `vp env` surface"
+      "description": "The end-to-end validation sequence verifies the upgraded repository-local CLI with `pnpm exec vp --version` and inspects its 0.2.9 toolchain with `pnpm exec vp toolchain --json`; it does not use the standalone-only `vp env` surface"
     },
     {
       "name": "Full validation sequence",
@@ -55,7 +55,7 @@
     {
       "name": "No direct package manager for local Vite+ stack",
       "max_score": 3,
-      "description": "The project-local upgrade does NOT use `npm install`, `pnpm update`, `yarn upgrade`, or other direct package-manager commands to select Vite+ package versions; the local Vite+ stack moves through `pnpm exec vp migrate`"
+      "description": "The upgrade does NOT use `npm install`, `pnpm update`, `yarn upgrade`, or other direct package-manager commands to select Vite+ package versions; the local Vite+ stack moves through the exact target `pnpm --package=vite-plus@0.2.9 dlx vp migrate` invocation"
     }
   ]
 }

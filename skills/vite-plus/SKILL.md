@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Vite+
 
-Move a frontend repo closer to the stock Vite+ toolchain while preserving repo-specific release and runtime logic. Vite+ is in beta, but still pre-1.0: install the repository dependencies first, verify behavior against `pnpm exec vp --version`, inspect packaged docs under `node_modules/vite-plus/docs/`, and check the latest [release notes](https://github.com/voidzero-dev/vite-plus/releases) instead of relying on memorized command shapes.
+Move a frontend repo closer to the stock Vite+ toolchain while preserving repo-specific release and runtime logic. Vite+ is in beta, but still pre-1.0: install the repository dependencies first, verify behavior against `pnpm exec vp --version`, use `pnpm exec vp toolchain --json` on 0.2.9+ to inspect bundled versions and relationships, inspect packaged docs under `node_modules/vite-plus/docs/`, and check the latest [release notes](https://github.com/voidzero-dev/vite-plus/releases) instead of relying on memorized command shapes.
 
 ## Migration Targets
 
@@ -16,7 +16,7 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 - Tooling versions have one checked-in source of truth. Preserve the repo's existing Node declaration (`.node-version`, `.nvmrc`, `.tool-versions`, or `package.json`) and pass that file to `setup-vp`; package-manager versions come from `package.json#packageManager` or `devEngines.packageManager`; Vite+ comes from the repo's `vite-plus` dependency or workspace catalog. Do not repeat Node, package-manager, or Vite+ literals in workflows when a source file can be read
 - test files use `vite-plus/test` (and `vite-plus/test/browser/context` for browser mode); Vite+ 0.2.x runs upstream Vitest directly and no longer uses `@voidzero-dev/vite-plus-test`
 - scripts prefer `vp dev`, `vp test`, `vp test watch`, `vp test run --coverage`, `vp pack`, `vp build`, `vp preview`, and `vp run <script>` (or `vpr <script>`) over direct package-manager, raw Vitest, or tsdown wiring
-- hooks use `vp config`, `.vite-hooks`, and `vp staged` as the default hook stack; read [references/hooks.md](references/hooks.md) before migrating, disabling, or removing hooks
+- hooks use `vp hooks` for dispatcher lifecycle, `vp config` for broader project setup, `.vite-hooks` for project-owned hook scripts, and `vp staged` for staged checks on Vite+ 0.2.9+; read [references/hooks.md](references/hooks.md) before migrating, disabling, or removing hooks
 - single-source config in `vite.config.ts`: no parallel `vitest.config.ts`, `.oxlintrc*`, `.oxfmtrc*`, or `tsdown.config.ts`
 - project agent guidance comes from Vite+ itself when possible: `vp migrate --agent <name>` writes the official short `AGENTS.md`/`CLAUDE.md` block, and installed projects may expose the same guidance at `node_modules/vite-plus/AGENTS.md`
 - contributor docs move to the new `vp` commands in the same change
@@ -33,8 +33,8 @@ Default to this destination unless a repo-specific boundary clearly blocks it. I
 7. Update tests and coverage per [references/testing.md](references/testing.md).
 8. Check [references/commands.md](references/commands.md) before changing command invocations. Load [references/known-issues.md](references/known-issues.md) only on unexpected behavior or when upgrading Vite+.
 9. Keep repo-specific release, binary, or packaging steps Vite+ does not replace. Verify jobs may use Vite+ dependency caches; secret-bearing release, publish, signing, and deploy jobs disable dependency caches and run fresh installs.
-10. To adopt a newer Vite+ release, use the repository-local CLI: install the current lockfile, run `pnpm exec vp migrate`, then reinstall if migration changed manifests. Follow [references/commands.md#upgrades](references/commands.md#upgrades). Use `--full` only when first-time setup should run again. Confirm with `pnpm exec vp --version`, lockfile inspection, and `pnpm exec vp outdated`.
-11. End-to-end validation: `pnpm install --frozen-lockfile`, then `pnpm exec vp check` and `pnpm exec vp test`; verify `pnpm exec vp build` or `pnpm exec vp pack` artifacts, `pnpm exec vp preview` where applicable, `pnpm exec vp test run --coverage`, and `pnpm exec vp staged` on a staged change.
+10. To adopt a release newer than the installed project CLI without adding a global dependency, install the current lockfile, select an exact target, and run `pnpm --package=vite-plus@<target> dlx vp migrate` from the workspace root. The explicit package and binary are both required because Vite+ publishes multiple binaries. The migrator pins to the version executing it, so the older `pnpm exec vp migrate` cannot select a newer release by itself. Reinstall if migration changed manifests, then return to `pnpm exec vp ...`. Follow [references/commands.md#upgrades](references/commands.md#upgrades). Use `--full` only when first-time setup should run again. Confirm the exact target with `pnpm exec vp --version`, `pnpm exec vp toolchain --json` on 0.2.9+, manifest and package-manager config inspection, and the lockfile importer. When the release changes Oxfmt or Oxlint, run `pnpm exec vp fmt` before the final check and review the resulting diff.
+11. End-to-end validation: `pnpm install --frozen-lockfile`, then `pnpm exec vp check` and `pnpm exec vp test`; verify `pnpm exec vp build` or `pnpm exec vp pack` artifacts, `pnpm exec vp preview` where applicable, `pnpm exec vp test run --coverage`, and `pnpm exec vp staged` on a staged change. When hooks are in scope on 0.2.9+, also verify `pnpm exec vp hooks status`.
 
 ## Tooling Source Of Truth
 
@@ -44,7 +44,7 @@ Before changing CI, preserve one canonical version owner:
 - package manager: `package.json#packageManager` or `devEngines.packageManager`; do not create a second declaration just for CI
 - Vite+: the `vite-plus` dependency or workspace catalog; when CI needs an explicit `version`, derive it from that source with a structured parser
 - Vite core: keep the `vite` manifest dependency plus package-manager override/catalog/resolution pointed at the matching `npm:@voidzero-dev/vite-plus-core@<version>`
-- Vitest: do not add a `vitest` override for node-mode-only Vite+ 0.2.x projects; add direct Vitest and `@vitest/*` packages only when the project uses Vitest APIs, coverage packages, UI, or browser providers directly
+- Vitest: let `vp migrate` pin the exact bundled Vitest version in the package-manager override and verify it with `vp toolchain vitest` on 0.2.9+; node-mode-only projects normally do not need a direct `vitest` dependency, while direct Vitest APIs, coverage/UI packages, and browser providers may require direct packages at that bundled version
 - workflow exceptions: document why the action cannot read the repo-owned source
 - Docker: for containerized builds, prefer the official `ghcr.io/voidzero-dev/vite-plus` toolchain image; do not use it as a production runtime image
 
@@ -83,10 +83,11 @@ export default defineConfig({
 
 ## Guardrails
 
-- Prefer `pnpm dlx vite-plus create` for an uninitialized repository and `pnpm exec vp migrate --agent <name> --editor <name>` once Vite+ is a local dependency, rather than hand-rolling agent or editor config.
+- Prefer `pnpm --package=vite-plus@<target> dlx vp create` for an uninitialized repository and `pnpm exec vp migrate --agent <name> --editor <name>` once Vite+ is a local dependency at the intended version, rather than hand-rolling agent or editor config.
 - Preserve working release workflows, binary packaging, and publish steps while migrating the surrounding Vite+ flow.
 - After editing workflows, grep for duplicated tooling literals such as `node-version:`, `pnpm@`, `corepack prepare`, and inline `version: "0.`. Keep action pins separate: GitHub Action SHAs and their same-line version comments are allowed because they identify the action, not the project toolchain.
 - For cacheable `vp run` tasks, rely on automatic file tracking first. A standard `vp build` task now reports Vite inputs, outputs, and relevant env metadata to Vite Task, so do not add manual `input`, `output`, or `env` config unless the project has behavior Vite cannot report.
+- Vite+ 0.2.9+ supports cached `vp run` tasks and automatic file-access tracking in the default Codex CLI and Claude Code sandboxes. Do not request extra sandbox permissions or disable caching to work around `Failed to set up task communication: Operation not permitted`; upgrade an older affected Vite+ release instead.
 - If `vp check` is not running type-aware lint or type checks, confirm `lint.options.typeAware` and `lint.options.typeCheck` in `vite.config.ts`, and check for `compilerOptions.baseUrl` in `tsconfig.json` — `tsgolint` does not support `baseUrl` and Vite+ silently skips type-aware checks when it is present.
 
 ## Known Caveats

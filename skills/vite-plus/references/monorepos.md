@@ -10,7 +10,7 @@ Command examples below use the concise `vp` spelling appropriate inside package 
 - Keep workspace package-manager conventions and cache boundaries unless Vite+ replaces them cleanly.
 - Leaf packages and apps should still prefer `vp check`, `vp test`, and `vp pack` where Vite+ is the real tool owner.
 - Use `vp run <pkg>#<task>`, `vp run -r`, `vp run -t`, and `vp run --filter` when Vite+ owns the task graph.
-- Keep commit-hook setup repo-wide: prefer one `vp config`-managed `.vite-hooks` install plus staged checks in root `vite.config.ts` over per-package hook tooling.
+- Keep commit-hook setup repo-wide: on Vite+ 0.2.9+, manage one `.vite-hooks` dispatcher with `vp hooks`, use `vp config` for broader project setup, and keep staged checks in root `vite.config.ts` instead of adding per-package hook tooling.
 
 ## Orchestration with `vp run`
 

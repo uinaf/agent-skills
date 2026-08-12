@@ -45,7 +45,7 @@ Command examples below use the concise `vp` spelling appropriate inside package 
 
 - `npm` projects use `overrides` in `package.json`; Yarn projects use `resolutions`.
 - After reinstalling, check that `pnpm-lock.yaml` records the importer `vite` specifier as `npm:@voidzero-dev/vite-plus-core@<version>` and the version as `@voidzero-dev/vite-plus-core@...`; do not stop at `pnpm config get overrides`.
-- In Vite+ 0.2.x and newer, do not alias `vitest` to `@voidzero-dev/vite-plus-test`; that wrapper was removed. Plain node-mode tests should not list `vitest` directly. Keep or add direct upstream `vitest` / `@vitest/*` dependencies only for direct Vitest API usage, coverage/UI packages, or browser-mode requirements.
+- In Vite+ 0.2.x and newer, do not alias `vitest` to `@voidzero-dev/vite-plus-test`; that wrapper was removed. Let `vp migrate` keep an exact upstream `vitest` pin in the package-manager override or managed catalog so the project shares the bundled runner version. Plain node-mode tests should not list `vitest` directly. Keep or add direct upstream `vitest` / `@vitest/*` dependencies only for direct Vitest API usage, coverage/UI packages, or browser-mode requirements.
 
 ## Notes
 
