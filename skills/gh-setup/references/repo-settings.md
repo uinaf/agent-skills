@@ -16,6 +16,7 @@ Check the live repo before making severity calls or writing instructions:
 - protected tag rules
 - Actions permissions and allowed actions policy
 - GitHub Environments, reviewers, branch/tag restrictions, secrets, and vars
+- code scanning default setup and organization code security configurations
 - repository description, homepage, topics, and visibility
 
 Prefer `gh` or the GitHub UI/API for live settings. Checked-in workflow files are evidence, not proof of repo settings.
@@ -37,6 +38,47 @@ For public repositories that ship a private-first `SECURITY.md`:
 Private repositories do not expose that reporting surface. Do not enable or
 document PVR there; use a private-maintainer-channel `SECURITY.md` instead
 (see [templates](templates.md)).
+
+## Code Scanning
+
+Do not enable GitHub CodeQL default setup as an organization or repository
+baseline.
+
+Default setup always analyzes pull requests against the default branch, every
+push to the default or protected branches, and a weekly schedule. The API
+`schedule` field is additive. It does not mean "run only after merge." There is
+no default-setup option for post-merge or weekly-on-main-only scans.
+
+That PR analysis is slow (especially compiled languages), has no concurrency
+cancel, and still stalls merges in practice: pending checks set
+`mergeStateStatus: BLOCKED`, and agents or auto-merge wait even when the check
+is not required.
+
+Prefer `actionlint`, `zizmor`, GitHub secret scanning and push protection,
+repository-history secret scanners, and Dependabot. Those are the useful
+org-wide controls.
+
+Do not add CodeQL as a required status check. Do not attach it to an
+organization security configuration.
+
+If default setup is already on, disable it on the owning configuration first
+when a config is enforced, then confirm each repository:
+
+```bash
+gh api orgs/{org}/code-security/configurations
+gh api --method PATCH orgs/{org}/code-security/configurations/{id} --input - <<'EOF'
+{"code_scanning_default_setup": "disabled"}
+EOF
+gh api repos/{owner}/{repo}/code-scanning/default-setup
+```
+
+The per-repository read should return `state: not-configured`. Cancel leftover
+in-progress CodeQL workflow runs after disabling; they keep blocking the
+current pull request until they finish or are cancelled.
+
+Do not replace default setup with advanced-setup workflows across a fleet just
+to get weekly-on-main scans. Add a `push`/`schedule`-only workflow only when
+the user explicitly wants CodeQL on a specific high-value repository.
 
 ## Merge Policy
 
@@ -93,8 +135,9 @@ For an organization with multiple repository shapes:
   intended bypass posture.
 - Keep required status checks repository-local when check names differ.
 - Require the smallest stable voting surface that represents the repo's real
-  merge contract. Keep CodeQL, dependency reports, release, deploy, and other
+  merge contract. Keep dependency reports, release, deploy, and other
   intentionally advisory jobs non-blocking unless policy says otherwise.
+  Do not enable or require CodeQL; see [Code Scanning](#code-scanning).
 - Add one stable final gate only when lane detection, matrices, conditional
   jobs, or documentation-only skips make raw job names unstable or capable of
   false greens. The gate must run with `always()`, aggregate every voting job,

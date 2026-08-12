@@ -35,6 +35,8 @@ It also owns baseline existence and template shape for GitHub-facing collaborati
    - `gh api repos/{owner}/{repo}/automated-security-fixes`
    - `gh api repos/{owner}/{repo}/environments`
    - `gh api repos/{owner}/{repo}/rulesets`
+   - `gh api repos/{owner}/{repo}/code-scanning/default-setup`
+   - `gh api orgs/{owner}/code-security/configurations` when the owner is an organization
 3. Classify the repo:
    - **Versioned artifact**: package, library, CLI, GitHub Action, Homebrew-published binary, or registry publish -> read [release workflows](references/release-workflows.md) and [release targets](references/release-targets.md).
    - **Running app or service**: Pages, Cloudflare, SST, container, static app, backend, or hosted service -> read [deploy workflows](references/deploy-workflows.md), [deploy environments](references/deploy-environments.md), and [deploy secrets](references/deploy-secrets.md).
@@ -114,6 +116,7 @@ Hard defaults:
 
   Preserve any intentional `allowed_actions` / allowlist values from the GET.
 - Run `actionlint` for syntax and `zizmor` for GitHub Actions security before inventing bespoke validators.
+- Do not enable CodeQL default setup. It always analyzes pull requests and cannot be limited to post-merge or weekly-on-main. Prefer actionlint, zizmor, secret scanning, and Dependabot; see [repo settings](references/repo-settings.md).
 - Run repository-history secret detection in a dedicated GitHub Actions workflow.
 - Keep workflow YAML boring: prefer maintained actions and repo-owned commands over large inline shell/JavaScript blocks.
 - Keep untrusted PR caches separate from privileged push, release, deploy, signing, or publish caches.

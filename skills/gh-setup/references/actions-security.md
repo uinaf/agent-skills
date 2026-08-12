@@ -70,7 +70,9 @@ Prefer scanner-backed gates before bespoke workflow validators:
 - `actionlint` for syntax and expression mistakes
 - `zizmor` for GitHub Actions security
 - gitleaks or TruffleHog for secret scanning when appropriate
-- CodeQL or dependency scanners when the repo uses them
+- Dependabot alerts and security updates for dependency advisories
+
+Do not enable CodeQL default setup. See [repo settings](repo-settings.md).
 
 For repos without GitHub Advanced Security, configure zizmor for annotations and omit `security-events: write`.
 

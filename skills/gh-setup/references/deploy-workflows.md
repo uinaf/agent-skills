@@ -63,7 +63,7 @@ on:
 
 Do not add inline shell or JavaScript blocks to satisfy a scanner. Use standard actions first; use repo-owned actions or scripts only when the repo has a real product-specific boundary.
 
-- Standard checks: use `actionlint`, `zizmor`, secret scanners, CodeQL, and dependency scanners instead of bespoke grep/awk/YAML parsers.
+- Standard checks: use `actionlint`, `zizmor`, and secret scanners instead of bespoke grep/awk/YAML parsers.
 - Change detection: use `dorny/paths-filter`, GitHub path filters, or the repo's existing monorepo tool entrypoint.
 - Auth and cloud setup: use maintained setup/auth actions such as `aws-actions/configure-aws-credentials`, `docker/login-action`, or provider-owned OIDC actions.
 - Complex validation: put it in `.github/actions/<name>` or `scripts/ci/<name>` with a narrow contract and tests; call it from YAML with inputs and outputs.
