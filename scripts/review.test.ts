@@ -10,6 +10,14 @@ function readRepoFile(path: string): string {
   return readFileSync(join(repoRoot, path), "utf8");
 }
 
+function workflowStep(workflow: string, name: string): string {
+  const marker = `      - name: ${name}`;
+  const start = workflow.indexOf(marker);
+  assert.notEqual(start, -1, `missing workflow step: ${name}`);
+  const next = workflow.indexOf("\n      - name:", start + marker.length);
+  return workflow.slice(start, next === -1 ? undefined : next);
+}
+
 test("CI uses free lint verify; authenticated 100-point review stays local", () => {
   const packageJson = JSON.parse(readRepoFile("package.json")) as {
     devDependencies: Record<string, string>;
@@ -62,6 +70,23 @@ test("CI uses free lint verify; authenticated 100-point review stays local", () 
   assert.match(
     publishWorkflow,
     /grafana\/github-api-commit-action@b1d81091e8480dd11fcea8bc1f0ab977a0376ca5/,
+  );
+  const failureAwareWriteback =
+    /if: \$\{\{ !cancelled\(\) && \(steps\.publish\.outcome == 'success' \|\| steps\.publish\.outcome == 'failure'\) && github\.event_name == 'push' && github\.ref == 'refs\/heads\/main' \}\}/;
+  assert.match(
+    workflowStep(publishWorkflow, "Publish changed plugins"),
+    /\n        id: publish\n/,
+    "writeback conditions require the publish step outcome",
+  );
+  assert.match(
+    workflowStep(publishWorkflow, "Stage published plugin versions"),
+    failureAwareWriteback,
+    "published versions must be staged after a partial publish failure",
+  );
+  assert.match(
+    workflowStep(publishWorkflow, "Commit published plugin versions"),
+    failureAwareWriteback,
+    "published versions must be committed after a partial publish failure",
   );
   assert.doesNotMatch(
     publishWorkflow,

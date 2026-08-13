@@ -92,6 +92,7 @@ jobs:
           permission-contents: write
 
       - name: Publish changed plugins
+        id: publish
         env:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
           GITHUB_SHA: ${{ github.sha }}
@@ -100,11 +101,11 @@ jobs:
         run: ./scripts/publish.sh
 
       - name: Stage published plugin versions
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ !cancelled() && (steps.publish.outcome == 'success' || steps.publish.outcome == 'failure') && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: git add -- skills
 
       - name: Commit published plugin versions
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ !cancelled() && (steps.publish.outcome == 'success' || steps.publish.outcome == 'failure') && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: grafana/github-api-commit-action@b1d81091e8480dd11fcea8bc1f0ab977a0376ca5 # v1.0.0
         with:
           commit-message: "chore: sync published plugin versions [skip ci]"
