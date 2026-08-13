@@ -1,6 +1,7 @@
 # Radar model
 
-Radar is a complete inventory with a deliberately small attention surface.
+Radar is the tracked inventory with a deliberately small attention surface.
+Coverage reconciliation determines whether every in-scope open item is present.
 
 ## Work hierarchy
 
