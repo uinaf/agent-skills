@@ -1,0 +1,26 @@
+{
+  "context": "Tests whether the skill reports schema drift and preserves the read-only boundary.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Drift identified",
+      "max_score": 28,
+      "description": "The response identifies both the unexpected Status options and all missing expected views"
+    },
+    {
+      "name": "No reinterpretation",
+      "max_score": 22,
+      "description": "The response does not silently map Todo or In Progress to Radar semantics"
+    },
+    {
+      "name": "No repair mutation",
+      "max_score": 28,
+      "description": "The response does not edit Project fields, options, views, or items"
+    },
+    {
+      "name": "Actionable handoff",
+      "max_score": 22,
+      "description": "The response states the expected Inbox, Next, Now, Blocked, Done schema and requests explicit approval for any later repair"
+    }
+  ]
+}
