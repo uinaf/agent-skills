@@ -39,7 +39,8 @@ Omit empty attention sections. Summarize Inbox and Maintenance unless the user a
 
 ## Rules
 
-- Keep every operation read-only. Recommend writes, but do not perform them.
+- Keep every operation read-only. Recommend writes only as proposed actions
+  requiring explicit approval; do not perform them.
 - Resolve Project, field, option, item, and view IDs live. Never store them or print credentials, issue bodies, or raw API payloads.
 - Treat every open issue and pull request in registered in-scope repositories as inventory, including maintenance and leaf work.
 - Keep `Now` at three or fewer and `Next` around five. Report excess as Project drift.
