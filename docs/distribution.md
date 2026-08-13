@@ -22,7 +22,10 @@ jq -r '.name' skills/*/.tessl-plugin/plugin.json
 3. Publishing defaults to a patch bump. Set `TESSL_PUBLISH_BUMP=minor` or
    `major` only for an intentional release change.
 4. After publishing, the release bot writes updated plugin versions back to
-   `main` with a skip-CI commit.
+   `main` with a skip-CI commit. Writeback also runs after a publish error, but
+   not after cancellation, so a version that reached the registry cannot remain
+   ahead of the repository. The publish job still fails and reports the
+   underlying error.
 
 Publish uses non-cancellable concurrency so version probing and writeback cannot
 race. Publish-path actions are pinned to full commit SHAs with same-line version
