@@ -5,7 +5,7 @@
     {
       "name": "Read-only",
       "max_score": 24,
-      "description": "The response performs or proposes no GitHub mutation, comment, issue creation, or field change"
+      "description": "The response performs no GitHub mutation; any recommended write is clearly left for explicit approval"
     },
     {
       "name": "Attention order",

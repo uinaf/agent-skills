@@ -4,7 +4,7 @@ Use the installed `gh` CLI and the active authenticated identity. Never store li
 
 ## Canonical check
 
-Run:
+From the skill directory, run:
 
 ```bash
 ./scripts/check.sh
