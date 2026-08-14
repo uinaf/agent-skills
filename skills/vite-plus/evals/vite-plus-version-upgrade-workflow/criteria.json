@@ -1,11 +1,11 @@
 {
-  "context": "Tests whether the agent correctly handles an exact-target Vite+ 0.2.9 upgrade without a global CLI, using a target-pinned one-shot migrator before returning to the project CLI, removing the obsolete test wrapper, classifying direct Vitest usage, and performing the correct end-to-end validation sequence.",
+  "context": "Tests whether the agent correctly handles an exact-target Vite+ 0.2.9 upgrade without a global CLI or custom migration wrapper, using the maintained target-pinned migrator before returning to the project CLI, removing the obsolete test wrapper, classifying direct Vitest usage, and performing the correct end-to-end validation sequence.",
   "type": "weighted_checklist",
   "checklist": [
     {
       "name": "No global CLI dependency",
       "max_score": 12,
-      "description": "The upgrade procedure does not install, inspect, or upgrade a global `vp`; only the exact target migration uses `pnpm --package=vite-plus@0.2.9 dlx vp`, and all post-install Vite+ operations resolve the repository-local CLI through `pnpm exec vp`"
+      "description": "The upgrade procedure does not install, inspect, or upgrade a global `vp`, and does not add a custom migration shell script; only the exact target migration uses `pnpm --package=vite-plus@0.2.9 dlx vp`, and all post-install Vite+ operations resolve the repository-local CLI through `pnpm exec vp`"
     },
     {
       "name": "Pinned package manager bootstrap",

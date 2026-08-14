@@ -48,7 +48,8 @@ CLI, invent a score, or spend credits silently.
 - **Workflow:** the body has a clear start, evidence loop, stop condition, and
   observable completion.
 - **Progressive disclosure:** core decisions stay inline; each reference has a
-  task-shaped retrieval job; repeated deterministic work is scripted.
+  task-shaped retrieval job; repeated deterministic work routes to an existing
+  tool or maintained executable resource.
 - **Repo fit:** links, commands, metadata, and conventions are current and the
   package remains independently usable.
 - **Verification:** the strongest available mechanical check and realistic
@@ -58,8 +59,8 @@ CLI, invent a score, or spend credits silently.
 
 Invalid metadata, broken links or commands, missing completion, repo conflicts,
 and sibling-package dependencies are blockers. Bloated bodies, vague discovery,
-abstract examples, duplicated doctrine, and prose replacing deterministic
-scripts are major findings.
+abstract examples, duplicated doctrine, and prose replacing an existing
+deterministic implementation are major findings.
 
 ## Improve
 

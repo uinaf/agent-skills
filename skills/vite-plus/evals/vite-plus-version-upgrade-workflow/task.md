@@ -6,16 +6,30 @@ The Nexus UI team maintains a widely-used TypeScript component library that was 
 
 The team's senior engineer is on leave, and the remaining engineers are unsure of the correct upgrade procedure. A previous attempt by a well-meaning team member ran `pnpm update vite-plus` directly, which updated the `package.json` entry for `vite-plus` but left the project in a broken state — `vp check` was reporting errors that hadn't existed before and `vp test` was running the wrong Vitest version. It took an hour of debugging to realize the issue: the Vite+ core alias, Vitest pin, and removed 0.1.x test wrapper were not handled together.
 
-The team has approved `vite-plus@0.2.9` as the exact target. They need a clear, correct upgrade runbook they can follow now and reuse for future upgrades. Their workstation policy forbids a global Vite+ installation: the target migration may use an exact `pnpm --package=vite-plus@0.2.9 dlx vp` invocation, and every command after reinstall must resolve the repository's pinned `vite-plus` dependency. They also want a shell script (`upgrade-vite-plus.sh`) that automates the project-level upgrade so future upgrades are one-command operations and includes verification steps so the engineer knows the upgrade succeeded before they push.
+The team has approved `vite-plus@0.2.9` as the exact target. They need a clear,
+correct upgrade runbook they can follow now and reuse for future upgrades. Their
+workstation policy forbids a global Vite+ installation: the target migration
+may use an exact `pnpm --package=vite-plus@0.2.9 dlx vp` invocation, and every
+command after reinstall must resolve the repository's pinned `vite-plus`
+dependency. The Vite+ migrator and repository package scripts are the
+deterministic owners; do not wrap them in a custom upgrade shell script.
 
 ## Output Specification
 
 Produce the following files:
 
-- `upgrade-vite-plus.sh` — a shell script that performs the complete upgrade procedure in the correct order, including verification
-- `UPGRADE.md` — a human-readable runbook explaining each step, why it is needed, and what to do if a step fails
+- `package.json` — the migrated project manifest
+- `pnpm-workspace.yaml` — the migrated toolchain aliases/overrides
+- `UPGRADE.md` — a concise runbook explaining the maintained migration path,
+  verification sequence, and recovery checkpoints
 
-Both files should document all necessary steps a developer would need to run to fully upgrade Vite+ without a global CLI. Install the current lockfile, use the exact target migrator `pnpm --package=vite-plus@0.2.9 dlx vp migrate` instead of asking the installed 0.1.24 CLI to select a newer release or hand-editing package versions, reinstall if migration changes dependency metadata, and validate through the upgraded local CLI. The script should be executable as-is (no placeholder TODOs).
+Document all necessary steps a developer would need to run to fully upgrade
+Vite+ without a global CLI. Install the current lockfile, use the exact target
+migrator `pnpm --package=vite-plus@0.2.9 dlx vp migrate` instead of asking the
+installed 0.1.24 CLI to select a newer release or hand-editing package versions,
+reinstall if migration changes dependency metadata, and validate through the
+upgraded local CLI. Do not add a second migration implementation, command graph,
+or JSON parser in shell.
 
 ## Input Files
 
