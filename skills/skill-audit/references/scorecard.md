@@ -33,9 +33,16 @@ These usually lower trust or activation even if the skill technically works:
 - `name` is vague, generic, or forgettable
 - `description` buries its action or repeats synonyms instead of naming distinct request branches
 - `SKILL.md` is bloated with detail that belongs in `references/`
+- runtime guidance begins with a source inventory or literature review instead
+  of the task, decision, or workflow it exists to support
 - boundaries are missing, muddy, or depend on an unnamed external workflow
-- the skill asks the model to invent deterministic steps that should be scripted
+- the skill asks the model to re-invent deterministic steps instead of routing
+  to an existing tool or executable resource
+- deterministic guidance defaults to ad-hoc shell despite an existing
+  framework, plugin, schema, task graph, library, or typed project language
 - examples are abstract instead of practical
+- repeated deterministic work has neither a maintained executable resource nor
+  a task-shaped pointer to tested implementation code
 - optimizer use is suggested without explicit approval
 
 ## Minor Findings

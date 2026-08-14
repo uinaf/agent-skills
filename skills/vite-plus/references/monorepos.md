@@ -1,135 +1,54 @@
 # Monorepos
 
-Use this reference for workspace repos adopting Vite+.
+Use for workspace repositories adopting Vite+.
 
-Command examples below use the concise `vp` spelling appropriate inside package scripts. From an interactive shell, run the same built-ins as `pnpm exec vp ...` after installing the repository dependencies.
+## Ownership
 
-## Defaults
+- Run creation and migration from the workspace root unless a leaf is truly
+  independent.
+- Keep one root editor, agent, hook, and consolidated tooling policy.
+- Preserve the package manager's workspace declaration and dependency graph.
+- Move scripts, test imports, config, and CI as one coherent migration.
 
-- Move workspace scripts, test surface, and CI together.
-- Keep workspace package-manager conventions and cache boundaries unless Vite+ replaces them cleanly.
-- Leaf packages and apps should still prefer `vp check`, `vp test`, and `vp pack` where Vite+ is the real tool owner.
-- Use `vp run <pkg>#<task>`, `vp run -r`, `vp run -t`, and `vp run --filter` when Vite+ owns the task graph.
-- Keep commit-hook setup repo-wide: on Vite+ 0.2.9+, manage one `.vite-hooks` dispatcher with `vp hooks`, use `vp config` for broader project setup, and keep staged checks in root `vite.config.ts` instead of adding per-package hook tooling.
+## Task Selection
 
-## Orchestration with `vp run`
+Use the installed `vp run` surface for:
 
-`vp run` reads the same workspace dependency graph that the package manager already uses — regular `dependencies` (and `workspace:*`) in each `package.json`. There is no separate task-runner config to maintain.
+- one package and task
+- a package plus its transitive workspace dependencies
+- every package defining a task
+- filtered or parallel execution
 
-Three flags cover almost all root-level orchestration:
+Confirm the exact flags with installed help. Dependency order comes from
+workspace manifests; do not introduce a second project graph.
 
-| Flag | Selects | Order | Use when |
-| ---- | ------- | ----- | -------- |
-| `vp run <pkg>#<task>` | one package | n/a | Targeted action against a single package |
-| `vp run -t <pkg>#<task>` | a package and all of its workspace deps | topological (deps first) | Build chains, deploy commands, anything that needs upstream artifacts ready |
-| `vp run -r <task>` | every workspace package that defines `<task>` | topological by default; `--parallel` ignores order | Repo-wide passes (test, check, dev) |
+For a consumer app that imports a publishable sibling package, choose
+deliberately:
 
-### Pattern: build chain for CI / deploy
+- **Built-artifact consumption:** slower, but proves the package exports and
+  shipped artifact that external consumers receive.
+- **Source alias:** faster local iteration, but does not prove packaging.
 
-Use `vp run -t` for any "build the consumer and everything it depends on" command. The classic case is a demo app that bundles a sibling library:
+Prefer built-artifact consumption when the demo or app doubles as consumer
+verification. Seed required one-shot builds before starting parallel watch
+tasks; a never-ending dependency watcher cannot precede another dev task in a
+sequential chain.
 
-```json
-{
-  "scripts": {
-    "build:example": "vp run -t @scope/example#build"
-  }
-}
-```
+## Caching
 
-This is the right shape for Cloudflare Pages, Vercel, or any CI step that takes a single root-level command and expects all transitive artifacts to land. The dependency order comes from `apps/example/package.json` declaring `"<lib>": "workspace:*"`.
+Start with simple package scripts. Enable Vite+ caching or root
+`vite.config.ts` task definitions only after the workflow is correct and a hot
+path is measured.
 
-### Pattern: parallel dev with a one-shot library seed
+Automatic file tracking is preferred when supported. Add explicit inputs,
+outputs, environment, or dependency rules only for behavior the installed
+toolchain cannot infer. Verify cached tasks invalidate on source, config,
+lockfile, and relevant environment changes.
 
-A demo app that consumes the library's published artifact (via the library's `exports` map → `dist/`) needs the library's `dist/` to exist before its dev server can resolve imports. The library's dev script is typically a watch task (`vp pack --watch`) that never returns — so a sequential `vp run -t example#dev` blocks forever on the watch and never starts the demo.
+## Completion
 
-Seed the library once, then start every package's `dev` task in parallel:
-
-```json
-{
-  "scripts": {
-    "dev:example": "vp run <lib>#build && vp run -r --parallel dev"
-  }
-}
-```
-
-After the seed, the demo's Vite dev server resolves `<lib>` against `dist/index.mjs`, and HMR flows through to library code on subsequent edits via the lib's watch loop.
-
-### Build-first vs source-alias for a demo app
-
-Two valid patterns for "demo app inside a publishable-library monorepo":
-
-- **Build-first (default for OSS / publishable libraries).** Demo bundles the library's published `dist/` artifact. A green deploy proves what npm consumers will install actually resolves end-to-end. Slightly slower; requires the `vp run -t` chain above. Recommended when the demo deploy doubles as integration verification of the published shape.
-- **Source alias.** Demo's Vite config aliases the library name to `../packages/<lib>/src/index.ts`. Faster, no chain needed, full HMR for free. But the demo no longer validates the published artifact, so a broken `exports` map or missing `files` entry only surfaces when a real consumer installs the package.
-
-For OSS or published libraries, prefer build-first. For a purely internal demo whose only job is fast iteration, source alias is fine.
-
-## Migrate Scripts Deliberately
-
-Use `vp run -r` for root scripts that fan out a Vite+-owned task such as `test`, `check`, or `verify`. This keeps the repo on one task surface, preserves topological ordering, and allows Vite Task to inline nested `vp run` calls. Keep the package manager's recursive runner only for a proven task Vite+ does not own, and document that exception.
-
-```json
-{
-  "scripts": {
-    "build": "vp run <lib>#build",
-    "build:example": "vp run -t @scope/example#build",
-    "dev:example": "vp run <lib>#build && vp run -r --parallel dev",
-    "preview:example": "vp run @scope/example#preview",
-    "test": "vp run -r test",
-    "check": "vp run -r check",
-    "verify": "vp run -r verify"
-  }
-}
-```
-
-All workspace task orchestration goes through `vp run`; the package manager remains responsible for dependency installation and workspace declaration.
-
-## Caching and nested `vp run`
-
-- `vp run` of a `package.json` script is uncached by default. Opt in with `vp run --cache <script>` for one invocation, set `run.cache.scripts: true` in `vite.config.ts` to flip the default workspace-wide, or move the task into `vite.config.ts` (cached by default).
-- Compound commands joined with `&&` are split into independent sub-tasks, each cached separately. When a script contains `vp run`, Vite Task inlines those nested calls as sibling tasks instead of spawning a nested process. Recursion (root `build` -> `vp run -r build` -> root `build` ...) is detected and the self-reference is pruned automatically.
-- Automatic file tracking is the default for cache-enabled tasks. `vp build` also reports Vite inputs, outputs, and relevant env metadata to Vite Task, so standard Vite builds do not need hand-written `input`, `output`, or `env` config.
-- Some non-Vite targets cannot infer task inputs automatically. If Vite+ reports that a task ran uncached because `input` was not configured, add explicit task inputs in `vite.config.ts`.
-
-## Graduating to `vite.config.ts` task definitions
-
-Tasks defined in the root `vite.config.ts` `run.tasks` block are cached by default and can declare `dependsOn: ['<otherpkg>#<task>']` to express ordering inline. When CI build chains start to dominate wall-clock time, move the orchestrating task into `vite.config.ts` to pick up caching for free:
-
-```ts
-import { defineConfig } from 'vite-plus';
-
-export default defineConfig({
-  run: {
-    tasks: {
-      'build:example': {
-        command: 'vp run @scope/example#build',
-        dependsOn: ['<lib>#build'],
-      },
-    },
-  },
-});
-```
-
-For tasks that should run before all direct dependency packages, use the object form:
-
-```ts
-dependsOn: [{ task: 'build', from: ['dependencies', 'devDependencies'] }]
-```
-
-This is a follow-up, not a day-one migration. Land the script-based orchestration first, measure, then promote the hot paths.
-
-## Pitfall: `pnpm --filter "...<pkg>"` does not include workspace deps reliably
-
-Per the pnpm documentation, `--filter "...<pkg>"` should select `<pkg>` and all of its workspace dependencies. In practice on `pnpm@10.33.2` driving `pnpm run`, the leading-ellipsis filter matched only the leaf package — workspace dependencies were not included even with `pnpm -r`. Verify in any repo with:
-
-```bash
-pnpm -r --filter '...<pkg>' list --depth -1
-```
-
-If only one package is listed, use `vp run -t <pkg>#<task>` for transitive builds. `vp run -t` walks the same workspace dependency graph and gives the expected topological order.
-
-## Guardrails
-
-- Apply Vite+ to frontend or Node packages.
-- Keep workspace-specific caching and dependency ordering rules if Vite+ does not fully cover them yet.
-- Verify the important leaf packages still build and test after the migration.
-- Use `vp run -t` for workspace ordering before adding another task-runner config.
+- important leaf packages check, test, and build or pack independently
+- transitive consumer builds execute in dependency order
+- workspace-wide tasks cover every intended package exactly once
+- hook and editor policy is root-owned
+- release, deploy, SDK, or native packaging tasks Vite+ does not own remain intact

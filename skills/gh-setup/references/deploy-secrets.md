@@ -14,18 +14,10 @@ Keep these classes separate. Repo-level secrets are bootstrap-only; production d
 
 ## OIDC First
 
-When the provider supports federation, use GitHub's OIDC token instead of long-lived credentials:
-
-```yaml
-deploy:
-  permissions:
-    contents: read
-    id-token: write
-  environment:
-    name: production
-  steps:
-    - run: ./scripts/ci/assume-deploy-identity --environment production
-```
+When the provider supports federation, use GitHub's OIDC token instead of
+long-lived credentials. Grant `id-token: write` only to the Environment-scoped
+job that uses a maintained provider Action or repository-owned typed identity
+client; do not invent a shell credential broker.
 
 The provider trust policy should bind at least:
 

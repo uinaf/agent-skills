@@ -1,111 +1,56 @@
-# Environments
+# Deploy Environments
 
-Use this reference when wiring deploy credentials, target selection, and manual promotion. The skill intentionally avoids provider cookbooks. Keep platform-specific deployment logic in repo-owned scripts, SST, or infrastructure code, and keep the GitHub Actions contract small.
+Use when changing target selection, promotion policy, provider identity, or
+manual deploys. Provider commands remain in repo-owned scripts or infrastructure
+code.
 
 ## Environment Contract
 
-Every deploy lane declares a GitHub Environment:
+- Declare one GitHub Environment per blast radius: for example `staging`,
+  `production`, or an isolated preview.
+- Keep production-only secrets and variables on that Environment.
+- Use protection rules only for intentional human approval or policy gates.
+- Publish jobs may suppress deployment records when no protection-rule app
+  needs a deployment object. Running-service deploys keep records enabled and
+  publish their target URL.
+- Environment branch/tag policy constrains the workflow run ref, not a different
+  ref checked out later.
 
-```yaml
-deploy-web:
-  environment:
-    name: production
-    url: ${{ steps.deploy.outputs.url }}
-  concurrency:
-    group: deploy-production-web
-    cancel-in-progress: false
-```
+## Identity and Isolation
 
-- Use one environment per blast radius: `staging`, `production`, `preview`, or a repo-specific equivalent.
-- Put production-only secrets and variables on the Environment, not at repository scope.
-- Use Environment protection rules when humans must approve production promotion.
-- Do not rely on Environment branch policies as the only trust boundary. If a job checks out a manual `inputs.ref`, validate that ref separately before checkout or credential loading.
+Prefer provider federation/OIDC scoped to repository, Environment, intended
+branch or tag, audience, and one deployment role. Separate staging and
+production identities and state. Static credentials are an Environment-scoped
+fallback with a documented reason.
 
-## Identity
-
-Prefer short-lived identity over static tokens:
-
-```yaml
-permissions:
-  contents: read
-  id-token: write
-
-steps:
-  - name: Assume deploy identity
-    run: ./scripts/ci/assume-deploy-identity --environment production
-```
-
-- Use OIDC or provider federation when the provider supports it.
-- Scope the provider trust policy to the repository, environment, branch or protected tag, and intended audience.
-- Use separate identities for staging and production.
-- Static provider tokens are a fallback, not the default. If required, store them on the GitHub Environment and document why OIDC is not available.
-- Cloudflare API tokens are static credentials unless a repo has a stronger federation path. Store them on `staging` or `production` GitHub Environments, not as repository-level secrets.
-
-## SST
-
-SST is a good deploy layer when the repo owns both app code and infrastructure. Treat it as the provider-thin promotion step, not as a reason to weaken the workflow boundary:
-
-```yaml
-- run: pnpm sst deploy --stage production
-```
-
-- Run SST after the GitHub Environment is selected and OIDC/provider identity is available.
-- Map SST stages to GitHub Environments (`staging`, `production`, preview names) so secrets and approvals stay visible in GitHub.
-- Split SST app/state boundaries by environment when one deploy path could delete or mutate the other environment's resources. Make `prod` and `staging` explicit stages/projects.
-- Avoid one shared SST app with different behavior by branch unless state ownership, deletion policy, and provider resource names are proven isolated.
-- Keep runtime secrets in SST/provider secret stores or GitHub Environment secrets; do not pass them as CLI flags.
-- Prefer deploying the already verified payload: local build output from the same trusted job, a release asset, a package version, a provider-native package, or an immutable image. If SST must build internally, document why the payload pass-through rule does not fit and add an equivalent build provenance check.
-- Disable dependency/build caches in the credential-bearing SST deploy path unless the cache is scoped to the same trusted event class.
-- After deploy, hand off to the repo's real monitoring, alerting, synthetic checks, and rollback runbook. A cheap CI curl is not production proof.
-- If the repo owns meaningful synthetic checks, trigger or link those from a read-only follow-up job with no cloud credentials. Do not invent a shallow smoke job just to make the workflow look safer.
+When a repo uses SST or an equivalent app-plus-infrastructure deployer, map its
+stages to GitHub Environments and keep provider state/resource ownership
+isolated. The tool remains a thin promotion layer; it does not justify shared
+production/staging state, secret CLI flags, or an unverified rebuild.
 
 ## Payload Promotion
 
-Deploy jobs promote the payload produced by verify:
+Promote the exact payload proved by verification: same trusted job output,
+release asset, registry version, provider-native package, or immutable image
+digest. Record source commit, producing run, reference, and checksum/digest for
+manual or older-version promotion. Verify existence and provenance before
+loading credentials.
 
-```yaml
-- run: ./scripts/prepare-deploy-payload --ref "$VERIFIED_PAYLOAD_REF" --out apps/web/dist
-
-- run: ./scripts/deploy-web --payload apps/web/dist --environment production
-```
-
-- Do not rebuild in the deploy job.
-- Use immutable image digests or commit-SHA tags for containers; mutable tags are browsing hints only.
-- If a manual deploy promotes an older payload, record source commit, producing workflow run, payload reference, and digest or checksum.
-- Verify payload existence before loading deploy credentials.
-
-## Secrets
-
-Separate three layers:
-
-- CI identity: OIDC role names, provider audience, or a bootstrap token when federation is unavailable.
-- Deploy configuration: non-sensitive identifiers such as account IDs, project IDs, regions, service names, and URLs.
-- Runtime secrets: database URLs, API keys, signing keys, and internal service tokens.
-
-Rules:
-
-- Keep non-sensitive identifiers in Environment vars.
-- Keep production runtime secrets in the provider secret store or GitHub Environment secrets, never in workflow YAML.
-- Pass secret values via env vars or stdin, not command-line flags.
-- Never print rendered env files or provider token responses.
+Runtime secrets belong in the provider secret store or selected Environment;
+non-sensitive account/project/region names belong in Environment variables.
+Pass secrets through environment variables or stdin and never print rendered
+configuration.
 
 ## Manual Deploys
 
-Manual `workflow_dispatch` deploys are promotion paths, not build paths:
+Treat `workflow_dispatch` as promotion, not a new build:
 
-```yaml
-on:
-  workflow_dispatch:
-    inputs:
-      ref: { type: string, required: true }
-      environment: { type: choice, options: [staging, production], required: true }
-      lane: { type: choice, options: [web, api], required: true }
-```
+1. Validate environment, lane, and ref in a secretless job.
+2. Resolve the ref to one immutable SHA and prove the corresponding payload.
+3. For production, restrict to the default branch/current default SHA or a
+   protected release tag explicitly supported by the repo contract.
+4. Emit sanitized outputs, then load the target Environment and credentials.
+5. Reuse the normal deploy concurrency key and downstream proof.
 
-- Validate `inputs.ref`, `inputs.environment`, and `inputs.lane` in a secretless job.
-- For staging app deploys, allow same-repo branches or full SHAs after resolving to a single SHA. For zone/domain/IaC changes, allow only default branch unless isolated staging state is proven.
-- For production, allow only the default branch or the current default-branch SHA.
-- Allow protected release tags only when the repo's deploy contract explicitly uses tag promotion.
-- Emit sanitized outputs and use only those outputs downstream.
-- Use the same deploy concurrency key as `main.yml`.
-- Load credentials only after validation and payload provenance checks pass.
+After deploy, hand off to repository-owned monitoring, alerting, synthetic
+checks, and rollback. A shallow CI curl is not production evidence.

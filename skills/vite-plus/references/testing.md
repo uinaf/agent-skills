@@ -1,58 +1,17 @@
 # Testing
 
-Use this reference when migrating tests to Vite+ native usage.
+Use when migrating tests, coverage, or browser mode.
 
-Command examples below describe Vite+ built-ins. Invoke them interactively through the repository-local CLI as `pnpm exec vp ...`; keep bare `vp` inside package scripts.
+- Confirm the installed release's public test and browser-context import paths.
+- Move imports, config, scripts, coverage packages, and lockfile pins together.
+- Put supported test configuration in the `test` block of `vite.config.ts`.
+- Use the installed `vp test` help for one-shot, watch, coverage, filtering, and
+  reporter syntax; do not infer raw Vitest defaults.
+- Remove obsolete wrappers only after migration and reinstall prove the public
+  Vite+ imports resolve.
+- Keep direct upstream Vitest packages only for APIs, coverage/UI modules, or
+  browser providers the repository uses directly, pinned compatibly with the
+  installed toolchain.
 
-## Defaults
-
-- Import from `vite-plus/test` when migrating to Vite+.
-- Browser-mode imports become `vite-plus/test/browser/context`.
-- Move coverage and test-command wiring together with script updates.
-- Verify both the default test pass and any coverage mode the repo actually depends on.
-- Use the built-in `vp test` family rather than attempting to invoke Vitest through a made-up subcommand.
-
-## Command Surface
-
-- `vp test` runs tests once. Unlike raw Vitest, it does not stay in watch mode by default.
-- `vp test watch` enters watch mode.
-- `vp test run --coverage` runs once with coverage; `vp test run` is the explicit non-watch form for CI.
-- Additional Vitest flags can be passed through after the subcommand (e.g. `vp test run --reporter verbose`).
-- Vite+ 0.2.x runs upstream Vitest directly through `vite-plus`; do not keep the removed `@voidzero-dev/vite-plus-test` wrapper.
-
-## Configuration
-
-- Put test config in the `test` block in `vite.config.ts` once the repo is on Vite+.
-
-```ts
-import { defineConfig } from 'vite-plus'
-
-export default defineConfig({
-  test: {
-    include: ['src/**/*.test.ts'],
-  },
-})
-```
-
-## Migration Diff
-
-```diff
--import { describe, expect, it, vi } from 'vitest'
--const { page } = await import('@vitest/browser/context')
-+import { describe, expect, it, vi } from 'vite-plus/test'
-+const { page } = await import('vite-plus/test/browser/context')
-```
-
-After rewriting imports, remove the standalone `vitest` dependency for node-mode-only projects, keep the `vite` alias pointing at `@voidzero-dev/vite-plus-core`, and let `vp migrate` retain an exact upstream `vitest` pin in the package-manager override. Leave imports from `vite-plus/test` and `vite-plus/test/*` unchanged; they are the stable public API.
-
-## Vite+ 0.2.x Vitest Dependencies
-
-- Node-mode-only tests: remove `@voidzero-dev/vite-plus-test` and any alias pointing `vitest` at that removed wrapper; keep the exact upstream `vitest` override or managed catalog pin written by `vp migrate`, but do not add a direct `vitest` dependency.
-- Direct Vitest usage: if source/config imports from `vitest` or `@vitest/*`, or lists packages such as `@vitest/coverage-v8` / `@vitest/ui`, pin those upstream packages to the Vitest version bundled by the installed `vite-plus` release.
-- Browser mode: install the provider package the suite actually imports (`@vitest/browser-playwright` or `@vitest/browser-webdriverio`) in the workspace package that runs the browser tests, and keep its framework peer (`playwright` or `webdriverio`) present. With pnpm, also add direct `vitest` at the bundled version if `vitest/internal/browser` cannot resolve from the browser test server.
-- Type augmentations such as `declare module 'vitest'` or `declare module '@vitest/browser*'` should still target the upstream module identity.
-
-## Caveats
-
-- Adding `@vitest/coverage-v8` means the repo now directly participates in Vitest dependency resolution. Pin it to the bundled Vitest version and verify the lockfile resolves a single Vitest version.
-- Preserve a legacy test invocation only when the incompatibility reproduces on the installed Vite+ release. Document the exact affected version, the command that proves the exception, and the upstream resolution or first fixed version so the workaround can be removed after an upgrade.
+Verify the default suite, every configured coverage or browser path, and the
+real consumer or runtime surface affected by the migration.

@@ -1,7 +1,7 @@
 {
   "name": "uinaf/vite-plus",
   "version": "2.0.11",
-  "description": "Migrate or align frontend package and monorepo repositories to Vite+, including CI, tests, packaging, hook lifecycle, toolchain diagnostics, and Vitest cleanup.",
+  "description": "Create, migrate, or align TypeScript and JavaScript packages or monorepos with the repository-pinned Vite+ toolchain, including scripts, CI, tests, packaging, hooks, and diagnostics.",
   "private": false,
   "skills": [
     "SKILL.md"

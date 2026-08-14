@@ -1,150 +1,58 @@
-# Templates
+# Collaboration Files
 
-Use this reference when deciding whether to create or align GitHub-facing templates and contributor policy docs.
+Use when introducing or aligning GitHub-facing templates and contributor
+policy. First inspect a public `<owner>/.github` defaults repository: local
+files override shared defaults, and shared files are not copied into clones or
+release archives.
 
-This reference owns baseline existence and shape. General docs cleanup may keep
-these files accurate, but the decision to introduce them should follow the
-repo's collaboration model.
+## Ownership
 
-## Organization Defaults
+Use owner-level defaults only for policy true across every target repository.
+`SECURITY.md`, `CONTRIBUTING.md`, and a compact pull-request template are often
+shareable. Licenses remain repository-local. Add a code of conduct only when an
+actual enforcement and contact owner exists. Shared issue templates are risky
+because any repository-local issue configuration disables the shared set.
 
-When the repository owner has a public `<owner>/.github` defaults repository,
-inspect it before treating a missing local community file as a gap. GitHub's
-[default community-health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file)
-act as fallbacks only when the target repository has no file of the same type;
-repository-local files take precedence. Defaults are not copied into target
-repositories or included in their clones, packages, or downloads.
+Changing or creating a public defaults repository is a public policy change;
+obtain authorization first.
 
-Use shared defaults only for policy that is true across every target
-repository. A conservative starting set is:
+## Pull Requests and Issues
 
-- `SECURITY.md`
-- `CONTRIBUTING.md`
-- `PULL_REQUEST_TEMPLATE.md`
-
-Keep these constraints explicit:
-
-- Creating `<owner>/.github` is a public change; obtain authorization before
-  creating it or changing shared policy.
-- A shared `SECURITY.md` must work for both public and private repositories.
-  Prefer GitHub private vulnerability reporting when the target exposes it and
-  fall back to an existing private maintainer channel otherwise.
-- Any local issue-template file or config disables the shared issue-template
-  set for that repository. Add shared issue templates only when the triage
-  contract is truly universal.
-- Do not use the defaults repository for licenses; licenses must remain in each
-  repository so clones and packages include them.
-- Do not add a default code of conduct without an actual enforcement and
-  contact owner.
-
-## Pull Request Template
-
-Use a compact template for non-trivial repos:
+A useful pull-request template asks only for information reviewers use:
 
 ```md
 ## Summary
-
 ## Changed
-
 ## Risks
-
 ## Verification
-
 ## Complexity
 ```
 
-Guidance:
+Keep instructions brief. `Changed` groups surfaces by intent, `Risks` names
+what could regress, `Verification` records meaningful proof, and increased
+complexity needs a reason. Avoid ceremonial checklists.
 
-- Summary names the net change.
-- Changed lists files or surfaces by intent, not a noisy commit log.
-- Risks names what could regress and what reviewers should verify.
-- Verification lists meaningful local, CI, preview, or live proof.
-- Complexity is reduced, neutral, or increased; justify increased complexity.
+Create issue forms only when their fields improve triage. Common distinct
+routes are bug, feature, and—only when supported—question. Vulnerabilities
+always route to `SECURITY.md`, never a public issue form.
 
-Avoid long template checklists that authors learn to ignore.
+## Security and Contributing
 
-## Issue Templates
+`SECURITY.md` should say not to file public vulnerabilities, point to a private
+route that works for the repository visibility, request affected surface,
+impact, minimal reproduction, and mitigations, and avoid response promises the
+maintainer cannot meet.
 
-Create issue templates only when they improve triage.
+- Public repositories may use GitHub private vulnerability reporting only
+  after the setting is enabled and verified.
+- Private repositories route to an existing private maintainer channel; do not
+  promise the public Security-tab workflow.
 
-Useful split:
+`CONTRIBUTING.md` owns setup, canonical validation, and branch/PR expectations.
+Link deeper release or deploy runbooks instead of copying them into README,
+templates, and agent guidance.
 
-- bug report
-- feature request
-- support or question, only when the repo accepts that kind of issue
-
-Security vulnerabilities should route to `SECURITY.md`, not public issues.
-
-## Security Policy
-
-`SECURITY.md` should be short and private-first:
-
-- Tell reporters not to open public issues for vulnerabilities.
-- Provide the private reporting route that actually works for this visibility.
-- Ask for affected version or component, impact, minimal reproduction, and
-  known mitigations.
-- Avoid promising response times unless the maintainer can meet them.
-- Keep product- or organization-specific contact details in the owning overlay,
-  not in this generic base skill.
-
-Choose the route from repository visibility. Do not copy a public template into
-a private repo.
-
-**Public repositories** — GitHub private vulnerability reporting:
-
-1. Enable it (`PUT /repos/{owner}/{repo}/private-vulnerability-reporting`)
-   before or with shipping `SECURITY.md`.
-2. Verify `GET .../private-vulnerability-reporting` returns `enabled: true`.
-3. Point reporters at the Security tab / Report a vulnerability control.
-
-```md
-# Security
-
-Do not open a public issue for a suspected vulnerability.
-
-Use GitHub's private vulnerability reporting from this repository's Security
-tab (Report a vulnerability). Include the affected version or component, impact,
-minimal reproduction, and any known mitigations. Do not include live credentials
-or private source code.
-
-Security fixes are applied on a best-effort basis to the latest release and the
-latest code on `main`.
-```
-
-**Private repositories** — no public PVR surface. Point at an existing private
-maintainer channel. Do not mention the Security-tab reporting button.
-
-```md
-# Security
-
-Do not open a public issue for a suspected vulnerability.
-
-This repository is private. Report suspected vulnerabilities to a repository
-maintainer through an existing private channel before sharing sensitive details.
-Include the affected version or component, impact, minimal reproduction, and any
-known mitigations. Do not include live credentials or private source code.
-
-Security fixes are applied on a best-effort basis to the latest release and the
-latest code on `main`.
-```
-
-## Contributor Docs
-
-`CONTRIBUTING.md` should explain:
-
-- setup
-- validation commands
-- branch and PR workflow
-- release/deploy documentation pointers, when contributors need them
-
-Keep release/deploy mechanics in deeper docs such as `docs/DISTRIBUTION.md` or deployment runbooks. Do not copy the same workflow checklist into README, CONTRIBUTING, templates, and AGENTS.
-
-## Repository Metadata
-
-Repository descriptions and topics should help humans route the repo quickly:
-
-- one-sentence description
-- homepage or docs URL when there is a canonical public surface
-- topics that reflect language, framework, artifact type, and purpose
-
-Do not encode private org, client, machine, or unrelated repo facts into public metadata.
+Repository descriptions and topics should help humans route the project using
+its real purpose, artifact type, language or framework, and canonical public
+URL. Never leak private client, organization, host, or adjacent-repo facts into
+public metadata.

@@ -4,11 +4,11 @@ interface:
   default_prompt: |
     Use $vite-plus.
 
-    Goal: migrate or align a frontend repo with the stock Vite+ workflow.
+    Goal: create, migrate, or align a TypeScript or JavaScript repo with its repository-pinned Vite+ workflow.
 
     Inspect installed Vite+ behavior, the active toolchain, and repo guidance first. Align scripts, tests, config, CI, hooks, and packaging with Vite+-owned paths where supported. Preserve repo-specific release, binary, and runtime logic that Vite+ does not replace. Verify the migrated commands and artifacts end to end.
 
-    Boundaries: surface unsupported Vite or Vitest versions before migration. Do not preserve the removed `@voidzero-dev/vite-plus-test` wrapper.
+    Boundaries: existing repositories and proven compatibility constraints win. Inspect installed commands and package documentation instead of copying volatile versions or parallel Oxlint, Oxfmt, Vitest, and Vite configuration.
 
     Output: no conversational opener. Use bullet labels only: files changed, Vite+ shape, evidence, exceptions, and next. Summarize passing commands by intent/result instead of printing full command strings; include full commands only for failures, reproduction, or when asked.
 

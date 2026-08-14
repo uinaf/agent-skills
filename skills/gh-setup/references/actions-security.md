@@ -1,128 +1,53 @@
 # Actions Security
 
-Use this reference when editing GitHub Actions workflows, composite actions, reusable workflows, release jobs, deploy jobs, signing jobs, or any workflow that loads secrets.
+Use when a workflow executes project code or loads publish, signing, deploy, or
+other privileged credentials.
 
-## Dangerous Trigger Boundary
+## Trust Boundary
 
-Do not use `pull_request_target` for workflows that check out, install, build, test, package, publish, sign, deploy, or otherwise execute project code.
+- Never use `pull_request_target` to check out, install, build, test, package,
+  or otherwise execute pull-request code.
+- Fork and pull-request jobs use `pull_request`, read-only permissions, and no
+  delivery secrets.
+- Secret-bearing work runs only on trusted branches, protected tags, or a
+  validated manual dispatch.
+- Manual inputs are validated in a secretless job, refs resolve to one immutable
+  SHA, and downstream jobs consume only sanitized outputs.
 
-Use `pull_request` for outsider or fork code with read-only credentials. Keep secret-bearing work on trusted events such as `push` to protected branches, protected tags, or validated manual dispatch.
+## Permissions and Credentials
 
-## Manual Inputs
+Default workflow permissions to `contents: read` or `{}`. Grant write, OIDC,
+attestation, or pull-request permissions only to the job that needs them.
+Monitoring and notification jobs stay read-only.
 
-Secret-bearing manual workflows must validate inputs before checkout or credential loading:
+Use `persist-credentials: false` through checkout, install, build, pack, and
+test in privileged workflows. Add write credentials only at the narrow delivery
+boundary. Fetch full history only when tags, history, or affected detection
+requires it.
 
-1. Run a secretless validation job.
-2. Validate allowed values, ref shape, environment, lane, package, or version.
-3. Resolve refs to one immutable SHA when checking out code.
-4. Emit sanitized outputs.
-5. Use only those sanitized outputs downstream.
+## Dependencies, Caches, and Logic
 
-Environment branch/tag policy is not enough when the job later checks out `inputs.ref`.
+- Pin high-trust remote Actions to reviewed full SHAs and keep an automated
+  update path. Repository-level SHA enforcement is useful only after the
+  current allowlist and updater contract are understood.
+- Run repository-owned `actionlint`, `zizmor`, and appropriate secret scanners.
+  Use supported configuration instead of shell glue that merely silences them.
+- Never share package caches from untrusted pull requests with privileged
+  publish, signing, release, or deploy jobs.
+- Keep workflow YAML orchestration-thin. Prefer maintained Actions and the
+  repository's existing typed validation/task surfaces. When custom parsing,
+  ref policy, summaries, provider branching, or security-sensitive logic is
+  unavoidable, use a tested typed module or local action with explicit inputs
+  and outputs. Do not grow inline shell or move the same spaghetti into a new
+  `.sh` file; shell may only dispatch a few already-defined commands.
 
-## Permissions
+## Payloads and Artifacts
 
-Set workflow permissions to `contents: read` or `{}` by default, then grant per job:
+Actions artifacts are temporary same-run storage, not a durable release or
+recovery boundary. A later run or recoverable deploy should consume an
+immutable GitHub Release asset, registry version, image digest, provider-native
+package, or signed archive with checksum/provenance.
 
-- `contents: write` only for release notes, tags, release assets, or bump commits.
-- `id-token: write` only for OIDC, trusted publishing, or keyless provenance.
-- `attestations: write` only when producing GitHub build attestations.
-- `artifact-metadata: write` only when the attestation integration actually
-  creates an artifact storage record; ordinary file attestations do not need it.
-- `pull-requests: write` only when posting PR comments or checks that require it.
-- Monitoring, incident, or notification jobs stay read-only and receive no provider credentials.
-
-## Action Pinning
-
-Pin high-trust release, publish, upload, signing, and deploy actions to full commit SHAs with a same-line version comment when the repo can maintain pin refreshes.
-
-Example:
-
-```yaml
-- uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
-```
-
-Before committing a pin, verify the SHA resolves upstream. Dependabot can update SHA-pinned GitHub Actions when the version comment is accurate.
-
-Enable Dependabot `github-actions` updates for repos with pinned Actions. Pinning without an update path turns security hardening into drift.
-
-When the repository plan supports it, also enable GitHub's Actions
-`sha_pinning_required` setting so unpinned actions fail closed. This lives on
-the repository Actions permissions object (allowed-actions policy), not the
-default `GITHUB_TOKEN` workflow-permissions endpoint:
-
-```bash
-gh api repos/{owner}/{repo}/actions/permissions
-gh api --method PUT repos/{owner}/{repo}/actions/permissions --input - <<'EOF'
-{"enabled": true, "allowed_actions": "all", "sha_pinning_required": true}
-EOF
-```
-
-Read the current permissions object first and preserve `enabled` /
-`allowed_actions` (and selected-action allowlists) the repo intentionally set.
-Local `uses: ./.github/actions/...` paths are unaffected; once the setting is
-on, remote actions must use full commit SHAs.
-
-## Standard Hardening
-
-Prefer scanner-backed gates before bespoke workflow validators:
-
-- `actionlint` for syntax and expression mistakes
-- `zizmor` for GitHub Actions security
-- gitleaks or TruffleHog for secret scanning when appropriate
-- Dependabot alerts and security updates for dependency advisories
-
-Do not enable CodeQL default setup. See [repo settings](repo-settings.md).
-
-For repos without GitHub Advanced Security, configure zizmor for annotations and omit `security-events: write`.
-
-## Repository Secret Scanning
-
-Run repository-history secret detection in a dedicated `Secret scanning`
-workflow:
-
-- trigger on pull requests and default-branch pushes
-- add a weekly schedule and manual dispatch for recurring coverage
-- check out full history with persisted credentials disabled
-- run maintained scanners at explicit versions with redacted output
-- keep the repository's default local verification focused on its source,
-  build, documentation, and test contracts
-
-Use the repository's dependency updater for pinned Actions. Keep machine and
-host configuration audits in their owning operational tooling; they are a
-different surface from repository-history scanning.
-
-## Inline Logic Budget
-
-Workflow YAML is orchestration, not an application runtime.
-
-- Prefer maintained actions for standard checks, auth setup, package publishing, artifact handling, and security scanning.
-- Keep inline `run:` steps to simple command calls or a tiny amount of glue.
-- Move policy logic, ref resolution, JSON parsing, summaries, and provider-specific branching into a repo-owned script or local action with tests.
-- Do not add bespoke shell, JavaScript, grep, awk, or YAML parsing just to silence a scanner. Fix the workflow shape or use the scanner's supported configuration.
-- When no maintained action fits and the logic is security-sensitive, make the local action's contract narrow: typed inputs, explicit outputs, no implicit secrets, and tests that cover bad input.
-
-## Checkout And Credentials
-
-Use `fetch-depth: 0` when release tooling, semantic versioning, affected detection, or tag operations need history.
-
-Keep `persist-credentials: false` through dependency install, build, pack, and test steps whenever possible in secret-bearing jobs. Add write credentials only at the narrow release or deploy boundary.
-
-## Caches
-
-Do not share package-manager caches between untrusted PR runs and privileged push, release, publish, signing, deploy, or promotion jobs.
-
-If a cache is unavoidable, namespace it by workflow, event/trust level, platform, and lockfile. Release and signing jobs should regenerate or verify generated trees before publishing.
-
-## Artifacts And Payloads
-
-GitHub Actions artifacts are temporary CI scratch storage. They are acceptable for same-run handoff when retention and quota are understood, but they are a weak durable boundary.
-
-Use same-job tested output only for a same-run deploy. Recovery and later runs
-must use durable publish/deploy inputs:
-
-- GitHub Release asset
-- package registry version
-- container image digest
-- provider-native deployment package
-- signed archive with checksum or provenance
+Do not rebuild after verification unless the provider is intentionally the
+builder and records equivalent provenance. Keep secret-bearing delivery jobs
+non-cancellable and make retries reconcile durable state.

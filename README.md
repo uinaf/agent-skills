@@ -16,7 +16,6 @@ and the other skills in the catalog.
 | [`planning`](skills/planning/SKILL.md) | Saving agreed work as resumable plans in the repository's preferred tracker. |
 | [`react-ban-use-effect`](skills/react-ban-use-effect/SKILL.md) | Replacing direct React `useEffect` with clearer patterns and enforcement. |
 | [`skill-audit`](skills/skill-audit/SKILL.md) | Auditing skill activation, packaging, instructions, and quality. |
-| [`verify`](skills/verify/SKILL.md) | Proving a completed change works before independent review. |
 | [`vite-plus`](skills/vite-plus/SKILL.md) | Migrating frontend packages and monorepos to Vite+. |
 
 ## Install
@@ -30,11 +29,11 @@ pnpm dlx skills add uinaf/skills --list
 Install one skill globally for Codex and Claude Code:
 
 ```bash
-pnpm dlx skills add uinaf/skills -g -y -a codex -a claude-code -s verify
+pnpm dlx skills add uinaf/skills -g -y -a codex -a claude-code -s agent-readiness
 ```
 
-Replace `verify` with any catalog name. Omit `-g` for a repository-local
-installation.
+Replace `agent-readiness` with any catalog name. Omit `-g` for a
+repository-local installation.
 
 ## Contributing
 

@@ -35,7 +35,7 @@ TESSL_REVIEW_MODE=lint ./scripts/review.sh
 ./scripts/review.sh
 
 # review one package
-./scripts/review.sh skills/verify
+./scripts/review.sh skills/agent-readiness
 
 # intentional full portfolio gate
 TESSL_REVIEW_ALL=true ./scripts/review.sh
@@ -65,7 +65,7 @@ For structured output from one package, use the locked CLI directly;
 `scripts/review.sh` rejects `--json`:
 
 ```bash
-pnpm exec tessl review run --json --workspace uinaf --threshold 100 skills/verify
+pnpm exec tessl review run --json --workspace uinaf --threshold 100 skills/agent-readiness
 ```
 
 ## Impact evals
@@ -90,7 +90,7 @@ Publishing is documented separately in [Distribution](../docs/distribution.md).
 Apply Tessl's optimizer to one skill at a time:
 
 ```bash
-./scripts/optimize.sh verify
+./scripts/optimize.sh agent-readiness
 ```
 
 The optimizer mutates one package. Inspect its diff before keeping the result.

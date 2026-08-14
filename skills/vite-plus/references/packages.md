@@ -1,55 +1,18 @@
-# Packages
+# Standalone Packages
 
-Use this reference for standalone package repos adopting Vite+.
+Use for one publishable library, CLI, executable, or application package.
 
-Command examples below use the concise `vp` spelling appropriate inside package scripts. From an interactive shell, run the same built-ins as `pnpm exec vp ...` after installing the repository dependencies.
+- Prefer the installed Vite+ pack surface for libraries and executables and the
+  build surface for applications.
+- Keep pack, test, lint, and format configuration in `vite.config.ts` when the
+  selected release supports it.
+- Let the exact migrator own the required Vite core alias and bundled Vitest
+  pin. Verify them in the manifest and lockfile instead of copying a versioned
+  example from this reference.
+- Keep direct Vitest ecosystem packages only when the repository imports their
+  APIs or needs coverage, UI, or browser providers directly.
+- Preserve SDK generation, native packaging, release preparation, and consumer
+  checks Vite+ does not replace.
 
-## Defaults
-
-- Prefer `vp pack` for libraries and standalone executables (`pack.exe = true` for native binaries).
-- Prefer `vp check` and `vp test` as the default verify surface.
-- Keep `pack` config in `vite.config.ts` instead of maintaining a parallel `tsdown.config.ts`. After migrating, delete the standalone `tsdown.config.ts`.
-
-## Aliased Dependencies
-
-- In standalone packages, declare `vite` directly in `devDependencies` as the Vite+ core alias, even if no source file imports Vite:
-
-  ```json
-  {
-    "devDependencies": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@<matching-vite-plus-version>",
-      "vite-plus": "^<matching-vite-plus-version>"
-    }
-  }
-  ```
-
-  This gives pnpm a concrete importer for the aliased `vite` name. An override alone can leave Vitest and Vite+ peer contexts locked against upstream `vite@8.x` instead of `@voidzero-dev/vite-plus-core`.
-
-- `pnpm` repos should keep the `vite` override pointed at Vite+ core:
-
-  ```yaml
-  # pnpm-workspace.yaml
-  overrides:
-    vite: npm:@voidzero-dev/vite-plus-core@<matching-vite-plus-version>
-  ```
-
-  For single-package pnpm repos, add `packages: ["."]` or the block form below if the workspace file would otherwise contain only settings:
-
-  ```yaml
-  packages:
-    - "."
-
-  overrides:
-    vite: npm:@voidzero-dev/vite-plus-core@<matching-vite-plus-version>
-  ```
-
-- `npm` projects use `overrides` in `package.json`; Yarn projects use `resolutions`.
-- After reinstalling, check that `pnpm-lock.yaml` records the importer `vite` specifier as `npm:@voidzero-dev/vite-plus-core@<version>` and the version as `@voidzero-dev/vite-plus-core@...`; do not stop at `pnpm config get overrides`.
-- In Vite+ 0.2.x and newer, do not alias `vitest` to `@voidzero-dev/vite-plus-test`; that wrapper was removed. Let `vp migrate` keep an exact upstream `vitest` pin in the package-manager override or managed catalog so the project shares the bundled runner version. Plain node-mode tests should not list `vitest` directly. Keep or add direct upstream `vitest` / `@vitest/*` dependencies only for direct Vitest API usage, coverage/UI packages, or browser-mode requirements.
-
-## Notes
-
-- `vp pack --watch` is the watch-mode equivalent for libraries; pair it with `vp run -r --parallel dev` in monorepos that consume the library via `dist/`.
-- Multi-config and workspace pack builds run in parallel by default. Use `vp pack --concurrency <count>` when CI or local resource limits require a bounded number of Rolldown builds; leave it unset when full parallelism is appropriate.
-- Keep SDK, codegen, or bootstrap steps that Vite+ does not replace.
-- Update docs when install, test, or packaging commands change.
+Verify the packed artifact as a downstream consumer would, not only through
+source-level tests.

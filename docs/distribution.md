@@ -65,7 +65,7 @@ environment and never call cloud review.
 ## Dry-run one plugin
 
 ```bash
-TESSL_DRY_RUN=true ./scripts/publish.sh skills/verify
+TESSL_DRY_RUN=true ./scripts/publish.sh skills/agent-readiness
 ```
 
 The wrapper uses the same CLI, workspace, lint, and bump defaults as the hosted

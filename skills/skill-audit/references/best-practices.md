@@ -1,13 +1,5 @@
 # Skill Authoring Best Practices
 
-This reference distills the guidance that commonly shapes good skills:
-
-- [Claude Code memory guidance](https://code.claude.com/docs/en/memory)
-- [Claude skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
-- [Matt Pocock's writing-for-agents](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-for-agents/SKILL.md)
-- [OpenAI Codex AGENTS.md guidance](https://developers.openai.com/codex/guides/agents-md)
-- source-repo conventions and contributor guidance, when present
-
 Use it when an audit finds weak activation, a bloated `SKILL.md`, or unclear workflow boundaries.
 
 ## Metadata And Discovery
@@ -22,6 +14,8 @@ Use it when an audit finds weak activation, a bloated `SKILL.md`, or unclear wor
 ## Body Shape
 
 - keep `SKILL.md` focused on the workflow, principles, boundaries, and routing
+- lead with the task, not a bibliography or research recap; attach external
+  evidence to the decision it supports
 - assume the model is already smart; spend tokens on repo-specific judgment
 - keep always-loaded guidance small and move repeatable task workflows into skills or scoped rules
 - match the level of instruction to the task:
@@ -35,9 +29,16 @@ Use it when an audit finds weak activation, a bloated `SKILL.md`, or unclear wor
 ## Progressive Disclosure
 
 - put durable detail, rubrics, and long examples in `references/`
+- judge eval fixtures on realism, coverage, safety, and answer leakage rather
+  than runtime token budget; their size does not affect skill retrieval
 - keep references one hop away from `SKILL.md`
 - keep material every execution path needs inline; disclose reference needed by only one branch behind a pointer that names that branch
-- use scripts for repeated deterministic work instead of rewriting the same logic in prose
+- for repeated deterministic work, first use the target's existing framework,
+  plugin, schema, task graph, or library; otherwise add a tested module in its
+  primary language rather than defaulting to shell
+- when executable code belongs to another maintained project, link the exact
+  public script, config, workflow, or template and state what contract it
+  demonstrates; do not fork it into prose
 - if a reference is not worth loading on demand, it probably does not belong in the skill
 - if a skill only repeats broad behavior rules, move that guidance to `AGENTS.md`, `CLAUDE.md`, or the owning repo docs instead
 - keep each package independently usable: state prerequisite evidence and out-of-scope next steps locally rather than invoking or requiring sibling skills

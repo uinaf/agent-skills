@@ -1,7 +1,7 @@
 {
   "name": "uinaf/skill-audit",
   "version": "0.2.14",
-  "description": "Audit, score, or improve existing skills using repository checks, Tessl plugin lint, optional credit-aware Tessl review, metadata checks, repo conventions, and skill-authoring best practices. Prefer free lint over cloud review except for publish-ready 100-point scores. Use when creating or revising a skill, asking why a skill did not activate, checking skill quality, comparing a skill against `AGENTS.md`, `CLAUDE.md`, or repo rules, or preparing a skill for publish. Do not use to verify general application code or to rewrite unrelated docs.",
+  "description": "Audit, score, or improve an existing skill using repository checks, free Tessl lint, optional credit-aware Tessl review, discovery metadata, progressive disclosure, eval coverage, and repo conventions. Use for skill quality, activation failures, package comparisons, or publish readiness. Do not use for general code review, application verification, or unrelated documentation cleanup.",
   "private": false,
   "skills": [
     "SKILL.md"
