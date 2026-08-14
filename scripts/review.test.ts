@@ -63,6 +63,12 @@ test("CI uses free lint verify; authenticated 100-point review stays local", () 
   assert.doesNotMatch(publishWorkflow, /run: pnpm run verify:skills/);
   assert.doesNotMatch(publishWorkflow, /TESSL_THRESHOLD:/);
   assert.doesNotMatch(publishWorkflow, /TESSL_REVIEW_ALL:/);
+  assert.match(
+    workflowStep(publishWorkflow, "Publish changed plugins"),
+    /TESSL_PUBLISH_SKIP_EVALS: "true"/,
+    "automatic publishing must not consume eval credits",
+  );
+  assert.match(publishScript, /TESSL_PUBLISH_SKIP_EVALS/);
   // publish job still needs the token for registry publish
   assert.match(publishWorkflow, /TESSL_TOKEN: \$\{[{] secrets\.TESSL_TOKEN [}]\}/);
   assert.doesNotMatch(publishWorkflow, /run: \.\/scripts\/review\.sh/);

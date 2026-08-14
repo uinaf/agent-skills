@@ -18,7 +18,9 @@ jq -r '.name' skills/*/.tessl-plugin/plugin.json
    (`pnpm run verify`: typecheck, shell/action lint, tests, `tessl plugin lint`).
    CI does not run credit-burning Tessl cloud review.
 2. On pushes to `main`, `scripts/publish.sh` lints and publishes only changed
-   plugins. A manual `workflow_dispatch` on `main` publishes every plugin.
+   plugins without running or uploading registry eval scenarios. This keeps the
+   automatic lane credit-free; eval fixtures remain canonical in Git. A manual
+   `workflow_dispatch` on `main` publishes every plugin with the same policy.
 3. Publishing defaults to a patch bump. Set `TESSL_PUBLISH_BUMP=minor` or
    `major` only for an intentional release change.
 4. After publishing, the release bot writes updated plugin versions back to
@@ -38,6 +40,10 @@ For an intentional 100-point Tessl cloud score before a sensitive skill change,
 run `pnpm run verify:skills` locally (changed skills) or
 `TESSL_REVIEW_ALL=true pnpm run review:skills` for the portfolio. See
 [Skill evaluation](../scripts/README.md).
+
+To publish one plugin with its eval scenarios when credits are intentionally
+available, run `./scripts/publish.sh skills/<name>` locally. The hosted workflow
+sets `TESSL_PUBLISH_SKIP_EVALS=true`; the wrapper's local default is false.
 
 Fleet inventory, monthly free lint, and the ban on scheduled cloud review live
 in [Skill fleet](skill-fleet.md).

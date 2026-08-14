@@ -53,7 +53,10 @@ CI stays on the free lint lane:
 - A monthly scheduled workflow also runs `pnpm run verify` only — never cloud
   review. See [Skill fleet](../docs/skill-fleet.md).
 - Main still publishes changed plugins after that gate; Tessl registry publish
-  uses `TESSL_TOKEN` in the publish job only.
+  uses `TESSL_TOKEN` in the publish job only and sets
+  `TESSL_PUBLISH_SKIP_EVALS=true` so automatic publishing stays credit-free.
+  Eval fixtures remain in Git; publish them locally only when a paid eval run is
+  intentional.
 - Run authenticated 100-point review locally with `pnpm run verify:skills` or
   `TESSL_REVIEW_ALL=true ./scripts/review.sh` when you intentionally want scores.
   Do not put that on a cron.

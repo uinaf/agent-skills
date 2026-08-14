@@ -98,6 +98,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           TESSL_WORKSPACE: uinaf
           TESSL_PUBLISH_ALL: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
+          TESSL_PUBLISH_SKIP_EVALS: "true"
         run: ./scripts/publish.sh
 
       - name: Stage published plugin versions

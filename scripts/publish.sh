@@ -9,6 +9,7 @@ bump="${TESSL_PUBLISH_BUMP:-patch}"
 publish_all="${TESSL_PUBLISH_ALL:-false}"
 dry_run="${TESSL_DRY_RUN:-false}"
 scenario_quality_check="${TESSL_SCENARIO_QUALITY_CHECK:-false}"
+skip_evals="${TESSL_PUBLISH_SKIP_EVALS:-false}"
 
 publish_args=(--workspace "$workspace" --bump "$bump")
 if [[ "$dry_run" == "true" ]]; then
@@ -16,6 +17,9 @@ if [[ "$dry_run" == "true" ]]; then
 fi
 if [[ "$scenario_quality_check" == "true" ]]; then
   publish_args+=(--with-scenario-quality-check)
+fi
+if [[ "$skip_evals" == "true" ]]; then
+  publish_args+=(--skip-evals)
 fi
 
 declare -a plugin_dirs=()
