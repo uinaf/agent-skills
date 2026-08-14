@@ -1,6 +1,6 @@
 {
   "name": "uinaf/vite-plus",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "Create, migrate, or align TypeScript and JavaScript packages or monorepos with the repository-pinned Vite+ toolchain, including scripts, CI, tests, packaging, hooks, and diagnostics.",
   "private": false,
   "skills": [
