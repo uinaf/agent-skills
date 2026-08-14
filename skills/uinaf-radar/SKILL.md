@@ -1,11 +1,11 @@
 ---
 name: uinaf-radar
-description: "Read the private uinaf Radar GitHub Project and summarize Now, Blocked, Next, Inbox, Maintenance, recently Shipped work, and drift. Use for uinaf status, prioritization, bug or dependency queues, daily checks, or coverage audits with an exact repository scope. Read-only: recommend changes but never mutate GitHub."
+description: "Read the private uinaf radar GitHub Project and summarize Now, Blocked, Next, Inbox, Maintenance, recently Shipped work, and drift. Use for uinaf status, prioritization, bug or dependency queues, daily checks, or coverage audits with an exact repository scope. Read-only: recommend changes but never mutate GitHub."
 ---
 
-# uinaf Radar
+# uinaf radar
 
-Radar is the tracked work inventory with a deliberately small attention
+radar is the tracked work inventory with a deliberately small attention
 surface. A coverage audit determines whether that inventory is complete.
 
 ## Run
@@ -50,7 +50,7 @@ Omit empty attention sections. Summarize Inbox and Maintenance unless the user a
 
 Coverage scope comes from the caller. With an exact repository list and start
 date, verify every repository is readable, compare its current open issue and
-pull-request URLs with Radar, and query recently closed issues and merged pull
+pull-request URLs with radar, and query recently closed issues and merged pull
 requests. Report inaccessible repositories, missing items, and stale plans
 separately. Without both inputs, report `Coverage: not audited`. Do not infer
 scope or mutate GitHub.
