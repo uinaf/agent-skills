@@ -37,6 +37,11 @@ step failed:
    [release workflows](release-workflows.md#partial-failure-recovery).
 4. Re-prove parity after recovery.
 
+If the exact tag says a Release should already exist, retry an authenticated
+exact-tag lookup for bounded visibility before diagnosing it as missing. Keep
+the terminal API error and fail closed when the expected Release stays
+invisible; do not turn that state into a green skip.
+
 When Actions artifact quota blocks deploy after successful publication, remove
 the temporary artifact dependency and promote from the durable release asset,
 registry, image digest, or provider-native package.

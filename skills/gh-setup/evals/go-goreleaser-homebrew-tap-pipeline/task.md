@@ -30,12 +30,16 @@ release actor. Resolve the remote ref through a tested repo-owned helper using
 the source-repository workflow token and authenticated GitHub Git Refs/Tags
 APIs; the checkout keeps persisted credentials disabled. The separate tap App
 token must never be used for source reads or writes.
-Because the REST by-tag endpoint omits drafts, inspect an authenticated,
-paginated Releases listing before deciding the exact tag is absent; API failure
-or duplicate exact-tag state must fail closed. Reject a prerelease for the
-stable tag. Before attestation or publication, require the resumed draft's
-complete asset names and SHA-256 digests to equal the current build manifest;
-missing, extra, or mismatched assets fail closed.
+Use an authenticated exact-tag lookup that can see drafts and retry visibility
+for a bounded period before deciding release state. When the current run already
+created or identified an expected draft, an exhausted lookup preserves the
+terminal API error and fails closed rather than reporting absence or success. In
+explicit recovery, accept a genuinely missing Release only after the bounded
+lookup, backfill it from the trusted tag, and reread exact state; API failure,
+create conflict, or duplicate exact-tag state must not become a green no-op.
+Reject a prerelease for the stable tag. Before attestation or publication,
+require the resumed draft's complete asset names and SHA-256 digests to equal
+the current build manifest; missing, extra, or mismatched assets fail closed.
 
 ## Output Specification
 
