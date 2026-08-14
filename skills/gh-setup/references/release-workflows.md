@@ -49,12 +49,12 @@ assets, configure it to create a draft. If all assets already exist, one
 publisher may create the draft, upload, and publish atomically. Never append or
 replace assets after publication.
 
-A retry reads the exact tag and Release state first. When a tag implies that a
-Release should exist, use an authenticated exact-tag lookup that can see drafts
-and retry visibility for a bounded period. Preserve the final lookup error and
-fail closed if the expected Release never appears; absence must never become a
-successful no-op. Published means mutation is over; continue only missing
-downstream reconciliation.
+A recovery reads the exact tag and Release state first. When a tag implies that
+a Release should exist, use an authenticated exact-tag lookup that can see
+drafts. A failed expected lookup is an error, not a successful no-op. Add a
+bounded visibility retry only when the repository has demonstrated transient
+lookup lag. Published means mutation is over; continue only missing downstream
+reconciliation.
 
 ## Signed Writeback
 
@@ -102,10 +102,11 @@ Reconcile durable state before choosing a repair:
 
 Backfills validate inputs before secrets, reread every durable boundary after
 repair, and never create another version bump. In an explicit recovery path
-where a missing Release is a valid state, conclude absence only after bounded
-authenticated lookups. Backfill from the already-trusted tag, then reread the
-exact Release. A create conflict or duplicate exact-tag state is reconciliation
-work, not success.
+where a missing Release is a valid state, accept only an unambiguous not-found
+response as absence. Authentication, authorization, rate-limit, network, and
+server failures remain errors. Backfill from the already-trusted tag, then
+reread the exact Release. A create conflict or duplicate exact-tag state is
+reconciliation work, not success.
 
 ## Supply-Chain and Handoff
 
