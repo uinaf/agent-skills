@@ -57,6 +57,35 @@ vulnerability reporting must have that setting enabled and read back. Private
 repositories do not expose the same public reporting surface; route them to an
 existing private maintainer channel.
 
+For an organization that wants useful free defaults without per-active-committer
+Advanced Security charges, suggest one enforced organization security
+configuration with this baseline:
+
+- apply it to all current repositories and make it the default for all new
+  repositories;
+- do not allow repository owners to modify the configured features;
+- disable the paid **Secret Protection** bundle;
+- disable the paid **Code Security** bundle and legacy blanket
+  `advanced_security` enablement;
+- disable CodeQL default setup;
+- enable the dependency graph, Dependabot alerts, and Dependabot security
+  updates.
+
+This is a billing-safe baseline, not a claim that every overlapping public-repo
+security feature is off. GitHub may provide some secret scanning or other
+security capabilities for public repositories without consuming a paid
+license. Read back both the effective repository settings and Advanced Security
+license usage instead of inferring them from the configuration label.
+
+Treat repository visibility changes as billing-sensitive. Before and after a
+public-to-private transition, read back the attached security configuration,
+effective paid features, active-committer license usage, and projected billing.
+A feature that was free for a public repository can become billable when that
+repository becomes private. If a repository genuinely needs Secret Protection,
+Code Security, or CodeQL, use a separate narrow configuration or explicit
+repository opt-in with accepted cost, owner, and trigger design; do not weaken
+the organization baseline for the whole fleet.
+
 Do not enable CodeQL default setup as a blanket baseline. Its pull-request and
 scheduled behavior is not a configurable post-merge-only scan and can block
 merge state even when not required. Prefer the repository's deliberate

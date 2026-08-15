@@ -61,7 +61,8 @@ provider details.
 
 Read [repository settings](references/repo-settings.md) for merge methods,
 rulesets, required checks, signed commits, tags, Actions policy, Environments,
-CodeQL posture, and repository metadata.
+the cost-safe organization security baseline, CodeQL posture, and repository
+metadata.
 
 Preserve existing approval, actor, signed-commit, tag, and status-check rules
 unless the requested change owns them. Running a check and enforcing it are
