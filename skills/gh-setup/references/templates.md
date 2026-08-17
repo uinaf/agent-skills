@@ -18,22 +18,23 @@ obtain authorization first.
 
 ## Pull Requests and Issues
 
-A useful pull-request template asks only for information reviewers use:
+A useful pull-request template asks for plain sentences, not headings for
+their own sake:
 
 ```md
-## Summary
-## Changed
-## Risks
-## Verification
-## Complexity
+<!--
+Open with the problem this change solves, as the requester stated it,
+then the solution, then exactly what ran to prove it. Name a risk only
+when there is a real one. No implementation inventories.
+-->
 ```
 
-Keep instructions brief. `Changed` groups surfaces by intent, `Risks` names
-what could regress, `Verification` records meaningful proof, and increased
-complexity needs a reason. Avoid ceremonial checklists.
+Title the way the repository titles merged work, outcome over mechanism.
+Avoid ceremonial checklists and heading scaffolds; reviewers read
+sentences, not section labels.
 
 Create issue forms only when their fields improve triage. Common distinct
-routes are bug, feature, and—only when supported—question. Vulnerabilities
+routes are bug, feature, and (only when supported) question. Vulnerabilities
 always route to `SECURITY.md`, never a public issue form.
 
 ## Security and Contributing
