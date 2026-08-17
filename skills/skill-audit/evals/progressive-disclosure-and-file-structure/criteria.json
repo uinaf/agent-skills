@@ -1,5 +1,5 @@
 {
-  "context": "Tests whether the agent correctly identifies and fixes progressive disclosure violations — moving rubrics and examples from SKILL.md into references/, removing duplicate checklist content already in a script, and fixing invalid frontmatter fields — then reruns Tessl to confirm improvement.",
+  "context": "Tests whether the agent correctly identifies and fixes progressive disclosure violations — moving rubrics and examples from SKILL.md into references/, removing duplicate checklist content already in a script, and fixing invalid frontmatter fields — then reruns the structural skill lint to confirm improvement.",
   "type": "weighted_checklist",
   "checklist": [
     {
@@ -28,19 +28,19 @@
       "description": "SKILL.md contains repo-relative links to the reference files that were moved out (not bare filenames or absolute paths)"
     },
     {
-      "name": "Tessl run before edits",
+      "name": "Lint run before edits",
       "max_score": 9,
-      "description": "audit-log.sh shows a Tessl invocation before any file edits are recorded"
+      "description": "audit-log.sh shows a structural skill lint invocation before any file edits are recorded"
     },
     {
-      "name": "Tessl rerun after edits",
+      "name": "Lint rerun after edits",
       "max_score": 9,
-      "description": "audit-log.sh shows a second Tessl invocation after edits, and audit-report.md states the post-edit score"
+      "description": "audit-log.sh shows a second lint invocation after edits, and audit-report.md states the post-edit result"
     },
     {
-      "name": "Before/after scores compared",
+      "name": "Before/after results compared",
       "max_score": 8,
-      "description": "audit-report.md explicitly compares the pre-edit and post-edit Tessl scores"
+      "description": "audit-report.md explicitly compares the pre-edit and post-edit lint results"
     },
     {
       "name": "Change reasons documented",

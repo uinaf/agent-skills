@@ -1,4 +1,4 @@
-![skills — reusable agent skills with deterministic review and publishing gates.](https://uinaf.dev/og/banner/skills.png)
+![skills — reusable agent skills with a deterministic lint gate.](https://uinaf.dev/og/banner/skills.png)
 
 # uinaf/agent-skills
 
@@ -40,14 +40,10 @@ pnpm install --frozen-lockfile
 pnpm run verify
 ```
 
-CI uses that same free lint/structure gate. For an intentional local 100-point
-Tessl cloud score before a sensitive skill change:
+CI runs that same gate: workflow lint plus
+[`@uinaf/skillcheck`](https://github.com/uinaf/skillcheck) structural lint,
+both keyless.
 
-```bash
-pnpm run verify:skills
-```
-
-See [Skill evaluation](scripts/README.md) for lint vs review lanes,
-[Distribution](docs/distribution.md) for publication and release setup, and
+See [Distribution](docs/distribution.md) for how skills reach consumers and
 [Skill fleet](docs/skill-fleet.md) for the cross-repo inventory and monthly
-lint cadence (no scheduled cloud review).
+lint cadence.

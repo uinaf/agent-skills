@@ -1,9 +1,0 @@
-{
-  "name": "uinaf/uinaf-radar",
-  "version": "0.1.2",
-  "description": "Read the private uinaf Radar GitHub Project and summarize Now, Blocked, Next, Inbox, Maintenance, recently Shipped work, and drift. Use for uinaf status, prioritization, bug or dependency queues, daily checks, or coverage audits with an exact repository scope. Read-only: recommend changes but never mutate GitHub.",
-  "private": false,
-  "skills": [
-    "SKILL.md"
-  ]
-}

@@ -1,16 +1,16 @@
 {
-  "context": "Tests whether the agent audits discovery quality (name specificity, description completeness), flags missing overlap boundaries, identifies misplaced content and its proper capability boundary without inventing another skill, uses Tessl per skill, writes descriptions in third person with what/when/boundary, and avoids calling the optimizer without approval.",
+  "context": "Tests whether the agent audits discovery quality (name specificity, description completeness), flags missing overlap boundaries, identifies misplaced content and its proper capability boundary without inventing another skill, runs the structural skill lint per skill, writes descriptions in third person with what/when/boundary, and avoids calling the optimizer without approval.",
   "type": "weighted_checklist",
   "checklist": [
     {
-      "name": "Tessl run per skill",
+      "name": "Lint run per skill",
       "max_score": 8,
-      "description": "audit-log.sh contains a separate Tessl invocation for each of the four skills (four distinct Tessl commands targeting different skill paths)"
+      "description": "audit-log.sh contains a separate structural skill lint invocation for each of the four skills (four distinct lint commands targeting different skill paths)"
     },
     {
-      "name": "Score per skill reported",
+      "name": "Lint findings per skill reported",
       "max_score": 7,
-      "description": "audit-report.md states a Tessl score for each of the four skills individually"
+      "description": "audit-report.md states the structural lint findings (or a clean result) for each of the four skills individually"
     },
     {
       "name": "Vague names flagged",
@@ -50,7 +50,7 @@
     {
       "name": "Evidence over taste",
       "max_score": 8,
-      "description": "audit-report.md grounds each finding in Tessl output, repo conventions, or the actual file content — not subjective preference alone"
+      "description": "audit-report.md grounds each finding in lint output, repo conventions, or the actual file content — not subjective preference alone"
     },
     {
       "name": "Optimizer not invoked",

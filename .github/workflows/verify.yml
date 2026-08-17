@@ -1,4 +1,4 @@
-name: Review Skills
+name: Verify
 
 on:
   pull_request:
@@ -31,6 +31,4 @@ jobs:
             - args: [--frozen-lockfile]
 
       - name: Run repository verification
-        env:
-          TESSL_AUTO_UPDATE_INTERVAL_MINUTES: "0"
         run: pnpm run verify

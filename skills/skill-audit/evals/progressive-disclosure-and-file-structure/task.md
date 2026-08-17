@@ -4,14 +4,14 @@
 
 A DevOps team built a `release-coordinator` skill several months ago when they were still figuring out their workflow. The skill file has grown considerably since then: it contains a large inline scoring rubric, four worked examples, a step-by-step checklist that duplicates a shell script already in the repo, and a wall of prose in the frontmatter beyond the usual fields. The team suspects this is hurting performance because the model spends too long parsing the file before it understands what to do.
 
-They want you to audit the skill's structure — specifically whether the right content is in the right place — and then restructure it so it follows sound information-architecture principles. After restructuring, they want Tessl run again so they can measure the improvement. Produce a before-and-after comparison and a written explanation of every structural change you made and why.
+They want you to audit the skill's structure — specifically whether the right content is in the right place — and then restructure it so it follows sound information-architecture principles. After restructuring, they want the structural skill lint run again so they can measure the improvement. Produce a before-and-after comparison and a written explanation of every structural change you made and why.
 
 ## Output Specification
 
 Produce the following files:
 
-- `audit-report.md` — covering the initial Tessl score, structural findings, every change made with a reason, the post-edit Tessl score, and a summary of what improved
-- `audit-log.sh` — shell commands run during the audit in execution order (Tessl invocations, file reads, etc.)
+- `audit-report.md` — covering the initial lint findings, structural findings, every change made with a reason, the post-edit lint result, and a summary of what improved
+- `audit-log.sh` — shell commands run during the audit in execution order (lint invocations, file reads, etc.)
 - An updated version of `skills/release-coordinator/SKILL.md` reflecting the restructured skill
 - Any new files you create in `skills/release-coordinator/references/` or `skills/release-coordinator/scripts/` as part of the restructure
 

@@ -5,7 +5,6 @@ Contributor guidance for this reusable skill catalog.
 - Keep top-level docs short. Put skill depth in `skills/<name>/references/` only when it earns its keep.
 - Skill frontmatter has `name` and `description` only unless a supported
   invocation-control field is required to keep a manual workflow user-invoked.
-  Keep Codex-only invocation policy in `agents/openai.yaml`.
 - Descriptions should self-activate: what it does, when to use it, and the main boundary.
 - Put shared repo-wide guidance here; keep package-specific guidance inside its owning skill.
 - Keep every skill package standalone. Do not identify, invoke, import, route to, require, or sequence against a sibling package as a skill in frontmatter, picker metadata, bodies, references, scripts, or evals. State prerequisites, boundaries, and next steps as capabilities and evidence instead of skill identities. Ordinary package, tool, and technology references remain valid.
@@ -34,12 +33,9 @@ Contributor guidance for this reusable skill catalog.
   libraries, framework plugins, schemas, task graph, and primary typed language.
   Add shell only for small linear orchestration of existing commands, never as
   a parser, policy engine, state machine, retry loop, or duplicate test runner.
-- Run `pnpm run verify` before handoff; CI (PR, main, and monthly lint) uses
-  this free lint/structure gate only — it does not burn Tessl review credits.
-- Before publishing a skill that needs a fresh 100-point score, run
-  `pnpm run verify:skills` locally (changed skills) or
-  `TESSL_REVIEW_ALL=true pnpm run review:skills` for a portfolio gate. Prefer
-  `tessl plugin lint` over credit-burning review for routine audits. Never
-  schedule cloud review across the fleet. Follow
-  [Skill evaluation](scripts/README.md) and [Skill fleet](docs/skill-fleet.md).
+- Run `pnpm run verify` before handoff; CI (PR and monthly lint) runs the same
+  keyless gate: workflow lint plus `skillcheck lint`.
+- Skill eval scenarios live in `skills/<name>/evals/<scenario>/` as `task.md`
+  plus `criteria.json`. Eval sweeps need model credentials and stay
+  operator-run; see [Skill fleet](docs/skill-fleet.md).
 - Use repo-relative links in checked-in Markdown. No absolute local paths, `file://`, or editor URIs.
