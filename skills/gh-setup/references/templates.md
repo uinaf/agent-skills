@@ -18,20 +18,29 @@ obtain authorization first.
 
 ## Pull Requests and Issues
 
-A useful pull-request template asks for plain sentences, not headings for
-their own sake:
+The uinaf default template gives the body three headings that are the
+problem-first flow itself, with guidance in comments:
 
 ```md
-<!--
-Open with the problem this change solves, as the requester stated it,
-then the solution. Name a risk only when there is a real one. Mention
-proof only when CI cannot show it. No implementation inventories.
--->
+## Problem
+
+<!-- as the requester stated it, not the mechanism -->
+
+## Solution
+
+<!-- plain sentences; name a risk only when there is a real one -->
+
+## Proof
+
+<!-- only what CI cannot show: a screenshot, before/after numbers.
+     Delete this section when CI covers everything. -->
 ```
 
-Title the way the repository titles merged work, outcome over mechanism.
-Avoid ceremonial checklists and heading scaffolds; reviewers read
-sentences, not section labels.
+Prefer the shared org default over repository-local copies; delete local
+overrides unless the repository genuinely needs different fields. Title
+the way the repository titles merged work, outcome over mechanism. No
+implementation inventories, no ceremonial checklists, and no extra
+headings that restate the diff.
 
 Create issue forms only when their fields improve triage. Common distinct
 routes are bug, feature, and (only when supported) question. Vulnerabilities
