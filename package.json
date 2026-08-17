@@ -8,18 +8,11 @@
   "packageManager": "pnpm@11.18.0",
   "scripts": {
     "lint:actions": "github-actionlint .github/workflows/*.yml",
-    "lint:shell": "shellcheck scripts/*.sh",
-    "lint:skills": "TESSL_REVIEW_MODE=lint ./scripts/review.sh",
-    "review:skills": "./scripts/review.sh",
-    "test:skills": "node --test scripts/*.test.ts",
-    "typecheck": "tsc --noEmit",
-    "verify": "pnpm run typecheck && pnpm run lint:shell && pnpm run lint:actions && pnpm run test:skills && pnpm run lint:skills",
-    "verify:skills": "pnpm run verify && pnpm run review:skills"
+    "skills:lint": "skillcheck lint",
+    "verify": "pnpm run lint:actions && pnpm run skills:lint"
   },
   "devDependencies": {
-    "@types/node": "24.13.3",
-    "github-actionlint": "1.7.12",
-    "tessl": "0.95.0",
-    "typescript": "7.0.2"
+    "@uinaf/skillcheck": "^0.2.0",
+    "github-actionlint": "1.7.12"
   }
 }

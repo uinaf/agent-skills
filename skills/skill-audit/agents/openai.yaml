@@ -1,4 +1,0 @@
-interface:
-  display_name: "Skill Audit"
-  short_description: "Audit skills with available repo-aware checks"
-  default_prompt: "Use $skill-audit to choose a formal audit or recent-task experiential feedback, use repository-owned Tessl when available and the explicit manual fallback when it is not, inspect discovery, workflow shape, packaging, and repo fit, then report recommendations or make only explicitly authorized skill changes and rerun the strongest available gate."

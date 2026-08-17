@@ -50,7 +50,7 @@ Use it when an audit finds weak activation, a bloated `SKILL.md`, or unclear wor
 - practical, review-oriented examples beat generic filler
 - if a mechanical check exists, prefer it over prose
 - metadata, bodies, references, scripts, and evals must not invoke, route to, import, require, or assume sibling skills, or reference their package paths; ordinary package and technology names remain valid
-- after changing a skill, rerun the strongest available audit surface and the repo's normal gate; use Tessl when available and the manual scorecard when it is not
+- after changing a skill, rerun the strongest available audit surface and the repo's normal gate; use the repository's skill lint when available and the manual scorecard when it is not
 
 ## Audit Questions
 

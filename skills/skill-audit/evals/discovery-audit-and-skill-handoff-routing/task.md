@@ -12,7 +12,7 @@ Your task is to audit all four skills for discovery and boundary clarity, identi
 
 Produce:
 
-- `audit-report.md` — one section per skill, each including: the Tessl command run, the score, a discovery assessment, a boundary assessment, the current description's weaknesses, and a proposed replacement description
+- `audit-report.md` — one section per skill, each including: the structural skill lint command run, its findings, a discovery assessment, a boundary assessment, the current description's weaknesses, and a proposed replacement description
 - `audit-log.sh` — shell commands run in execution order
 - `rewrite-suggestions.md` — the four proposed replacement `name` + `description` fields in frontmatter format, ready to copy-paste
 

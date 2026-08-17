@@ -1,6 +1,6 @@
 ---
 name: skill-audit
-description: "Audit, score, or improve an existing skill using repository checks, free Tessl lint, optional credit-aware Tessl review, metadata discovery, progressive disclosure, eval coverage, and repo conventions. Use for skill quality, activation failures, package comparisons, or publish readiness. Do not use for general code review, application verification, or unrelated documentation cleanup."
+description: "Audit or improve an existing skill using repository checks, skillcheck lint, metadata discovery, progressive disclosure, eval coverage, and repo conventions. Use for skill quality, activation failures, or package comparisons. Do not use for general code review, application verification, or unrelated documentation cleanup."
 ---
 
 # Skill Audit
@@ -10,17 +10,11 @@ surface. Evidence beats stylistic preference.
 
 ## Choose the Mode
 
-- **Routine:** structure, activation, pruning, or light edits. Run free plugin
-  lint plus the manual scorecard; do not spend cloud credits.
-- **Formal:** explicit publish readiness, Tessl score, or a substantive
-  discovery/workflow rewrite that must reach 100. Run one narrow cloud review
-  only when the repository-owned launcher, authentication, and credits exist.
+- **Routine:** structure, activation, pruning, or light edits. Run the
+  repository's skill lint plus the manual scorecard.
 - **Experiential:** a recent task exposed wrong activation, missing guidance,
   excessive ceremony, or a fragile workflow. Reconstruct that failure and make
   the smallest change that would alter behavior.
-
-Read [Tessl policy](references/tessl.md) for exact formal commands, credit
-boundaries, fallbacks, and optimizer approval.
 
 ## Baseline
 
@@ -28,18 +22,19 @@ boundaries, fallbacks, and optimizer approval.
 2. Inspect linked references, scripts, evals, picker metadata, and package
    manifest only as required by the audit scope.
 3. Discover repository-owned verification.
-4. Run the free structural baseline:
+4. Run the repository's structural skill lint. uinaf repos pin
+   `@uinaf/skillcheck` and expose it as a script:
 
    ```bash
-   pnpm exec tessl plugin lint skills/<name>
+   pnpm run skills:lint
    ```
 
 5. Apply [the scorecard](references/scorecard.md) and
    [authoring guidance](references/best-practices.md).
 
-If formal review is unavailable, record the boundary once and continue with
-lint plus the manual scorecard. Never install, authenticate, resolve a different
-CLI, invent a score, or spend credits silently.
+If the repository owns no skill lint, record the boundary once and continue
+with the manual scorecard. Never install a new tool, resolve a different CLI,
+or invent lint results silently.
 
 ## Audit Dimensions
 
@@ -77,7 +72,7 @@ effects.
 
 ```text
 scope: package or portfolio
-validation: commands and Tessl score, or explicit no-score boundary
+validation: lint commands and findings, or the explicit no-lint boundary
 strengths: highest-signal dimensions
 findings: blockers and major findings only
 changes: files changed or smallest recommended change; include rerun status

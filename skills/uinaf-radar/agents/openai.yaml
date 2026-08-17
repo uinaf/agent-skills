@@ -1,4 +1,0 @@
-interface:
-  display_name: "uinaf radar"
-  short_description: "Read uinaf work and attention state"
-  default_prompt: "Use $uinaf-radar to read the private uinaf radar and summarize Now, Blocked, Next, Inbox, Maintenance, recently Shipped, and Project drift without changing GitHub. Label coverage not audited unless an exact repository list and start date were supplied."

@@ -1,17 +1,17 @@
 # Skill Audit Scorecard
 
-Use this scorecard after Tessl or as the primary manual fallback so the audit stays evidence-based and repo-aware.
+Use this scorecard after the repository's skill lint, or as the primary manual fallback, so the audit stays evidence-based and repo-aware.
 
 ## Manual Fallback Evidence
 
-When Tessl cannot produce review evidence:
+When the repository owns no skill lint:
 
-- record its exact unavailable boundary without repeatedly retrying it
+- record the exact unavailable boundary without repeatedly retrying it
 - run every repository-owned deterministic skill check that remains available
 - inspect `SKILL.md`, linked references and scripts, evals, and picker metadata in the requested scope
 - cite actual files and sections for blockers and major findings
 - grade every audit dimension `strong`, `mixed`, or `weak`
-- report the missing Tessl score as unavailable; never synthesize a numeric replacement
+- report the missing lint evidence as unavailable; never synthesize a replacement
 
 Manual review can complete the audit. A mandatory publication gate remains unverified until its required command succeeds.
 
@@ -53,7 +53,7 @@ These are worth tightening after the blockers and majors:
 - instructions restate capable-model defaults without changing behavior
 - output format is implied instead of stated
 - references exist but are not linked from `SKILL.md`
-- `agents/openai.yaml` lags behind the skill's current wording
+- picker or harness metadata lags behind the skill's current wording
 
 ## Audit Dimensions
 
