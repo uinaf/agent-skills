@@ -24,8 +24,8 @@ their own sake:
 ```md
 <!--
 Open with the problem this change solves, as the requester stated it,
-then the solution, then exactly what ran to prove it. Name a risk only
-when there is a real one. No implementation inventories.
+then the solution. Name a risk only when there is a real one. Mention
+proof only when CI cannot show it. No implementation inventories.
 -->
 ```
 
