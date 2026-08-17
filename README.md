@@ -1,6 +1,6 @@
 ![skills — reusable agent skills with deterministic review and publishing gates.](https://uinaf.dev/og/banner/skills.png)
 
-# uinaf/skills
+# uinaf/agent-skills
 
 A small catalog of standalone skills for coding agents. Install only what you
 need; each skill works independently of this repository's development tooling
@@ -10,10 +10,7 @@ and the other skills in the catalog.
 
 | Skill | Use it for |
 | --- | --- |
-| [`agent-readiness`](skills/agent-readiness/SKILL.md) | Making repositories and runners dependable for autonomous work. |
-| [`docs`](skills/docs/SKILL.md) | Auditing and rewriting repository documentation and agent guidance. |
 | [`gh-setup`](skills/gh-setup/SKILL.md) | Setting up GitHub collaboration, CI, releases, and deployments. |
-| [`planning`](skills/planning/SKILL.md) | Saving agreed work as resumable plans in the repository's preferred tracker. |
 | [`react-ban-use-effect`](skills/react-ban-use-effect/SKILL.md) | Replacing direct React `useEffect` with clearer patterns and enforcement. |
 | [`skill-audit`](skills/skill-audit/SKILL.md) | Auditing skill activation, packaging, instructions, and quality. |
 | [`vite-plus`](skills/vite-plus/SKILL.md) | Migrating frontend packages and monorepos to Vite+. |
@@ -23,16 +20,16 @@ and the other skills in the catalog.
 Browse the catalog:
 
 ```bash
-pnpm dlx skills add uinaf/skills --list
+pnpm dlx skills add uinaf/agent-skills --list
 ```
 
 Install one skill globally for Codex and Claude Code:
 
 ```bash
-pnpm dlx skills add uinaf/skills -g -y -a codex -a claude-code -s agent-readiness
+pnpm dlx skills add uinaf/agent-skills -g -y -a codex -a claude-code -s gh-setup
 ```
 
-Replace `agent-readiness` with any catalog name. Omit `-g` for a
+Replace `gh-setup` with any catalog name. Omit `-g` for a
 repository-local installation.
 
 ## Contributing

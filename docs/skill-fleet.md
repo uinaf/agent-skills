@@ -8,7 +8,7 @@ beside the product.
 
 | Owner repo | Skill path | Publish path |
 | --- | --- | --- |
-| `uinaf/skills` | `skills/*` | `.github/workflows/publish-skills.yml` (lint gate, then publish) |
+| `uinaf/agent-skills` | `skills/*` | `.github/workflows/publish-skills.yml` (lint gate, then publish) |
 | `uinaf/attach` | `skills/attach-cli` | `.github/workflows/publish-skill.yml` via `tessl-publish-action` (`review-mode: lint`) |
 | `uinaf/autoreview` | `skills/autoreview` | same pattern |
 | `uinaf/slopshipper` | `skills/slopshipper` | same pattern |
