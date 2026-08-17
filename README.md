@@ -1,4 +1,4 @@
-![skills — reusable agent skills with a deterministic lint gate.](https://uinaf.dev/og/banner/skills.png)
+![agent-skills — reusable agent skills with a deterministic lint gate.](https://uinaf.dev/og/banner/agent-skills.png)
 
 # uinaf/agent-skills
 
