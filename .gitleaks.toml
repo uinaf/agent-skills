@@ -1,0 +1,9 @@
+# Historical test fixtures; no live credentials.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "historical autoreview test fixtures"
+paths = [
+  '''skills/autoreview/tests/''',
+]
