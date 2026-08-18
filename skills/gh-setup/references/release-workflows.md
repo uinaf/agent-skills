@@ -100,13 +100,14 @@ Reconcile durable state before choosing a repair:
 | draft has partial assets | repair the draft, verify the complete manifest, publish once |
 | immutable Release exists, downstream missing | run idempotent downstream reconciliation keyed by the tag |
 
-Backfills validate inputs before secrets, reread every durable boundary after
-repair, and never create another version bump. In an explicit recovery path
-where a missing Release is a valid state, accept only an unambiguous not-found
-response as absence. Authentication, authorization, rate-limit, network, and
-server failures remain errors. Backfill from the already-trusted tag, then
-reread the exact Release. A create conflict or duplicate exact-tag state is
-reconciliation work, not success.
+- Backfills validate inputs before secrets, reread every durable boundary
+  after repair, and never create another version bump.
+- In an explicit recovery path where a missing Release is a valid state,
+  accept only an unambiguous not-found response as absence. Authentication,
+  authorization, rate-limit, network, and server failures remain errors.
+- Backfill from the already-trusted tag, then reread the exact Release.
+- A create conflict or duplicate exact-tag state is reconciliation work, not
+  success.
 
 ## Supply-Chain and Handoff
 

@@ -34,15 +34,15 @@ requires it.
   configuration instead of shell glue that merely silences them.
 - When the owner maintains many repositories, define the scan baseline once as
   a reusable workflow in the owner's `.github` repository
-  (`on: workflow_call`, every image and Action digest-pinned there) and give
-  each repository a thin caller job
-  (`uses: <owner>/.github/.github/workflows/<name>.yml@main`) that owns its
-  triggers. Version and digest bumps then land in one place for every adopter.
-  A repository with bespoke scanner needs keeps its own copy deliberately.
-  `zizmor`'s blanket pin policy flags the caller's branch ref; adopters allow
-  first-party refs while keeping hash pins for everything else
-  (`.github/zizmor.yml`: `unpinned-uses` policies `"<owner>/.github/*": ref-pin`,
-  `"*": hash-pin`).
+  (`on: workflow_call`, every image and Action digest-pinned there).
+  - Give each repository a thin caller job
+    (`uses: <owner>/.github/.github/workflows/<name>.yml@main`) that owns its
+    triggers. Version and digest bumps then land in one place for every adopter.
+  - A repository with bespoke scanner needs keeps its own copy deliberately.
+  - `zizmor`'s blanket pin policy flags the caller's branch ref; adopters allow
+    first-party refs while keeping hash pins for everything else
+    (`.github/zizmor.yml`: `unpinned-uses` policies
+    `"<owner>/.github/*": ref-pin`, `"*": hash-pin`).
 - Never share package caches from untrusted pull requests with privileged
   publish, signing, release, or deploy jobs.
 - Keep workflow YAML orchestration-thin. Prefer maintained Actions and the

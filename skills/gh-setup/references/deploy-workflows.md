@@ -67,7 +67,7 @@ Read [Environments](deploy-environments.md) for target and identity policy and
 ## Deployment Proof and Handoff
 
 Deploy success is the provider's accepted immutable payload plus the
-repository's real monitoring or synthetic evidence—not a shallow curl added to
+repository's real monitoring or synthetic evidence, not a shallow curl added to
 make CI look complete.
 
 End each run with a concise handoff:
