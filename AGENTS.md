@@ -10,7 +10,9 @@ Contributor guidance for this reusable skill catalog.
 - Keep every skill package standalone. Do not identify, invoke, import, route to, require, or sequence against a sibling package as a skill in frontmatter, picker metadata, bodies, references, scripts, or evals. State prerequisites, boundaries, and next steps as capabilities and evidence instead of skill identities. Ordinary package, tool, and technology references remain valid.
 - Keep this repository standalone. Do not add package, script, CI, checkout, or
   validation dependencies on external setup or workspace repositories.
-  Composition belongs to the consumer.
+  Composition belongs to the consumer. The owner's `.github` repository is the
+  one sanctioned exception: inherited community files and the shared scan
+  workflow are org trust-root defaults, not workspace coupling.
 - Check reality before editing docs or examples; keep commands and paths repo-valid.
 - Optimize runtime Markdown for decision value per token. Measure the common
   reference path for a realistic request, not only package totals or line count.
