@@ -37,7 +37,8 @@ requires it.
   (`on: workflow_call`, every image and Action digest-pinned there).
   - Give each repository a thin caller job
     (`uses: <owner>/.github/.github/workflows/<name>.yml@main`) that owns its
-    triggers. Version and digest bumps then land in one place for every adopter.
+    triggers.
+  - Version and digest bumps then land in one place for every adopter.
   - A repository with bespoke scanner needs keeps its own copy deliberately.
   - `zizmor`'s blanket pin policy flags the caller's branch ref; adopters allow
     first-party refs while keeping hash pins for everything else

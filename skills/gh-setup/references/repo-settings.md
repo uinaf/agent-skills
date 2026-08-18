@@ -81,8 +81,9 @@ Treat repository visibility changes as billing-sensitive:
 
 - Before and after a public-to-private transition, read back the attached
   security configuration, effective paid features, active-committer license
-  usage, and projected billing. A feature that was free for a public
-  repository can become billable when that repository becomes private.
+  usage, and projected billing.
+- A feature that was free for a public repository can become billable when
+  that repository becomes private.
 - If a repository genuinely needs Secret Protection, Code Security, or CodeQL,
   use a separate narrow configuration or explicit repository opt-in with
   accepted cost, owner, and trigger design; do not weaken the organization

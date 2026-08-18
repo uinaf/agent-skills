@@ -8,10 +8,12 @@ release archives.
 ## Ownership
 
 - Use owner-level defaults for policy true across every target repository.
-- The pull-request template and `SECURITY.md` live in the owner defaults;
-  delete repository-local copies unless a repository genuinely diverges.
+- The pull-request template and `SECURITY.md` live in the owner defaults.
+- Delete repository-local copies of them unless a repository genuinely
+  diverges.
 - `CONTRIBUTING.md` stays repository-local because it carries environment
-  setup and repo-specific workflow. Licenses remain repository-local.
+  setup and repo-specific workflow.
+- Licenses remain repository-local.
 - Add a code of conduct only when an actual enforcement and contact owner
   exists.
 - Shared issue templates are risky because any repository-local issue
