@@ -77,22 +77,27 @@ security capabilities for public repositories without consuming a paid
 license. Read back both the effective repository settings and Advanced Security
 license usage instead of inferring them from the configuration label.
 
-Treat repository visibility changes as billing-sensitive. Before and after a
-public-to-private transition, read back the attached security configuration,
-effective paid features, active-committer license usage, and projected billing.
-A feature that was free for a public repository can become billable when that
-repository becomes private. If a repository genuinely needs Secret Protection,
-Code Security, or CodeQL, use a separate narrow configuration or explicit
-repository opt-in with accepted cost, owner, and trigger design; do not weaken
-the organization baseline for the whole fleet.
+Treat repository visibility changes as billing-sensitive:
 
-Do not enable CodeQL default setup as a blanket baseline. Its pull-request and
-scheduled behavior is not a configurable post-merge-only scan and can block
-merge state even when not required. Prefer the repository's deliberate
-`actionlint`, `zizmor`, secret scanning, push protection, dependency alerts,
-and tested language-specific security checks. Add CodeQL only when explicitly
-chosen for a repository with an accepted cost and trigger design; do not make
-it a fleet-wide required context.
+- Before and after a public-to-private transition, read back the attached
+  security configuration, effective paid features, active-committer license
+  usage, and projected billing.
+- A feature that was free for a public repository can become billable when
+  that repository becomes private.
+- If a repository genuinely needs Secret Protection, Code Security, or CodeQL,
+  use a separate narrow configuration or explicit repository opt-in with
+  accepted cost, owner, and trigger design; do not weaken the organization
+  baseline for the whole fleet.
+
+Do not enable CodeQL default setup as a blanket baseline:
+
+- Its pull-request and scheduled behavior is not a configurable
+  post-merge-only scan and can block merge state even when not required.
+- Prefer the repository's deliberate `actionlint`, `zizmor`, secret scanning,
+  push protection, dependency alerts, and tested language-specific security
+  checks.
+- Add CodeQL only when explicitly chosen for a repository with an accepted
+  cost and trigger design; do not make it a fleet-wide required context.
 
 ## Metadata and Readback
 

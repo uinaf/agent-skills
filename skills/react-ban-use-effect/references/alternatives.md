@@ -19,7 +19,7 @@ reshape or paginate it.
 
 Keep work at its cause. Use event handlers, framework or React actions,
 repository form primitives, or server-state mutations. Pending, error, and
-optimistic UI belongs to the selected action/mutation contract—not a flag that
+optimistic UI belongs to the selected action/mutation contract, not a flag that
 another effect observes.
 
 ## External Stores

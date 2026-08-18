@@ -4,7 +4,7 @@ Vite+ is in beta and still moving quickly. Carry a caveat only when its failure 
 
 ## TanStack Start / SSR `instanceof` failures
 
-Some package managers (notably bun, sometimes npm) install two physical copies of `@voidzero-dev/vite-plus-core` — once via the `vite` alias and once via `vite-plus`'s direct dependency — which breaks SSR `isRunnableDevEnvironment()` checks.
+Some package managers (notably bun, sometimes npm) install two physical copies of `@voidzero-dev/vite-plus-core`: one via the `vite` alias and one via `vite-plus`'s direct dependency. The duplicate breaks SSR `isRunnableDevEnvironment()` checks.
 
 - If SSR fails after migration, run `vp dedupe` and confirm only one `@voidzero-dev/vite-plus-core` exists under `node_modules`.
 - Tracking: [voidzero-dev/vite-plus#1391](https://github.com/voidzero-dev/vite-plus/issues/1391).
