@@ -41,7 +41,7 @@ requires it.
   A repository with bespoke scanner needs keeps its own copy deliberately.
   `zizmor`'s blanket pin policy flags the caller's branch ref; adopters allow
   first-party refs while keeping hash pins for everything else
-  (`.github/zizmor.yml`: `unpinned-uses` policies `"<owner>/*": ref-pin`,
+  (`.github/zizmor.yml`: `unpinned-uses` policies `"<owner>/.github": ref-pin`,
   `"*": hash-pin`).
 - Never share package caches from untrusted pull requests with privileged
   publish, signing, release, or deploy jobs.
