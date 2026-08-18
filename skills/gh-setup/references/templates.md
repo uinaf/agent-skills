@@ -44,7 +44,7 @@ problem-first flow itself, with guidance in comments (live example:
      Delete this section when CI covers everything. -->
 ```
 
-Prefer the shared org default over repository-local copies; delete local
+Prefer the shared owner default over repository-local copies; delete local
 overrides unless the repository genuinely needs different fields. Title
 the way the repository titles merged work, outcome over mechanism. No
 implementation inventories, no ceremonial checklists, and no extra
