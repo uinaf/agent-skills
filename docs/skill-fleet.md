@@ -1,7 +1,8 @@
 # Skill Fleet
 
 Inventory and lint cadence for every first-party skill uinaf ships. This repo
-is the reusable catalog; product repos may ship one skill beside the product.
+is the reusable catalog; other repos ship their own skills beside the product
+they serve.
 
 ## Inventory
 
@@ -9,8 +10,7 @@ is the reusable catalog; product repos may ship one skill beside the product.
 | --- | --- |
 | `uinaf/agent-skills` | `skills/*` |
 | `uinaf/attach` | `skills/attach-cli` |
-| `uinaf/autoreview` | `skills/autoreview` |
-| `uinaf/slopshipper` | `skills/slopshipper` |
+| `uinaf/ffss` | `skills/*` |
 | `uinaf/intake` | `skills/uinaf-intake` |
 
 Do not treat harness-local copies under `~/.agents` or consumer
