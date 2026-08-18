@@ -24,8 +24,9 @@ obtain authorization first.
 
 ## Pull Requests and Issues
 
-The uinaf default template gives the body three headings that are the
-problem-first flow itself, with guidance in comments:
+A good owner default gives the body three headings that are the
+problem-first flow itself, with guidance in comments (live example:
+[uinaf/.github](https://github.com/uinaf/.github)):
 
 ```md
 ## Problem
@@ -34,7 +35,8 @@ problem-first flow itself, with guidance in comments:
 
 ## Solution
 
-<!-- plain sentences; name a risk only when there is a real one -->
+<!-- a short problem-lead sentence, then labeled bullets; never a
+     paragraph wall. Name a risk only when there is a real one. -->
 
 ## Proof
 
@@ -46,7 +48,9 @@ Prefer the shared org default over repository-local copies; delete local
 overrides unless the repository genuinely needs different fields. Title
 the way the repository titles merged work, outcome over mechanism. No
 implementation inventories, no ceremonial checklists, and no extra
-headings that restate the diff.
+headings that restate the diff. The comments are the verbosity control:
+agents fill templates literally, so guidance written there is the one
+place it reliably lands.
 
 Create issue forms only when their fields improve triage. Common distinct
 routes are bug, feature, and (only when supported) question. Vulnerabilities
