@@ -70,6 +70,14 @@ separate operations. Before requiring pull requests or a check, inventory
 release bots, dependency bots, generated writebacks, and maintainers who still
 write the default branch.
 
+Do not require pull requests by default. When repository policy permits direct
+updates and a reproducible local gate is mirrored by default-branch CI, allow
+verified fast-forward pushes. Require pull requests only for pre-merge review,
+untrusted contributions, merge queues, checks that must pass before the default
+branch moves, or an explicit owner policy. Post-push CI detects regressions
+after the branch moves, so run the local gate before pushing and monitor CI to
+completion.
+
 ## Collaboration Files
 
 Read [templates](references/templates.md) when adding or aligning pull-request

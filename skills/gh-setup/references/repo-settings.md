@@ -17,10 +17,17 @@ scoped compatible path.
 
 ## Collaboration Policy
 
+- Pull requests are a review mechanism, not a default prerequisite. When direct
+  updates are authorized, keep the local gate and default-branch CI aligned and
+  allow verified fast-forward pushes.
+- Post-push CI detects a broken commit after the branch moves. Run the local
+  gate before a direct push and monitor CI; require pre-merge checks when the
+  default branch cannot tolerate that detection window.
 - Prefer squash merge and automatic branch deletion when the repository wants
   a linear release-driving mainline; preserve intentional alternatives.
 - Block force pushes and deletion on the default branch.
-- Conversation resolution is useful even when maintainers retain direct push.
+- Require conversation resolution only where pull requests are already the
+  delivery path; do not use it merely to force pull-request creation.
 - Require signed commits when every protected-branch writer can satisfy the
   rule. An unavailable or plan-gated API is an unconfirmed gap, not evidence
   that no rule exists.
