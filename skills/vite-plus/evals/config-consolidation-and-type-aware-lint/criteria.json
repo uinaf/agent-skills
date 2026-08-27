@@ -5,17 +5,17 @@
     {
       "name": "No parallel vitest.config.ts",
       "max_score": 12,
-      "description": "The output does NOT include a `vitest.config.ts` file — test configuration has been moved into the `test` block inside `vite.config.ts`"
+      "description": "The output does NOT include a `vitest.config.ts` file; test configuration is in the `test` block inside `vite.config.ts`"
     },
     {
       "name": "No .oxlintrc* files",
       "max_score": 10,
-      "description": "The output does NOT include any `.oxlintrc`, `.oxlintrc.json`, `.oxlintrc.yml`, or similar oxlint standalone config files — lint config has been consolidated into `vite.config.ts`"
+      "description": "The output does NOT include `.oxlintrc`, `.oxlintrc.json`, `.oxlintrc.yml`, or a similar standalone oxlint config; lint config is in `vite.config.ts`"
     },
     {
       "name": "No parallel tsdown.config.ts",
       "max_score": 8,
-      "description": "The output does NOT include a `tsdown.config.ts` file — packaging config has been moved into `vite.config.ts`"
+      "description": "The output does NOT include `tsdown.config.ts`; packaging config is in `vite.config.ts`"
     },
     {
       "name": "typeAware enabled",

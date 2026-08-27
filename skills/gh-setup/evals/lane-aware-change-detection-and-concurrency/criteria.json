@@ -35,7 +35,7 @@
     {
       "name": "Concurrency group lane-scoped",
       "max_score": 9,
-      "description": "The deploy concurrency group key is scoped to (environment, lane) — e.g. `deploy-production-web` — NOT scoped to `${{ github.ref }}`"
+      "description": "The deploy concurrency group key is scoped to environment and lane, such as `deploy-production-web`, and NOT to `${{ github.ref }}`"
     },
     {
       "name": "Shared concurrency key",

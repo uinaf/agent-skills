@@ -9,8 +9,8 @@ The deploy provider supports OIDC federation for CI identity. The application's 
 ## Output Specification
 
 Produce the following files:
-- `.github/workflows/main.yml` — the push-to-main deploy workflow with correct permissions, OIDC auth, environment-scoped secret loading, and a read-only monitoring/incident handoff
-- `deploy/production.env.example` — the committed env template file with secret-store references (use plausible but fictional `secret://` paths)
-- `secrets-design.md` — an explanation of what each credential category is, where it lives, and why, including what goes in GitHub Environments, provider identity, runtime secret stores, and `vars.*`
+- `.github/workflows/main.yml`: the push-to-main deploy workflow with correct permissions, OIDC auth, environment-scoped secret loading, and a read-only monitoring and incident handoff
+- `deploy/production.env.example`: the committed env template with plausible but fictional `secret://` references
+- `secrets-design.md`: the credential categories, where each lives, and why, including GitHub Environments, provider identity, runtime secret stores, and `vars.*`
 
 Do not include any real credentials or tokens in the files. Any monitoring, notification, synthetic-check, or incident handoff job must not receive deploy-provider credentials and should fail if provider credential env vars are present.

@@ -4,7 +4,7 @@
 
 The Nexus UI team maintains a widely-used TypeScript component library that was migrated to Vite+ six months ago. Vite+ has since released several updates with bug fixes and new features the team wants to take advantage of, particularly improvements to the type-aware lint pass and faster test startup times.
 
-The team's senior engineer is on leave, and the remaining engineers are unsure of the correct upgrade procedure. A previous attempt by a well-meaning team member ran `pnpm update vite-plus` directly, which updated the `package.json` entry for `vite-plus` but left the project in a broken state — `vp check` was reporting errors that hadn't existed before and `vp test` was running the wrong Vitest version. It took an hour of debugging to realize the issue: the Vite+ core alias, Vitest pin, and removed 0.1.x test wrapper were not handled together.
+The team does not have a documented Vite+ upgrade procedure. A direct `pnpm update vite-plus` changed the manifest but left `vp check` with new errors and `vp test` on the wrong Vitest version. The update missed the Vite+ core alias, Vitest pin, and removal of the 0.1.x test wrapper.
 
 The team has approved `vite-plus@0.2.9` as the exact target. They need a clear,
 correct upgrade runbook they can follow now and reuse for future upgrades. Their
@@ -18,9 +18,9 @@ deterministic owners; do not wrap them in a custom upgrade shell script.
 
 Produce the following files:
 
-- `package.json` — the migrated project manifest
-- `pnpm-workspace.yaml` — the migrated toolchain aliases/overrides
-- `UPGRADE.md` — a concise runbook explaining the maintained migration path,
+- `package.json`: the migrated project manifest
+- `pnpm-workspace.yaml`: the migrated toolchain aliases and overrides
+- `UPGRADE.md`: a concise runbook explaining the maintained migration path,
   verification sequence, and recovery checkpoints
 
 Document all necessary steps a developer would need to run to fully upgrade

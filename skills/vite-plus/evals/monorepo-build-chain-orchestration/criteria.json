@@ -15,7 +15,7 @@
     {
       "name": "Library build seed in dev script",
       "max_score": 12,
-      "description": "The dev script (e.g. `dev:docs` or `dev:demo`) first runs a one-shot build of the library (`vp run <lib>#build` or equivalent) before starting the parallel dev phase — it does NOT jump straight into a parallel watch without seeding the library's dist/"
+      "description": "The dev script (e.g. `dev:docs` or `dev:demo`) runs a one-shot library build (`vp run <lib>#build` or equivalent) before the parallel dev phase; it does NOT start a parallel watch without seeding the library's dist/"
     },
     {
       "name": "--parallel flag in dev",
@@ -35,7 +35,7 @@
     {
       "name": "Build-first for demo app",
       "max_score": 10,
-      "description": "The demo/docs app does NOT configure a Vite `resolve.alias` pointing to the library's `src/` folder — the integration point is the library's built `dist/` artifact, not the source tree"
+      "description": "The demo/docs app does NOT configure a Vite `resolve.alias` to the library's `src/` folder; it integrates with the built `dist/` artifact"
     },
     {
       "name": "Single workspace-wide hook config",
@@ -45,7 +45,7 @@
     {
       "name": "No direct package manager for tasks owned by Vite+",
       "max_score": 10,
-      "description": "Scripts in the root `package.json` do NOT use `pnpm run`, `npm run`, or `yarn run` for any task that Vite+ owns (install, test, build, check) — those use `vp` commands or `vp run` instead"
+      "description": "Root `package.json` scripts do NOT use `pnpm run`, `npm run`, or `yarn run` for Vite+-owned install, test, build, or check tasks; those use `vp` commands or `vp run`"
     }
   ]
 }

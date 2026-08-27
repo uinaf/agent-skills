@@ -6,7 +6,7 @@ Apex Platform has built `notify-on-failure`, a TypeScript GitHub Action that sen
 
 The big challenge is distribution: users of GitHub Actions typically pin to a major version tag like `uses: apex-platform/notify-on-failure@v2` and expect that tag to always point to the latest stable release in that major line. If the team just creates `v2.1.0` but never updates the `v2` tag, all consumers are stuck on whatever version was current when they set up their workflow.
 
-Additionally, the action is written in TypeScript, but GitHub only runs JavaScript — so the compiled output needs to be what the action actually executes. The team needs the CI pipeline to handle both the verification of the TypeScript source and the proper handoff to the marketplace runtime.
+The action is written in TypeScript, but GitHub runs JavaScript. The compiled output must be the action's runtime entrypoint. CI must verify both the TypeScript source and the published JavaScript.
 
 The organization requires verified commits on `main`. Pull requests must build
 the checked-in `dist/` bundle and fail when rebuilding changes it. The release
@@ -48,9 +48,9 @@ fields are not the commit source of truth.
 
 Produce the following files:
 
-- `.github/workflows/ci.yml` — GitHub Actions workflow with verify and release jobs
-- `.releaserc.json` — semantic-release configuration suitable for a marketplace action
-- `action.yml` — the action manifest (you may adapt/complete the partial version provided below)
+- `.github/workflows/ci.yml`: GitHub Actions workflow with verify and release jobs
+- `.releaserc.json`: semantic-release configuration suitable for a marketplace action
+- `action.yml`: the action manifest (you may adapt or complete the partial version provided below)
 
 ## Input Files
 

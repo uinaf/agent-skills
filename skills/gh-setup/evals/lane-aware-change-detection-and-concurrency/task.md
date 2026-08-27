@@ -11,7 +11,7 @@ Design and write the GitHub Actions workflows that solve both problems. The fron
 ## Output Specification
 
 Produce the following files:
-- `.github/workflows/main.yml` — push-to-main pipeline with lane-aware detection, verify, e2e, and deploy stages for both apps
-- `.github/workflows/deploy.yml` — manual re-deploy workflow (workflow_dispatch) for re-deploying a verified artifact or image for a chosen lane and validated ref
-- `.github/workflows/verify.yml` — pull request verification workflow (no deployment)
-- `pipeline-design.md` — a brief explanation of how change detection works, how rapid pushes are handled, how environment credentials are scoped, and how the manual re-deploy relates to the main pipeline's concurrency
+- `.github/workflows/main.yml`: push-to-main pipeline with lane-aware detection, verify, e2e, and deploy stages for both apps
+- `.github/workflows/deploy.yml`: manual re-deploy workflow (`workflow_dispatch`) for a verified artifact or image on a chosen lane and validated ref
+- `.github/workflows/verify.yml`: pull request verification workflow with no deployment
+- `pipeline-design.md`: a brief explanation of change detection, rapid pushes, environment credential scope, and how manual re-deploy uses the main pipeline's concurrency

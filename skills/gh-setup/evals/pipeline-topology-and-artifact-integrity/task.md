@@ -2,9 +2,9 @@
 
 ## Problem/Feature Description
 
-A product team runs a React SPA (built with Vite) that is currently deployed by hand: a developer runs `npm run build` locally and uploads the `dist/` folder through the provider dashboard. This works when there is only one developer, but the team has grown to seven engineers and two of them broke production last week by shipping untested local builds. The team wants a GitHub Actions pipeline that enforces the rule "what was tested is exactly what gets deployed" — no exceptions.
+A product team deploys its Vite React SPA by running `npm run build` locally and uploading `dist/` through the provider dashboard. The team has grown to seven engineers, and two untested local builds broke production last week. GitHub Actions must enforce that the tested artifact is the deployed artifact.
 
-The pipeline should build the app once, run end-to-end tests against that exact build output, and only then promote it through the `production` GitHub Environment using the provider's OIDC-backed deploy identity. If the build produces no output (which happened silently twice this month due to a misconfigured Vite output path), the pipeline must catch it immediately. The app uses a Vite-based framework with a non-standard output structure. After every successful deployment, on-call engineers must be able to see which monitoring dashboard, alert policy, synthetic check, deploy marker, and rollback runbook cover the live site — right now deploys go green in CI but incident handoff depends on tribal knowledge.
+The pipeline should build the app once, run end-to-end tests against that output, and then promote it through the `production` GitHub Environment with the provider's OpenID Connect (OIDC) deploy identity. A misconfigured Vite output path produced no files twice this month, so the pipeline must reject an empty build. The framework uses a non-standard output structure. After deployment, on-call engineers need links to the live site's monitoring dashboard, alert policy, synthetic check, deploy marker, and rollback runbook. That handoff currently depends on tribal knowledge.
 
 ## Output Specification
 
@@ -12,4 +12,4 @@ Produce a working GitHub Actions workflow at `.github/workflows/main.yml` that t
 
 The deploy job must declare the `production` GitHub Environment, use `id-token: write`, and keep provider identifiers in environment vars rather than hardcoded workflow values.
 
-Include a brief `deploy-summary.md` file explaining the pipeline shape you chose — what runs in each job, what gets passed between jobs, what identity boundary the deploy uses, and why.
+Include a brief `deploy-summary.md` explaining each job, the artifacts passed between jobs, the deployment identity boundary, and the rationale.

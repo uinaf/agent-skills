@@ -2,7 +2,7 @@
 
 ## Problem/Feature Description
 
-The team at Fieldstone Labs has been maintaining `@fieldstone/form-validator`, a TypeScript form validation library published to npm. Right now, releases are entirely manual: a developer runs `npm version`, pushes a tag, and publishes by hand. This process is error-prone — two releases have been accidentally published without the changelog updated, and once a developer pushed to npm from their local machine with stale dependencies.
+Fieldstone Labs maintains `@fieldstone/form-validator`, a TypeScript library published to npm. A developer currently runs `npm version`, pushes a tag, and publishes by hand. Two releases shipped without a changelog update, and one local publish used stale dependencies.
 
 The team wants to automate this using GitHub Actions and semantic-release, so that every conventional commit pushed to `main` that warrants a release (feat, fix, or breaking change) automatically: runs the test suite, bumps the version, updates the changelog, publishes to npm through npm Trusted Publishing/OIDC, creates a GitHub Release, and commits the version bump back to the repo. They want protection against two releases accidentally racing each other, and they want the version bump commit to never retrigger CI.
 
@@ -36,8 +36,8 @@ semantic-release rerun is not sufficient recovery.
 
 Produce the following files in the workspace:
 
-- `.github/workflows/ci.yml` — the complete GitHub Actions workflow with verify and release jobs
-- `.releaserc.json` — the semantic-release configuration file
+- `.github/workflows/ci.yml`: the complete GitHub Actions workflow with verify and release jobs
+- `.releaserc.json`: the semantic-release configuration file
 
 Both files should be ready to commit to the repo root as-is (no placeholders left unfilled). You may create a `package.json` stub if needed to illustrate the configuration, but it is not required.
 

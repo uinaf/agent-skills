@@ -39,7 +39,7 @@
     },
     {
       "name": "No prop-copy or state-relay misuse",
-      "description": "The hook does NOT copy props into state, relay user actions, or fetch server data — it only subscribes to the browser network event",
+      "description": "The hook only subscribes to the browser network event. It does NOT copy props into state, relay user actions, or fetch server data",
       "max_score": 5
     }
   ]
