@@ -35,8 +35,8 @@ Contributor guidance for this reusable skill catalog.
   libraries, framework plugins, schemas, task graph, and primary typed language.
   Add shell only for small linear orchestration of existing commands, never as
   a parser, policy engine, state machine, retry loop, or duplicate test runner.
-- Run `pnpm run verify` before handoff; CI (PR and monthly lint) runs the same
-  keyless gate: workflow lint plus `skillcheck lint`.
+- Run `pnpm run verify` before handoff; pull-request CI runs the same keyless
+  gate: workflow lint plus `skillcheck lint`.
 - Skill eval scenarios live in `skills/<name>/evals/<scenario>/` as `task.md`
   plus `criteria.json`. Eval sweeps need model credentials and stay
   operator-run; see [Skill fleet](docs/skill-fleet.md).
