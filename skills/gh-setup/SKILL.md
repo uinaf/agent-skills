@@ -57,12 +57,19 @@ project code, load secrets, publish, sign, or deploy.
 Runner minutes are billed compute. Every trigger, runner size, and rerun is a
 cost decision; default to the cheapest shape that still proves the contract.
 
-- Default to the smallest Linux runner (currently `blacksmith-2vcpu-ubuntu-2404`
-  or `-arm`). macOS and other large runners are reserved for genuinely
+- Read live repository visibility before choosing runners. Public repositories
+  use standard GitHub-hosted runners; private repositories may use the smallest
+  suitable Blacksmith runner. Preserve the required OS and architecture when
+  migrating (for example, Linux x64 Ubuntu 24.04 to `ubuntu-24.04`). Reusable
+  workflows choose from the caller's visibility, not the workflow owner's.
+- Use Linux for portable checks. macOS and other large runners are reserved for
   platform-bound jobs (native apps, Darwin-only APIs, Homebrew taps) and must be
   gated behind path filters or restricted to `pull_request` +
-  `workflow_dispatch`. A repo whose checks run anywhere (lint, docs, dotfiles,
-  scripts) never gets a macOS runner.
+  `workflow_dispatch`. Runner changes preserve required proof, scan coverage,
+  triggers, permissions, and Environments.
+- Provider requirements still apply to private repositories: npm trusted
+  publishing requires GitHub-hosted runners; use the [npm publish
+  contract](references/release-targets.md#npm).
 - Secret and history scans trigger on `pull_request`, a weekly `schedule`, and
   `workflow_dispatch` — never on `push`. The merge commit's tree was already
   scanned in the pull request; the weekly cron covers history and new detector
