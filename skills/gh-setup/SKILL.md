@@ -1,6 +1,6 @@
 ---
 name: gh-setup
-description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch or ruleset policy, templates, Dependabot, Actions hardening, Environments, releases, publishing, and deploy workflows. Use for GitHub setup, CI/CD policy, protected delivery, package releases, or app deployment. Do not use for product architecture, provider infrastructure internals, application security review, or repository boot/readiness work."
+description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch or ruleset policy, templates, Dependabot or Renovate, Actions hardening, Environments, releases, publishing, and deploy workflows. Use for GitHub setup, CI/CD policy, protected delivery, package releases, or app deployment. Do not use for product architecture, provider infrastructure internals, application security review, or repository boot/readiness work."
 disable-model-invocation: true
 ---
 
@@ -127,8 +127,9 @@ defaults.
 - Keep templates short and evidence-oriented; avoid checklist theater.
 - Public security guidance needs a working private reporting route. Private
   repos use an existing private maintainer channel.
-- Add Dependabot configuration only for ecosystems and manifests that exist.
-  Keep scheduled updates low-noise and preserve compatibility constraints.
+- Read [dependency updates](references/dependency-updates.md) before adding
+  or migrating Dependabot or Renovate. Run one bot per repository; keep
+  security updates on under either.
 
 ## Release and Deploy Routes
 
