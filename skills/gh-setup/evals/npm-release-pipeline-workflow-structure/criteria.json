@@ -15,7 +15,7 @@
     { "name": "Prepare and publish order", "max_score": 8, "description": "commit analysis and notes precede deterministic changelog and npm preparation; the selected signed writeback commits those outputs, and tagging plus GitHub/registry publication continue only from the returned signed commit OID." },
     { "name": "Matching preset", "max_score": 4, "description": "commit-analyzer and release-notes-generator both use the conventionalcommits preset." },
     { "name": "Writeback configuration", "max_score": 7, "description": "The selected signed writeback includes only the prepared existing package.json and CHANGELOG.md and uses chore(release): ${nextRelease.version} with [skip ci]. If plugin v1.0.1 is selected it uses files and commitMessage, not assets or message." },
-    { "name": "Trusted publishing", "max_score": 7, "description": "npm publishing uses Trusted Publishing/OIDC without registry-url or NPM_TOKEN." },
+    { "name": "Trusted publishing", "max_score": 7, "description": "npm publishing uses Trusted Publishing/OIDC on a GitHub-hosted runner, including for a private source repository, without registry-url or NPM_TOKEN." },
     { "name": "Release gated by verify", "max_score": 6, "description": "The release job depends on successful verification." },
     { "name": "Credential boundary", "max_score": 6, "description": "Checkout does not persist write credentials and the App token is exposed only at the signed writeback boundary. If plugin v1.0.1 is selected, an immediate if: always() cleanup restores a credential-free origin." },
     { "name": "npm metadata", "max_score": 4, "description": "package.json has matching public repository metadata and public publishConfig.access for the scoped package." },
