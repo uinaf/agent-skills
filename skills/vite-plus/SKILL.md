@@ -1,6 +1,6 @@
 ---
 name: vite-plus
-description: "Create, migrate, or align frontend packages and monorepos on Vite+. Use for Vite+ scaffolding, migration, upgrades, `vp` commands, consolidated Vite/Oxlint/Oxfmt/Vitest configuration, hooks, packaging, or CI. Prefer the repository-pinned Vite+ surface and its packaged documentation; preserve existing stacks and proven exceptions."
+description: "Create, migrate, or align frontend packages and monorepos on Vite+. Use for Vite+ scaffolding, migration, upgrades, `vp` commands, consolidated Vite/Oxlint/Oxfmt/Vitest configuration, hooks, packaging, or CI. Do not use for non-Vite toolchains or for release, deploy, and runtime behavior Vite+ does not own."
 disable-model-invocation: true
 ---
 

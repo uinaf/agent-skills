@@ -10,7 +10,9 @@ they serve.
 | --- | --- |
 | `uinaf/agent-skills` | `skills/*` |
 | `uinaf/attach` | `skills/attach-cli` |
+| `uinaf/design` | `skills/uinaf-design` |
 | `uinaf/ffss` | `skills/*` |
+| `uinaf/healthd` | `skills/healthd-operator` |
 | `uinaf/intake` | `skills/uinaf-intake` |
 
 Do not treat harness-local copies under `~/.agents` or consumer
@@ -19,10 +21,8 @@ Do not treat harness-local copies under `~/.agents` or consumer
 ## Cadence
 
 - Every pull request runs `skillcheck lint` (keyless, structural).
-- A scheduled workflow in this repo runs `pnpm run verify` once a month.
-- Distributed skill shippers rely on their own lint gates; the monthly
-  operator pass confirms those gates are green and opens follow-ups for
-  failures.
+- Distributed skill shippers rely on their own lint gates; the operator
+  pass confirms those gates are green and opens follow-ups for failures.
 
 Eval sweeps (`skillcheck sweep`) need model credentials and stay operator-run;
 never schedule them in consumer CI.

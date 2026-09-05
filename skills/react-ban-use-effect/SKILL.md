@@ -1,6 +1,6 @@
 ---
 name: react-ban-use-effect
-description: "Detect, replace, and mechanically restrict direct React `useEffect` calls. Use when writing, refactoring, reviewing, or migrating React code that fetches, derives state, relays events, resets state, or synchronizes through effects. Preserve legitimate external-system synchronization inside reviewed domain hooks; do not use for unrelated React work or non-React effect systems."
+description: "Detect, replace, and mechanically restrict direct React `useEffect` calls. Use when writing, refactoring, reviewing, or migrating React code that fetches, derives state, relays events, resets state, or synchronizes through effects. Do not use for unrelated React work or non-React effect systems."
 ---
 
 # React Ban useEffect

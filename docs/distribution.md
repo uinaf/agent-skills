@@ -20,5 +20,4 @@ as sources of truth.
 ## Quality gate
 
 Every skill passes `pnpm run verify` (workflow lint plus `skillcheck lint`) on
-pull requests and a monthly schedule. See [Skill fleet](skill-fleet.md) for the
-cross-repo inventory.
+pull requests. See [Skill fleet](skill-fleet.md) for the cross-repo inventory.

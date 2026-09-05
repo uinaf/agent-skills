@@ -44,5 +44,5 @@ CI runs that same gate: workflow lint plus
 both keyless.
 
 See [Distribution](docs/distribution.md) for how skills reach consumers and
-[Skill fleet](docs/skill-fleet.md) for the cross-repo inventory and monthly
-lint cadence.
+[Skill fleet](docs/skill-fleet.md) for the cross-repo inventory and lint
+cadence.
