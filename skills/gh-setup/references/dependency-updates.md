@@ -26,7 +26,7 @@ script pins with checksums stay manual, or let the target fetch the upstream
 
 ## Renovate
 
-- Extend one organization preset (`github>uinaf/renovate-config`) and keep
+- Extend the target organization’s shared preset and keep
   repository files to opt-outs, approvals, and gated automerge opt-ins. Encode
   schedule, release age, grouping, commit prefixes, and registry overrides
   once. The preset repository must be public: the hosted app reads public
@@ -36,8 +36,7 @@ script pins with checksums stay manual, or let the target fetch the upstream
   required checks are ready. Keep `platformAutomerge: false` for repositories
   without those gates; Renovate then waits for visible checks on a later run.
   Keep majors on `dependencyDashboardApproval`.
-- Structure checks that require `.github/dependabot.yml` (for example a
-  workspace-kit `workspace.json` required-files list) must require
+- Update repository checks that require `.github/dependabot.yml` to require
   `renovate.json` instead, or the migration commit fails its own hook.
 - Keep **Require config file** on in the Mend organization settings so
   unmigrated repositories receive nothing while they still run Dependabot.

@@ -25,8 +25,7 @@ obtain authorization first.
 ## Pull Requests and Issues
 
 A good owner default gives the body three headings that are the
-problem-first flow itself, with guidance in comments (live example:
-[uinaf/.github](https://github.com/uinaf/.github)):
+problem-first flow itself, with guidance in comments:
 
 ```md
 ## Problem
