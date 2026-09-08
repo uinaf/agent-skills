@@ -57,11 +57,11 @@ project code, load secrets, publish, sign, or deploy.
 Runner minutes are billed compute. Every trigger, runner size, and rerun is a
 cost decision; default to the cheapest shape that still proves the contract.
 
-- Read live repository visibility before choosing runners. Public repositories
-  use standard GitHub-hosted runners; private repositories may use the smallest
-  suitable Blacksmith runner. Preserve the required OS and architecture when
-  migrating (for example, Linux x64 Ubuntu 24.04 to `ubuntu-24.04`). Reusable
-  workflows choose from the caller's visibility, not the workflow owner's.
+- uinaf repositories use standard GitHub-hosted runners for public and private
+  repositories, including reusable workflow callers. Preserve the required OS
+  and architecture when migrating (for example, Linux x64 Ubuntu 24.04 to
+  `ubuntu-24.04`, Linux ARM64 to `ubuntu-24.04-arm`). Check runner availability
+  and included-minute limits before choosing a platform or adding work.
 - Use Linux for portable checks. macOS and other large runners are reserved for
   platform-bound jobs (native apps, Darwin-only APIs, Homebrew taps) and must be
   gated behind path filters or restricted to `pull_request` +
