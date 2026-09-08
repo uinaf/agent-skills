@@ -57,11 +57,10 @@ project code, load secrets, publish, sign, or deploy.
 Runner minutes are billed compute. Every trigger, runner size, and rerun is a
 cost decision; default to the cheapest shape that still proves the contract.
 
-- uinaf repositories use standard GitHub-hosted runners for public and private
-  repositories, including reusable workflow callers. Preserve the required OS
-  and architecture when migrating (for example, Linux x64 Ubuntu 24.04 to
-  `ubuntu-24.04`, Linux ARM64 to `ubuntu-24.04-arm`). Check runner availability
-  and included-minute limits before choosing a platform or adding work.
+- Follow the target owner's runner policy. Compare live pricing, included
+  minutes, repository visibility, and runner availability before choosing a
+  provider or size. Preserve each job's required OS and architecture; reusable
+  workflows must support the caller's policy and platform needs.
 - Use Linux for portable checks. macOS and other large runners are reserved for
   platform-bound jobs (native apps, Darwin-only APIs, Homebrew taps) and must be
   gated behind path filters or restricted to `pull_request` +
@@ -73,9 +72,9 @@ cost decision; default to the cheapest shape that still proves the contract.
 - Secret and history scans trigger on `pull_request`, a weekly `schedule`, and
   `workflow_dispatch` — never on `push`. The merge commit's tree was already
   scanned in the pull request; the weekly cron covers history and new detector
-  rules. Call the shared `uinaf/.github/.github/workflows/scan.yml@main`
-  reusable workflow; do not copy scanner jobs or `docker build` scanner images
-  per run.
+  rules. Reuse the target owner’s shared scanning workflow when available;
+  keep its reference consistent with the repository’s pinning policy. Avoid
+  copying scanner jobs or building scanner images per run.
 - Every verification workflow declares workflow-level concurrency:
   `group: ${{ github.workflow }}-${{ github.ref }}`,
   `cancel-in-progress: ${{ github.event_name == 'pull_request' }}`. Release,
