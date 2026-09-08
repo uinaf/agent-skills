@@ -44,10 +44,11 @@ name that describes the target, such as `default-branch-checks`. Local checks
 and post-push CI cannot satisfy a pre-update requirement.
 
 When preserving an authorized direct writer, scope its bypass to the relevant
-repository's checks ruleset. A bypass covers the whole ruleset: keep signing,
-force-push, and deletion protections separate and unchanged. Do not grant an
-organization-wide App bypass to repair one publisher, or exempt a dependency
-bot from the checks intended to gate its merges.
+repository's checks ruleset with `bypass_mode: always`; `pull_request` mode
+does not permit direct pushes or API commits. A bypass covers the whole ruleset:
+keep signing, force-push, and deletion protections separate and unchanged. Do
+not grant an organization-wide App bypass to repair one publisher, or exempt a
+dependency bot from the checks intended to gate its merges.
 
 Running a check does not enforce it. Require the smallest stable voting surface
 that represents the repository's real gate. When matrices, conditional lanes,
