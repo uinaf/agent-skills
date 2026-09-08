@@ -1,5 +1,5 @@
 {
-  "context": "Tests whether the agent chooses Renovate for the right reasons, migrates without duplicate bots, handles the OpenTofu registry, and is honest about checksum pins.",
+  "context": "Tests whether the agent chooses Renovate for the right reasons, migrates without duplicate bots, handles the OpenTofu registry, and is honest about checksum pins. Also tests native-automerge ruleset compatibility with direct and cross-repository writers without broadening bypasses.",
   "type": "weighted_checklist",
   "checklist": [
     {
@@ -46,6 +46,16 @@
       "name": "Config validation and readback",
       "max_score": 10,
       "description": "Validates the config before pushing and checks the first run for correct prefixes, grouping, and registry with no PRs from the retired bot"
+    },
+    {
+      "name": "Ruleset scope and writer compatibility",
+      "max_score": 15,
+      "description": "Explains that required checks constrain all default-branch updates regardless of ruleset name; inventories content and release App identities and destination repos, distinguishes tag-only release, uses truthful naming and narrowly scoped checks-only bypasses where direct writes are authorized, and preserves signing/deletion/force rules without a dependency-bot or organization-wide bypass"
+    },
+    {
+      "name": "Fleet evidence and privacy",
+      "max_score": 10,
+      "description": "Reuses the existing private policy/audit command, prepares an exact before/after rules diff, validates a canary then reads back every in-scope repo, reports the failed rule read as unknown rather than healthy, and keeps private inventory out of public artifacts"
     }
   ]
 }
