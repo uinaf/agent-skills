@@ -83,10 +83,11 @@ Roll out to a few repositories first:
    push-only release or apply jobs with the same pinned runtime and
    dependencies when those pins change. Green unrelated checks are not
    compatibility proof.
-3. Preserve authorized direct pushes with narrowly scoped actor bypasses for
-   the new check rule. Keep force-push and deletion protection separate, and
-   do not grant the dependency bot a check bypass. Do not add mandatory review
-   merely to enable automerge.
+3. Apply the writer compatibility and bypass rules in
+   [repository settings](repo-settings.md#collaboration-policy). The new
+   required checks constrain all targeted branch updates, not only Renovate
+   merges; name the ruleset accordingly. Do not add mandatory review merely
+   to enable automerge.
 4. Enable GitHub's **Allow auto-merge**, then opt ready repositories into
    `platformAutomerge: true` with `automergeType: "pr"`. Keep the shared preset
    conservative until every consumer has enforceable gates. Preserve existing

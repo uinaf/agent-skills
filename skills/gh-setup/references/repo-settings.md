@@ -11,9 +11,11 @@ writers, Actions policy, Environments, visibility, security features, and
 repository metadata. Preserve current policy unless the request owns it.
 
 Before requiring pull requests or checks, inventory every default-branch
-writer: maintainers, release and dependency bots, generated-data jobs, deploy
-writebacks, and GitHub Apps. Each must move through a PR or have an explicit,
-scoped compatible path.
+writer from its owning workflow or runbook: maintainers, release and dependency
+bots, content publishers, generated-data jobs, and deploy writebacks. Record the
+actual App or user identity and destination repository/branch, including
+cross-repository release writes. Tag-only publishers do not imply a branch
+writeback. Each writer needs a compatible path before enforcement changes.
 
 ## Collaboration Policy
 
@@ -35,6 +37,19 @@ scoped compatible path.
 - Protect release tag families. Document intentional mutable pointers such as
   a marketplace major tag separately from immutable release tags.
 
+[Required status checks](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-status-checks-to-pass-before-merging)
+constrain every update to the targeted branch, including direct API commits;
+a name such as “Renovate checks” does not scope enforcement to that bot. Use a
+name that describes the target, such as `default-branch-checks`. Local checks
+and post-push CI cannot satisfy a pre-update requirement.
+
+When preserving an authorized direct writer, scope its bypass to the relevant
+repository's checks ruleset with `bypass_mode: always`; `pull_request` mode
+does not permit direct pushes or API commits. A bypass covers the whole ruleset:
+keep signing, force-push, and deletion protections separate and unchanged. Do
+not grant an organization-wide App bypass to repair one publisher, or exempt a
+dependency bot from the checks intended to gate its merges.
+
 Running a check does not enforce it. Require the smallest stable voting surface
 that represents the repository's real gate. When matrices, conditional lanes,
 or no-op paths make raw job names unstable, use one final `always()` gate that
@@ -42,9 +57,18 @@ fails closed on unexpected skips. Keep advisory dependency, release, deploy,
 and report jobs non-blocking unless policy explicitly makes them voting.
 
 Use non-strict required checks by default. Require up-to-date branches or merge
-queue only when integration risk justifies the extra executions. Roll fleet
-policy out to a small verified cohort before enabling an organization-wide
-required context.
+queue only when integration risk justifies the extra executions.
+
+## Fleet Changes
+
+Reuse checked-in policy and audit tooling when the owner has them. Prepare an
+exact before/after diff of targets, required contexts, enforcement, and bypass
+actors; preserve unrelated rules. Verify a small canary cohort, including its
+authorized writers, before expanding. Read back every repository in the
+approved scope against that diff. Report unavailable reads and incomplete
+writer evidence as unknown, not “no failures.” Keep private repository
+inventories and policy evidence in their private owner; public guidance should
+contain only the reusable procedure.
 
 ## Actions and Environments
 
