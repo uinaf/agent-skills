@@ -24,7 +24,7 @@ The following files are provided as inputs. Extract them before beginning.
 {
   "name": "@acme/config",
   "version": "0.1.0",
-  "packageManager": "pnpm@11.18.0",
+  "packageManager": "pnpm@12.0.0",
   "type": "module",
   "scripts": {
     "test": "vitest run",

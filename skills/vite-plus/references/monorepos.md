@@ -22,6 +22,11 @@ Use the installed `vp run` surface for:
 Confirm the exact flags with installed help. Dependency order comes from
 workspace manifests; do not introduce a second project graph.
 
+On [0.3.0+](https://github.com/voidzero-dev/vite-plus/releases/tag/v0.3.0), bare
+app commands at the workspace root prefer `defaultPackage` or root config
+before selecting a member. Verify the intended package actually runs; do not
+use a bare app command as evidence of workspace-wide coverage.
+
 For a consumer app that imports a publishable sibling package, choose
 deliberately:
 

@@ -24,7 +24,9 @@ or consumer behavior only after the generated project works.
 2. If the installed CLI is already the intended version, run its documented
    migration command from the workspace root.
 3. To adopt a newer release, run the exact target package's `vp migrate`
-   binary. An older installed migrator cannot select a newer toolchain.
+   binary: `pnpm --package=vite-plus@<target> dlx vp migrate`. Substitute the
+   selected exact version. An older installed migrator cannot select a newer
+   toolchain; `vp upgrade` manages the standalone installation, not this path.
 4. Use noninteractive, agent, editor, or full-setup flags only when supported by
    that exact release and required by the task.
 5. Reinstall after manifest or lockfile changes.
@@ -33,6 +35,24 @@ or consumer behavior only after the generated project works.
 
 Prefer migration over hand conversion, but never treat generated output as
 authoritative over repository-specific release and runtime contracts.
+
+## pnpm 12+ Upgrades
+
+Read the selected release's [pnpm notes](https://github.com/pnpm/pnpm/releases).
+For the [12.0 boundary](https://github.com/pnpm/pnpm/releases/tag/v12.0.0):
+
+- Fix unknown `pnpm-workspace.yaml` settings: they fail when the running pnpm
+  satisfies the project pin. Keep non-pnpm metadata elsewhere.
+- Hosted Git dependencies normalize to HTTPS identities. Exercise private
+  dependency access in CI; preserve machine-owned transport/auth configuration.
+- Inspect peer-cycle lockfile changes and `engineStrict` failures through
+  optional dependency trees instead of weakening the install policy.
+- Check the generated package-manager declaration; pnpm initialization can
+  select the registry's latest version rather than the invoking version.
+
+Reinstall with the selected pin to regenerate the lockfile, then prove a frozen
+install. Keep the runtime under its existing owner when pnpm or Vite+ offers
+to manage it.
 
 ## Completion
 

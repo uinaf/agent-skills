@@ -6,10 +6,10 @@ The Nexus UI team maintains a widely-used TypeScript component library that was 
 
 The team does not have a documented Vite+ upgrade procedure. A direct `pnpm update vite-plus` changed the manifest but left `vp check` with new errors and `vp test` on the wrong Vitest version. The update missed the Vite+ core alias, Vitest pin, and removal of the 0.1.x test wrapper.
 
-The team has approved `vite-plus@0.2.9` as the exact target. They need a clear,
+The team has approved `vite-plus@0.3.0` as the exact target. They need a clear,
 correct upgrade runbook they can follow now and reuse for future upgrades. Their
 workstation policy forbids a global Vite+ installation: the target migration
-may use an exact `pnpm --package=vite-plus@0.2.9 dlx vp` invocation, and every
+may use an exact `pnpm --package=vite-plus@0.3.0 dlx vp` invocation, and every
 command after reinstall must resolve the repository's pinned `vite-plus`
 dependency. The Vite+ migrator and repository package scripts are the
 deterministic owners; do not wrap them in a custom upgrade shell script.
@@ -25,7 +25,7 @@ Produce the following files:
 
 Document all necessary steps a developer would need to run to fully upgrade
 Vite+ without a global CLI. Install the current lockfile, use the exact target
-migrator `pnpm --package=vite-plus@0.2.9 dlx vp migrate` instead of asking the
+migrator `pnpm --package=vite-plus@0.3.0 dlx vp migrate` instead of asking the
 installed 0.1.24 CLI to select a newer release or hand-editing package versions,
 reinstall if migration changes dependency metadata, and validate through the
 upgraded local CLI. Do not add a second migration implementation, command graph,
@@ -39,7 +39,7 @@ The following files are provided as inputs. Extract them before beginning.
 {
   "name": "@nexus/ui",
   "version": "2.1.0",
-  "packageManager": "pnpm@11.18.0",
+  "packageManager": "pnpm@12.0.0",
   "type": "module",
   "exports": {
     ".": {

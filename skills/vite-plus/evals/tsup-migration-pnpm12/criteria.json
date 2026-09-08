@@ -1,0 +1,31 @@
+{
+  "context": "Checks the Vite+ 0.3.0 tsup migration boundary, pnpm 12 strict workspace settings, and catalog preservation without a global CLI.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "pnpm 12 setting recovery",
+      "max_score": 20,
+      "description": "Keeps pnpm 12.0.0 and moves teamMetadata to an appropriate non-pnpm owner with its value preserved; does not bypass workspace validation, downgrade pnpm, or change machine config. Does not claim a frozen install of a nonexistent input lockfile."
+    },
+    {
+      "name": "Exact migrator and local CLI",
+      "max_score": 20,
+      "description": "Runs pnpm --package=vite-plus@0.3.0 dlx vp migrate before manual conversion, reinstalls changed metadata, then uses pnpm exec vp; does not use standalone upgrade or implode."
+    },
+    {
+      "name": "Generated packaging config reconciled",
+      "max_score": 25,
+      "description": "Recognizes the migrator's tsdown.config.ts importing vite-plus/pack as intermediate output, consolidates supported packaging settings into vite.config.ts, removes redundant config and tsup wiring, and preserves entry, both formats, declarations, clean output, and source maps."
+    },
+    {
+      "name": "Catalog ownership preserved",
+      "max_score": 15,
+      "description": "Restores vite to catalog: in the manifest, updates its catalog alias to the selected core release, and verifies the resulting lockfile and local toolchain rather than leaving independent literal pins."
+    },
+    {
+      "name": "Artifact and install proof",
+      "max_score": 20,
+      "description": "Generates and verifies a frozen lockfile, runs the local check and pack commands, and exercises ESM, CommonJS, and declaration consumers through the exported artifact paths. Reports any unavailable checks accurately rather than assuming tsup-to-tsdown output names match."
+    }
+  ]
+}

@@ -19,7 +19,8 @@ Vite+ is pre-1.0 and changes quickly. Before editing:
 3. Read the relevant packaged documentation under
    `node_modules/vite-plus/docs/` and any shipped `AGENTS.md`.
 4. When changing the pinned release, read the intervening upstream release
-   notes and run that exact target's migrator.
+   notes from [upstream releases](https://github.com/voidzero-dev/vite-plus/releases)
+   and run that exact target's migrator.
 
 The installed CLI and packaged docs override memorized command, config, action,
 hook, and dependency shapes. Carry a workaround only when it reproduces on the
@@ -28,6 +29,9 @@ installed version and has a named removal condition.
 ## Target Contract
 
 - The repository owns Vite+ and package-manager versions; no global `vp` is required.
+- For pnpm creation or package-manager upgrades, target pnpm 12 or newer and
+  pin the selected version. Bootstrap existing projects with their current pin
+  first; preserve another package manager when migration is outside scope.
 - Interactive commands use the repository-local CLI. Package scripts and CI
   may use bare `vp` when their environment provides it.
 - `vite.config.ts` owns Vite+, test, lint, format, pack, staged, and task config
@@ -69,7 +73,7 @@ Preserve one checked-in owner for each layer:
 | Layer | Owner |
 | --- | --- |
 | runtime | existing version file, tool manager, or manifest declaration |
-| package manager | `packageManager` or equivalent existing contract |
+| package manager | `packageManager` or `devEngines.packageManager`; one consistent declaration |
 | Vite+ | dependency, catalog, or lockfile selected by migration |
 | bundled Vite/Vitest/Oxc | migrator-managed alias or override verified through the installed toolchain |
 | Actions | immutable action pin plus repository update policy |

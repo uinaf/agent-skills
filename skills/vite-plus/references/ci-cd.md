@@ -24,6 +24,12 @@ path. Pin GitLab remote templates and their setup target to the same immutable
 release. Provide Node through the GitLab image or runner when the template does
 not own it.
 
+When updating standalone setup across
+[0.3.0](https://github.com/voidzero-dev/vite-plus/releases/tag/v0.3.0), inspect
+custom PATH/cache assumptions: fresh installs use split directories; existing
+installs keep their layout. Prefer the official setup outputs. Do not run
+`vp implode` to align CI paths; it deletes managed runtimes and global state.
+
 ## Privileged Jobs
 
 Vite+ does not replace release or deploy orchestration. Preserve repository
