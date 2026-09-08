@@ -9,8 +9,9 @@ Contributor guidance for this reusable skill catalog.
 - Put shared repo-wide guidance here; keep package-specific guidance inside its owning skill.
 - Keep runtime skill guidance portable across owners and vendors. Consumer
   organization policy, repository routes, and provider preferences belong in
-  the consumer’s guidance, not this catalog. Use owner-neutral examples; keep
-  upstream attribution and this repository’s own metadata accurate.
+  the consumer’s guidance, not this catalog. Concrete public repositories may
+  be reference examples, but their policies are not defaults for consumers.
+  Keep upstream attribution and this repository’s own metadata accurate.
 - Keep every skill package standalone. Do not identify, invoke, import, route to, require, or sequence against a sibling package as a skill in frontmatter, picker metadata, bodies, references, scripts, or evals. State prerequisites, boundaries, and next steps as capabilities and evidence instead of skill identities. Ordinary package, tool, and technology references remain valid.
 - Keep this repository standalone. Do not add package, script, CI, checkout, or
   validation dependencies on external setup or workspace repositories.
