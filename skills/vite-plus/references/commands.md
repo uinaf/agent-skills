@@ -3,15 +3,9 @@
 Use before changing CLI invocations, package scripts, or task orchestration.
 Confirm every command against `pnpm exec vp --help` for the installed release.
 
-## Invocation
-
-- Install dependencies with the repository's declared package manager.
-- Use `pnpm exec vp ...` interactively in pnpm repositories; do not require a
-  machine-global CLI.
-- Keep bare `vp` inside package scripts and after an official CI setup action
-  provides it.
-- Use `vp run <script>` or `vpr <script>` for repository-defined scripts.
-  Built-in commands do not dispatch same-named package scripts.
+Use `pnpm exec vp ...` interactively in pnpm repositories. Dispatch package
+scripts with `vp run <script>` or `vpr <script>`; built-ins do not dispatch
+same-named scripts.
 
 ## Built-ins and Tasks
 
@@ -38,15 +32,5 @@ maintain a static version table in docs.
 
 ## Upgrade
 
-Run the exact target Vite+ package's migrator from the workspace root. Reinstall
-the resulting lockfile, then return to the repository-local CLI. Verify the
-migrator-managed Vite/Vitest aliases or overrides through the manifest,
-toolchain report, and lockfile importer.
-
-Preserve `catalog:` references. [0.3.0 fixes `vp up` replacing Vite catalog
-references with aliases](https://github.com/voidzero-dev/vite-plus/releases/tag/v0.3.0);
-run the target migrator to repair affected projects and inspect the catalog owner.
-
-After toolchain upgrades, run formatting before the final check and review the
-diff. Preserve no legacy invocation without a reproduction on the installed
-version and a removal condition.
+Use the [target-pinned migration procedure](bootstrap.md#existing-repository),
+then return to the repository-local CLI.

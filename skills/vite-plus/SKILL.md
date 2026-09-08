@@ -6,10 +6,7 @@ disable-model-invocation: true
 
 # Vite+
 
-Move the repository toward one coherent Vite+ toolchain without replacing
-product, release, or runtime behavior Vite+ does not own.
-
-## Establish Live Authority
+## Check the Installed Release
 
 Vite+ is pre-1.0 and changes quickly. Before editing:
 
@@ -18,9 +15,8 @@ Vite+ is pre-1.0 and changes quickly. Before editing:
    `pnpm exec vp toolchain --json`.
 3. Read the relevant packaged documentation under
    `node_modules/vite-plus/docs/` and any shipped `AGENTS.md`.
-4. When changing the pinned release, read the intervening upstream release
-   notes from [upstream releases](https://github.com/voidzero-dev/vite-plus/releases)
-   and run that exact target's migrator.
+4. When upgrading, read the intervening
+   [release notes](https://github.com/voidzero-dev/vite-plus/releases).
 
 The installed CLI and packaged docs override memorized command, config, action,
 hook, and dependency shapes. Carry a workaround only when it reproduces on the
@@ -28,18 +24,15 @@ installed version and has a named removal condition.
 
 ## Target Contract
 
-- The repository owns Vite+ and package-manager versions; no global `vp` is required.
 - For pnpm creation or package-manager upgrades, target pnpm 12 or newer and
   pin the selected version. Bootstrap existing projects with their current pin
   first; preserve another package manager when migration is outside scope.
-- Interactive commands use the repository-local CLI. Package scripts and CI
-  may use bare `vp` when their environment provides it.
+- Use the repository-local CLI interactively; no global `vp` is required.
+  Package scripts and CI may use bare `vp` when their environment provides it.
 - `vite.config.ts` owns Vite+, test, lint, format, pack, staged, and task config
   supported by the selected release. Remove parallel configs only after
   migration proves their settings were preserved.
 - Tests use the public Vite+ test imports exposed by the installed release.
-- CI uses the official setup surface when it fits and reads repo-owned runtime
-  and tool versions instead of copying literals.
 - Existing release, deploy, SDK generation, native packaging, and consumer
   checks remain when Vite+ does not replace them.
 - Contributor and agent guidance changes with the commands it documents.
@@ -58,8 +51,7 @@ installed version and has a named removal condition.
 5. Read [commands](references/commands.md) before changing invocation or task
    wiring, [testing](references/testing.md) when tests change, and
    [hooks](references/hooks.md) only when hook policy changes.
-6. Read [CI](references/ci-cd.md) before workflow edits. Keep secret-bearing
-   release and deploy jobs fresh and cache-isolated.
+6. Read [CI](references/ci-cd.md) before workflow edits.
 7. Load [known issues](references/known-issues.md) only after unexpected
    behavior reproduces or during an affected upgrade.
 8. For new config, task-graph, packaging, or CI code, open the closest
@@ -92,5 +84,4 @@ Use the installed release's documented equivalents of:
 5. preview, browser, staged, hook, or workspace-task checks only when changed
 
 Inspect manifests, consolidated config, and lockfile importers after migration.
-Report retained legacy wiring with the reproduced incompatibility and removal
-condition. Do not call a migration complete from generated files alone.
+Report retained legacy wiring with its incompatibility and removal condition.

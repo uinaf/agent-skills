@@ -8,7 +8,6 @@ Use for workspace repositories adopting Vite+.
   independent.
 - Keep one root editor, agent, hook, and consolidated tooling policy.
 - Preserve the package manager's workspace declaration and dependency graph.
-- Move scripts, test imports, config, and CI as one coherent migration.
 
 ## Task Selection
 
@@ -55,5 +54,3 @@ lockfile, and relevant environment changes.
 - important leaf packages check, test, and build or pack independently
 - transitive consumer builds execute in dependency order
 - workspace-wide tasks cover every intended package exactly once
-- hook and editor policy is root-owned
-- release, deploy, SDK, or native packaging tasks Vite+ does not own remain intact
