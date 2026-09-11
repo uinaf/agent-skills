@@ -1,9 +1,13 @@
-# Historical test fixtures; no live credentials.
 [extend]
 useDefault = true
 
-[allowlist]
-description = "historical autoreview test fixtures"
-paths = [
-  '''skills/autoreview/tests/''',
-]
+# The autoreview hardening test asserts that a quoted literal is redacted, and
+# `generic-api-key` reads that literal as a token. Allow only that one value in
+# that one file: the condition is AND, and the regex matches the finding's
+# secret rather than its line, so a credential sharing a line with it is still
+# reported.
+[[allowlists]]
+description = "autoreview hardening test fixture literal"
+condition = "AND"
+paths = ['''skills/autoreview/tests/test_autoreview_hardening\.py$''']
+regexes = ['''^N7xQ2mP9vK4r$''']
