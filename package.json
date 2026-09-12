@@ -7,12 +7,13 @@
   },
   "packageManager": "pnpm@12.0.0",
   "scripts": {
+    "audit": "pnpm audit --audit-level high",
     "lint:actions": "github-actionlint .github/workflows/*.yml",
     "skills:lint": "skillcheck lint",
-    "verify": "pnpm run lint:actions && pnpm run skills:lint"
+    "verify": "pnpm run audit && pnpm run lint:actions && pnpm run skills:lint"
   },
   "devDependencies": {
-    "@uinaf/skillcheck": "^0.2.0",
+    "@uinaf/skillcheck": "^0.5.2",
     "github-actionlint": "1.7.12"
   }
 }

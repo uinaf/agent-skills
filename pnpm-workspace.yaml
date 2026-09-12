@@ -7,8 +7,14 @@ allowBuilds:
   sharp: false
 
 minimumReleaseAgeExclude:
-  - adm-zip@0.6.0
-  - "@uinaf/skillcheck@0.2.0"
+  - adm-zip@0.6.1
+  - "@uinaf/skillcheck@0.5.2"
 
+# Transitive pins for high-severity advisories whose dependents still resolve
+# below the patched floor. The version selector retires each override once that
+# dependent declares a patched range of its own.
 overrides:
-  adm-zip@<0.6.0: 0.6.0
+  # onnxruntime-node, via @huggingface/transformers.
+  "adm-zip@<0.6.1": "^0.6.1" # GHSA-xcpc-8h2w-3j85, GHSA-vwc7-r8mq-g2x9
+  # @huggingface/transformers, via promptfoo.
+  "sharp@<0.35.4": "^0.35.4" # GHSA-rgj7-g3m4-5g8c, GHSA-f88m-g3jw-g9cj
