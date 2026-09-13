@@ -1,6 +1,6 @@
 ---
 name: vite-plus
-description: "Create, migrate, or align frontend packages and monorepos on Vite+. Use for Vite+ scaffolding, migration, upgrades, `vp` commands, consolidated Vite/Oxlint/Oxfmt/Vitest configuration, hooks, packaging, or CI. Do not use for non-Vite toolchains or for release, deploy, and runtime behavior Vite+ does not own."
+description: "Set up, migrate, upgrade, or debug Vite+ tooling and configuration. Use for Vite+ commands, tests, hooks, packaging, and CI; excludes application behavior and release policy."
 disable-model-invocation: true
 ---
 
@@ -8,15 +8,13 @@ disable-model-invocation: true
 
 ## Check the Installed Release
 
-Vite+ is pre-1.0 and changes quickly. Before editing:
-
-1. Install the repository's locked dependencies.
-2. Record `pnpm exec vp --version` and, when available,
-   `pnpm exec vp toolchain --json`.
-3. Read the relevant packaged documentation under
-   `node_modules/vite-plus/docs/` and any shipped `AGENTS.md`.
-4. When upgrading, read the intervening
-   [release notes](https://github.com/voidzero-dev/vite-plus/releases).
+Use the repository's pinned release and installed CLI as authority. Reuse a
+working installation; install locked dependencies only when missing or when
+manifest or lockfile changes require it. Inspect `pnpm exec vp --version` and
+use `pnpm exec vp toolchain --json` when bundled-tool relationships matter.
+Read the relevant packaged docs under `node_modules/vite-plus/docs/` and shipped
+`AGENTS.md` for the surface being changed. Upgrades also need the intervening
+[release notes](https://github.com/voidzero-dev/vite-plus/releases).
 
 The installed CLI and packaged docs override memorized command, config, action,
 hook, and dependency shapes. Carry a workaround only when it reproduces on the
@@ -37,26 +35,27 @@ installed version and has a named removal condition.
   checks remain when Vite+ does not replace them.
 - Contributor and agent guidance changes with the commands it documents.
 
-## Workflow
+## Choose the Task
 
-1. Audit manifests, lockfiles, runtime/package-manager owners, workspace shape,
-   scripts, configs, tests, hooks, CI, packaging, and release/deploy paths.
-2. Read [bootstrap](references/bootstrap.md) for creation, first migration, or
-   target-version upgrades.
-3. Read exactly one shape reference:
-   [packages](references/packages.md) for a standalone package or
-   [monorepos](references/monorepos.md) for a workspace.
-4. Run the selected release's migrator before hand-editing generated config.
-   Reconcile its result with repository-specific boundaries.
-5. Read [commands](references/commands.md) before changing invocation or task
-   wiring, [testing](references/testing.md) when tests change, and
-   [hooks](references/hooks.md) only when hook policy changes.
-6. Read [CI](references/ci-cd.md) before workflow edits.
-7. Load [known issues](references/known-issues.md) only after unexpected
-   behavior reproduces or during an affected upgrade.
-8. For new config, task-graph, packaging, or CI code, open the closest
-   [maintained example](references/examples.md) after selecting the repository
-   shape. Adapt it to the installed Vite+ release; do not copy its pins.
+- **Creation, migration, or upgrade:** inspect manifests, version owners,
+  workspace shape, and affected scripts, configs, tests, hooks, CI, and packaging.
+  Read [bootstrap](references/bootstrap.md) and the matching shape:
+  [packages](references/packages.md) or [monorepos](references/monorepos.md).
+  For migration or upgrade, run the selected release's migrator before reconciling
+  generated config with repository-specific boundaries.
+- **Maintenance or debugging:** inspect the affected config, command, and callers.
+  Preserve the installed toolchain and unrelated wiring. A configuration fix
+  does not require a migrator or a repository-wide migration audit.
+
+Read [commands](references/commands.md) when invocation or task wiring changes,
+[testing](references/testing.md) for test configuration,
+[hooks](references/hooks.md) for hook policy, and [CI](references/ci-cd.md) for
+workflow edits. Use a package or monorepo reference when packaging or workspace
+behavior is involved. Load [known issues](references/known-issues.md) only after
+unexpected behavior reproduces or during an affected upgrade.
+
+Use [maintained examples](references/examples.md) only to resolve a concrete
+implementation question repository code and installed docs do not answer.
 
 ## Version Ownership
 
@@ -75,7 +74,9 @@ existing owner. Do not hand-maintain a static bundled-version table.
 
 ## Verification
 
-Use the installed release's documented equivalents of:
+For maintenance, run repository-required gates and checks for the affected
+behavior; reuse still-valid proof. For creation, migration, or upgrades, use the
+selected release's documented equivalents of:
 
 1. frozen dependency install after the lockfile is final
 2. combined format, lint, and type checks

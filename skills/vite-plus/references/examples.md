@@ -10,5 +10,6 @@ not literal versions, task names, exceptions, or delivery policy.
 | TypeScript monorepo with recursive tests, topological builds, multiple packages, app deploy, and separate CLI publication | [`uinaf/attach` task graph](https://github.com/uinaf/attach/blob/main/package.json), [root config](https://github.com/uinaf/attach/blob/main/vite.config.ts), and [main workflow](https://github.com/uinaf/attach/blob/main/.github/workflows/main.yml) |
 | Library plus example-app workspace with seeded build then parallel development | [`uinaf/react-json-logic` scripts](https://github.com/uinaf/react-json-logic/blob/main/package.json), [library config](https://github.com/uinaf/react-json-logic/blob/main/packages/react-json-logic/vite.config.ts), and [CI](https://github.com/uinaf/react-json-logic/blob/main/.github/workflows/ci.yml) |
 
-Run the target repository's migrator first. Use an example only to resolve a
-concrete implementation question the installed documentation does not answer.
+For migrations, run the target repository's migrator first. Use an example only
+to resolve a concrete implementation question the installed documentation does
+not answer.

@@ -1,12 +1,19 @@
 ---
 name: react-ban-use-effect
-description: "Detect, replace, and mechanically restrict direct React `useEffect` calls. Use when writing, refactoring, reviewing, or migrating React code that fetches, derives state, relays events, resets state, or synchronizes through effects. Do not use for unrelated React work or non-React effect systems."
+description: "Review or replace React useEffect calls, or enforce a no-direct-effect policy. Use for effect implementation, refactoring, or lint policy; excludes unrelated React work and non-React effect systems."
 ---
 
 # React Ban useEffect
 
 Treat direct effects as an external-synchronization escape hatch, not a default
 state-management tool.
+
+## Scope
+
+Effect replacement changes the touched behavior. Repository-wide lint enforcement
+is a separate task: apply it when requested or required by existing repository
+policy. A review request produces findings; an implementation request authorizes
+in-scope replacements and verification without another approval checkpoint.
 
 ## Workflow
 
@@ -24,7 +31,7 @@ state-management tool.
    [alternatives](references/alternatives.md) only when the effect exposes a
    broader data, form, store, or performance ownership problem.
 4. Preserve the repository's framework, data layer, lint shape, and dependency
-   policy. Do not introduce a new library without approval.
+   policy. Add a library only when the request or repository policy authorizes it.
 5. Run lint, type, and test gates plus the smallest real UI or hook check for
    the changed behavior.
 
@@ -55,8 +62,8 @@ user actions, or hide a reset that belongs at a keyed boundary.
 
 ## Enforcement
 
-Extend the repository's existing linter to reject both named `useEffect`
-imports and `React.useEffect(...)`. Allow only narrow reviewed integration-hook
+When enforcement is in scope, extend the repository's existing linter to reject
+both named `useEffect` imports and `React.useEffect(...)`. Allow only narrow reviewed integration-hook
 files. Keep the canonical local gate and CI on that same lint surface; optional
 agent guidance or scanners do not replace mechanical enforcement.
 

@@ -1,6 +1,6 @@
 ---
 name: gh-setup
-description: "Set up or align a repository's GitHub collaboration and delivery surface: repo settings, branch or ruleset policy, templates, Dependabot or Renovate, Actions hardening, Environments, releases, publishing, and deploy workflows. Use for GitHub setup, CI/CD policy, protected delivery, package releases, or app deployment. Do not use for product architecture, provider infrastructure internals, application security review, or repository boot/readiness work."
+description: "Configure GitHub settings, collaboration files, Actions, releases, and deployments. Use for setup or changes to those surfaces; excludes provider infrastructure and product code."
 disable-model-invocation: true
 ---
 
@@ -9,28 +9,25 @@ disable-model-invocation: true
 Make GitHub the enforceable shell around the repository's existing build,
 verification, release, and deployment contracts.
 
-## Inspect and Classify
+## Scope and Route
 
-Before changing files or live settings:
+Start with repository guidance and the files and commands that own the requested
+change. Select the relevant route below before loading references.
 
-1. Read repository guidance, manifests, verification commands, release or deploy
-   scripts, `.github/`, contributor/security docs, and any repository-owned
-   delivery runbook.
-2. Read live GitHub state: default branch, merge methods, effective branch
-   rules, Actions policy, Environments, protected tags, security settings, and
-   every human or automated default-branch writer affected by the change.
-3. Record the relevant before-state and rollback path.
-4. Classify the delivery shape:
-   - **Versioned artifact:** read [release workflows](references/release-workflows.md)
-     and only the matching section of [publish targets](references/release-targets.md).
-   - **Running app or service:** read [deploy workflows](references/deploy-workflows.md),
-     then [Environments](references/deploy-environments.md) or
-     [credentials](references/deploy-secrets.md) when those boundaries change.
-   - **Both:** publish one immutable payload, then deploy that payload instead
-     of rebuilding it.
+- **Collaboration files:** inspect the local file and applicable owner defaults.
+- **Workflow correction:** inspect the affected jobs, their inputs, permissions,
+  dependencies, and required-check behavior. Preserve unrelated delivery policy.
+- **Settings or delivery policy:** read the affected live settings and actors,
+  including default-branch writers when branch rules or required checks change.
+  Record the before-state and rollback path before authorized mutations.
+- **Release or deployment:** inspect the owning scripts and runbook, then use
+  the matching release or deploy route. For both, publish one immutable payload
+  and deploy that payload instead of rebuilding it.
 
-Use repo-local commands as authority. If the repository cannot reproducibly
-build, verify, package, observe, or roll back the claimed surface, report that
+A local correction does not require a full live-policy inventory. Expand
+inspection only when a dependency or changed trust boundary requires it.
+Use repo-local commands as authority. If the claimed delivery surface cannot
+build, verify, package, observe, or roll back reproducibly, report the missing
 prerequisite instead of hiding it in workflow YAML.
 
 ## Shared Contract
@@ -46,58 +43,22 @@ prerequisite instead of hiding it in workflow YAML.
 - One verified payload crosses build, test, publish, and deploy boundaries.
 - Required checks use a stable final result when matrices, conditional lanes,
   or no-op paths make individual jobs unstable.
-- A green workflow is not completion until live settings and downstream state
-  are read back.
+- Live settings and downstream state changed by the task must be read back;
+  a green workflow alone does not prove those changes.
 
-Read [Actions security](references/actions-security.md) before workflows execute
-project code, load secrets, publish, sign, or deploy.
+Read [Actions security](references/actions-security.md) when adding workflows or
+changing code execution, credential, publication, signing, or deploy boundaries.
 
-## Runner Cost
-
-Runner minutes are billed compute. Every trigger, runner size, and rerun is a
-cost decision; default to the cheapest shape that still proves the contract.
-
-- Follow the target owner's runner policy. Compare live pricing, included
-  minutes, repository visibility, and runner availability before choosing a
-  provider or size. Preserve each job's required OS and architecture; reusable
-  workflows must support the caller's policy and platform needs.
-- Use Linux for portable checks. macOS and other large runners are reserved for
-  platform-bound jobs (native apps, Darwin-only APIs, Homebrew taps) and must be
-  gated behind path filters or restricted to `pull_request` +
-  `workflow_dispatch`. Runner changes preserve required proof, scan coverage,
-  triggers, permissions, and Environments.
-- Provider requirements still apply to private repositories: npm trusted
-  publishing requires GitHub-hosted runners; use the [npm publish
-  contract](references/release-targets.md#npm).
-- Secret and history scans trigger on `pull_request`, a weekly `schedule`, and
-  `workflow_dispatch` — never on `push`. The merge commit's tree was already
-  scanned in the pull request; the weekly cron covers history and new detector
-  rules. Reuse the target owner’s shared scanning workflow when available;
-  keep its reference consistent with the repository’s pinning policy. Avoid
-  copying scanner jobs or building scanner images per run.
-- Every verification workflow declares workflow-level concurrency:
-  `group: ${{ github.workflow }}-${{ github.ref }}`,
-  `cancel-in-progress: ${{ github.event_name == 'pull_request' }}`. Release,
-  publish, and deploy critical sections keep their own non-cancellable keys.
-- A workflow triggered on both `push: [main]` and `pull_request` pays twice per
-  merged change. Keep push-to-main lanes for release/deploy work and for repos
-  whose policy allows direct pushes; do not add a push trigger to re-verify a
-  tree a required PR check already verified.
-- Jitter cron minutes away from :00/:30; weekly is the default scan cadence.
-- Expensive-per-run jobs (simulators, cross-compiles, e2e) sit behind
-  `dorny/paths-filter` lanes or `workflow_dispatch`, with an `always()` result
-  job when branch protection needs a stable check.
-- Watch failure rates: a workflow that fails half its runs bills full minutes
-  for red. Fix or gate flaky jobs instead of rerunning them.
-
-When implementing rather than only auditing, read [maintained
-implementations](references/implementations.md) and start from the closest
-tested shape. Reuse its contract, not its literal versions, identities, or
-provider details.
+Read [runner cost](references/runner-cost.md) when configuring triggers, runners,
+scan cadence, concurrency, or expensive job selection.
+For new release or deploy machinery, start from the closest [maintained
+implementation](references/implementations.md). For local corrections, consult
+an example only when repository code leaves an implementation question unresolved.
+Adapt its contract, not literal versions, identities, or provider details.
 
 ## Repository Policy
 
-Read [repository settings](references/repo-settings.md) for merge methods,
+Read [repository settings](references/repo-settings.md) when changing merge methods,
 rulesets, required checks, signed commits, tags, Actions policy, Environments,
 the cost-safe organization security baseline, CodeQL posture, and repository
 metadata.
@@ -155,8 +116,10 @@ Deploy work uses:
 ## Verify and Finish
 
 Run repository gates plus `actionlint` and `zizmor` when workflows changed.
-Perform the narrowest safe live proof of the delivery contract. Dry-runs and
-static inspection cannot prove immutable publication, signed writeback,
+When live delivery is in scope and authorized, perform its narrowest safe
+proof. A workflow-only change does not authorize a release or deployment.
+Continue authorized local work when live proof is unavailable and report the gap.
+Dry-runs and static inspection cannot prove immutable publication, signed writeback,
 registry or tap parity, deployment, monitoring, or rollback.
 
 After authorized live changes, read back every setting, Environment, rule,
