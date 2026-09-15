@@ -12,9 +12,15 @@ cost decision; default to the cheapest shape that still proves the contract.
   gated behind path filters or restricted to `pull_request` +
   `workflow_dispatch`. Runner changes preserve required proof, scan coverage,
   triggers, permissions, and Environments.
-- Provider requirements still apply to private repositories: npm trusted
-  publishing requires GitHub-hosted runners; use the [npm publish
-  contract](release-targets.md#npm).
+- Private repositories run on Blacksmith self-hosted labels
+  (`blacksmith-2vcpu-ubuntu-2404`, `-arm` for arm jobs), because GitHub-hosted
+  Actions do not dispatch for them under the $0 paid-usage budget. Public
+  repositories stay GitHub-hosted, where minutes are free. A repository
+  declaring a Blacksmith label also needs `.github/actionlint.yaml` listing it.
+- Provider requirements override that default: npm trusted publishing requires
+  GitHub-hosted runners, so a private repository publishing to npm keeps that
+  job GitHub-hosted and accepts that it cannot run until the budget allows it.
+  Use the [npm publish contract](release-targets.md#npm).
 - Secret and history scans trigger on `pull_request`, a weekly `schedule`, and
   `workflow_dispatch` — never on `push`. The merge commit's tree was already
   scanned in the pull request; the weekly cron covers history and new detector
