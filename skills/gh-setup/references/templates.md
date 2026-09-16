@@ -41,6 +41,8 @@ problem-first flow itself, with guidance in comments (example:
 ## Proof
 
 <!-- only what CI cannot show: a screenshot, before/after numbers.
+     Upload media with `gh pr create --attach ./file.png` or
+     `gh pr comment <n> --attach ./file.mp4`; never commit it to the branch.
      Delete this section when CI covers everything. -->
 ```
 
@@ -51,6 +53,17 @@ implementation inventories, no ceremonial checklists, and no extra
 headings that restate the diff. The comments are the verbosity control:
 agents fill templates literally, so guidance written there is the one
 place it reliably lands.
+
+### Media proof
+
+A template that asks for screenshots or recordings without naming an upload
+route gets the asset committed to the branch. Name the route in the comment:
+`gh pr create --attach ./file.png` and `gh pr comment <n> --attach` (gh 2.99+,
+images and video, github.com and GitHub Enterprise Cloud; video goes on a bare
+line and takes no alt text). When asked to align an owner default or a set of
+repository-local templates, audit each proof or review-notes block for that
+line and add it where missing. Leave templates that already name a working
+upload route.
 
 Create issue forms only when their fields improve triage. Common distinct
 routes are bug, feature, and (only when supported) question. Vulnerabilities
