@@ -9,7 +9,6 @@ they serve.
 | Owner repo | Skill path |
 | --- | --- |
 | `uinaf/agent-skills` | `skills/*` |
-| `uinaf/attach` | `skills/attach-cli` |
 | `uinaf/design` | `skills/uinaf-design` |
 | `uinaf/ffss` | `skills/*` |
 | `uinaf/healthd` | `skills/healthd-operator` |
