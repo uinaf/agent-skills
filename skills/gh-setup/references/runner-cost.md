@@ -22,11 +22,25 @@ cost decision; default to the cheapest shape that still proves the contract.
   job GitHub-hosted and accepts that it cannot run until the budget allows it.
   Use the [npm publish contract](release-targets.md#npm).
 - Secret and history scans trigger on `pull_request`, a weekly `schedule`, and
-  `workflow_dispatch` — never on `push`. The merge commit's tree was already
-  scanned in the pull request; the weekly cron covers history and new detector
-  rules. Reuse the target owner’s shared scanning workflow when available;
+  `workflow_dispatch` — never on `push`. On PRs, scan only commits introduced
+  by the PR when the scanner supports a complete revision range; include secrets
+  added and removed between commits. Check range semantics against the selected
+  scanner version's upstream source and verify diverged branches and merges
+  before narrowing it. Keep a full scan where complete range coverage is
+  unproven; the [maintained shared workflow](https://github.com/uinaf/.github/blob/main/.github/workflows/scan.yml)
+  records the current TruffleHog constraint. Otherwise reserve full-history
+  scans for weekly/manual runs. A shallow
+  checkout or missing base must not silently turn the PR scan into an empty
+  success. Reuse the target owner’s shared scanning workflow when available;
   keep its reference consistent with the repository’s pinning policy. Avoid
   copying scanner jobs or building scanner images per run.
+- Gate Actionlint and Zizmor jobs on changes to workflows, local actions, and
+  their configuration; keep weekly/manual runs unconditional. Reuse changed-file
+  detection in an already-required job instead of paying for a filter-only
+  runner. Detect renames and deletions too; unknown or incomplete file lists must
+  run the checks or fail visibly. Gate at job level so unrelated PRs allocate no
+  linter runner. Preserve required-check names and successful skipped-job
+  behavior; workflow-level path filters can leave required checks pending.
 - Every verification workflow declares workflow-level concurrency:
   `group: ${{ github.workflow }}-${{ github.ref }}`,
   `cancel-in-progress: ${{ github.event_name == 'pull_request' }}`. Release,
@@ -41,4 +55,3 @@ cost decision; default to the cheapest shape that still proves the contract.
   job when branch protection needs a stable check.
 - Watch failure rates: a workflow that fails half its runs bills full minutes
   for red. Fix or gate flaky jobs instead of rerunning them.
-
