@@ -24,10 +24,12 @@ cost decision; default to the cheapest shape that still proves the contract.
 - Secret and history scans trigger on `pull_request`, a weekly `schedule`, and
   `workflow_dispatch` — never on `push`. On PRs, scan only commits introduced
   by the PR when the scanner supports a complete revision range; include secrets
-  added and removed between commits. Verify diverged branches and merges before
-  narrowing a scanner: TruffleHog's stop-at-base traversal can miss older PR
-  commits, so keep its full scan until a safe range is proven. Otherwise reserve
-  full-history scans for weekly/manual runs. A shallow
+  added and removed between commits. Check range semantics against the selected
+  scanner version's upstream source and verify diverged branches and merges
+  before narrowing it. Keep a full scan where complete range coverage is
+  unproven; the [maintained shared workflow](https://github.com/uinaf/.github/blob/main/.github/workflows/scan.yml)
+  records the current TruffleHog constraint. Otherwise reserve full-history
+  scans for weekly/manual runs. A shallow
   checkout or missing base must not silently turn the PR scan into an empty
   success. Reuse the target owner’s shared scanning workflow when available;
   keep its reference consistent with the repository’s pinning policy. Avoid
