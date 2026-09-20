@@ -37,9 +37,9 @@ requires it.
   (`on: workflow_call`, every image and Action digest-pinned there).
   - Give each repository a thin caller job that owns its triggers. Match the
     owner's effective Actions policy before choosing the reusable workflow ref.
-  - Where full-SHA pins are enforced, pin the caller too and keep the updater
-    enabled for that reusable workflow. Check inherited presets for exclusions;
-    retain hash-pin enforcement in local scanners.
+  - Where full-SHA pins are enforced, pin the reusable-workflow reference in
+    each caller and enable its updater in each consuming repository. Check
+    inherited presets for exclusions; retain hash-pin enforcement in local scanners.
   - Where the owner deliberately allows trusted first-party branch refs, callers
     may track `@main` so baseline updates reach every adopter. Scope any local
     `zizmor` exception to those workflows
