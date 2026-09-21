@@ -5,7 +5,7 @@
     {
       "name": "Checkout-free change detection",
       "max_score": 10,
-      "description": "The changes job has no checkout step on pull_request events; if a push-event checkout remains it uses the default depth, and no job in the workflow sets `fetch-depth: 0`."
+      "description": "The changes job has no checkout step on pull_request events and grants `pull-requests: read` at job or workflow scope so the filter can list files through the API; if a push-event checkout remains it uses the default depth, and no job in the workflow sets `fetch-depth: 0`."
     },
     {
       "name": "Default depth on verification jobs",
@@ -40,7 +40,7 @@
     {
       "name": "Shard decision bounded by setup",
       "max_score": 12,
-      "description": "ci-plan.md rejects or defers eight shards using the measured 95-second per-shard setup, or accepts more shards only after showing the reduced setup time, and states the arithmetic."
+      "description": "ci-plan.md separates wall time from billed minutes using the measured 95-second per-shard setup (for example, eight shards cut the critical path to roughly one setup plus an eighth of the tests while billing four times the setup), cuts setup before or alongside any shard increase, and states the arithmetic for whichever shard count it chooses."
     },
     {
       "name": "Setup timing recorded",

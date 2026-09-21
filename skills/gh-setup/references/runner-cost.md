@@ -62,12 +62,15 @@ The slowest chain of required jobs sets the wait, and small gating jobs sit
 ahead of every shard. Setup cost, not test volume, limits parallelism.
 
 - Fetch only what the job reads. Verification, lint, and build jobs use the
-  default checkout depth. Change detection on `pull_request` events uses the
-  pull-request API and needs no checkout; on `push` events it uses a shallow
-  checkout and lets the filter deepen. Affected-package detection fetches a
-  blobless tree and deepens to the merge base instead of full history. Full
-  history (`fetch-depth: 0`) is reserved for release version analysis, signed
-  writeback, and history scans.
+  default checkout depth. A paths filter on `pull_request` events lists files
+  through the API, so the job needs `pull-requests: read` and no checkout
+  step; on `push` events the filter fetches the missing base commit by SHA
+  itself, so a default-depth checkout suffices for a public repository, and
+  a private one keeps `fetch-depth: 0` on push because the fetch has no
+  credentials. Affected-package detection checks out with
+  `filter: blob:none` and a small `fetch-depth`, then runs
+  `git fetch --deepen` until the merge base resolves. Full history is
+  reserved for release version analysis, signed writeback, and history scans.
 - A job with under about half a minute of real work merges into a sibling
   job on the same runner and trust level, with the tasks run concurrently;
   a separate runner start, checkout, and install cost more than the work.
@@ -77,9 +80,10 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   the step summary; a dependency cache stays only when restore beats a cold
   install on the same runner for the same lockfile churn. A filtered install
   of the affected packages often wins over restoring everything.
-- Per-shard setup bounds the shard count. State the measured setup time
-  before proposing shards: doubling shards doubles setup, so shards help only
-  when setup is a small fraction of test time.
+- Per-shard setup bounds sharding. Wall time cannot drop below one setup
+  plus the largest shard, and every added shard bills one more setup. State
+  the measured setup time and both figures before proposing shards, and cut
+  setup first when it dominates.
 - Work that gates nothing (cache markers, coverage upload, summaries,
   notifications) runs in a job after the required check, never inside it.
 - Speedups that reduce test isolation (shared module state, reused
