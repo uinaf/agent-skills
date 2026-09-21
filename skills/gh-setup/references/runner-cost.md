@@ -71,21 +71,23 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   files and the action does not report truncation, so a job that skips lanes
   compares the listed count with the pull request's `changed_files` and runs
   everything when they differ. `merge_group` events take the git path: keep
-  a checkout and an explicit `base` there. Affected-package detection checks
+  a checkout there; the action reads the base and head SHAs from the event. Affected-package detection checks
   out with `filter: blob:none` and a small `fetch-depth`, then runs
   `git fetch --deepen` until the merge base resolves; `fetch-depth: 2` is not
   enough in the general case. Full history is reserved for release
   version analysis, signed writeback, and history scans.
 - A job with under about half a minute of real work merges into a sibling
-  job on the same runner and trust level, with the tasks run concurrently;
-  a separate runner start, checkout, and install cost more than the work.
-  Keep separate jobs for different runners, trust boundaries, or multi-minute
-  work.
+  job on the same runner and trust level, with the tasks run concurrently so
+  no parallelism is lost; a separate runner start, checkout, and install
+  cost more than the work. Keep separate jobs for different runners, trust
+  boundaries, or multi-minute work, and say whether latency or runner
+  minutes is the target.
 - Measure caches before keeping them. Record install and setup duration in
   the step summary; a dependency cache stays only when restore beats a cold
   install on the same runner for the same lockfile churn. Cache the
-  package-manager store, never `node_modules`, and expect a filtered install
-  of the affected packages to beat restoring everything.
+  package-manager store by default; keep a `node_modules` cache only where
+  its measured miss cost exceeds its restore cost, and expect a filtered
+  install of the affected packages to beat restoring everything.
 - Per-shard setup bounds sharding. Wall time cannot drop below one setup
   plus the largest shard, and every added shard bills one more setup. State
   the measured setup time and both figures before proposing shards, and cut
