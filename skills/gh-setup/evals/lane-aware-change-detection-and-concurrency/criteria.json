@@ -15,7 +15,7 @@
     {
       "name": "Checkout-free detection",
       "max_score": 9,
-      "description": "The changes/detect job has no checkout step on pull_request events (the filter reads the PR API); any push-event checkout keeps the default depth and does not set `fetch-depth: 0`"
+      "description": "The changes/detect job has no checkout step on pull_request events and grants `pull-requests: read` at job or workflow scope so the filter can read the PR API; any push-event checkout keeps the default depth and does not set `fetch-depth: 0`"
     },
     {
       "name": "Lane conditional build",

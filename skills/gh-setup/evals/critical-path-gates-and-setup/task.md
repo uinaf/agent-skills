@@ -90,6 +90,11 @@ jobs:
       - run: node scripts/check-results.mjs '${{ toJSON(needs) }}'
 ```
 
+`coverage:upload` publishes the coverage report to an external service and
+`test:cache-marker write` records that this input set passed; neither changes
+a test result, and a failure in either is reporting-only. The `api` tests use
+`psql` through `postgresql-client` for fixture loading.
+
 Recent run data: each of `lint`, `typecheck`, `format`, `licenses`, and
 `schema-check` spends 55 to 70 seconds on runner start, checkout, cache
 restore, and install, then 5 to 20 seconds working. The `node_modules` cache

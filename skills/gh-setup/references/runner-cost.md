@@ -65,9 +65,9 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   default checkout depth. A paths filter on `pull_request` events lists files
   through the API, so the job needs `pull-requests: read` and no checkout
   step; on `push` events the filter fetches the missing base commit by SHA
-  itself, so a default-depth checkout suffices for a public repository, and
-  a private one keeps `fetch-depth: 0` on push because the fetch has no
-  credentials. Affected-package detection checks out with
+  itself, so a default-depth checkout suffices where that fetch can
+  authenticate; a private repository whose checkout persists no credentials
+  keeps `fetch-depth: 0` on push. Affected-package detection checks out with
   `filter: blob:none` and a small `fetch-depth`, then runs
   `git fetch --deepen` until the merge base resolves. Full history is
   reserved for release version analysis, signed writeback, and history scans.
