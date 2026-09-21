@@ -15,8 +15,8 @@ or type-check modes only when the workflow needs them. The combined check
 already runs the bundled native type checker when `lint.options.typeCheck` is
 enabled; do not add a separate `tsc --noEmit` script or CI step beside it. Keep
 a standalone type-check step only for a program the check cannot cover, such as
-a framework's own checker, and run it through the bundled native compiler
-rather than `tsc`.
+a framework's own checker, and prefer the native TypeScript compiler to `tsc`
+for it.
 
 Use `vp run` when Vite+ owns dependency ordering, filtering, or caching. Keep a
 package-manager runner only for a proven task Vite+ does not cover. Define

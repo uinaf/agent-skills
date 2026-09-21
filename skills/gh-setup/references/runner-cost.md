@@ -58,9 +58,8 @@ cost decision; default to the cheapest shape that still proves the contract.
 
 ## Critical Path
 
-Wall time is set by the slowest chain of required jobs, and small gating jobs
-sit ahead of every shard. Setup cost, not test volume, bounds how far work
-can parallelize.
+The slowest chain of required jobs sets the wait, and small gating jobs sit
+ahead of every shard. Setup cost, not test volume, limits parallelism.
 
 - Fetch only what the job reads. Verification, lint, and build jobs use the
   default checkout depth. Change detection on `pull_request` events uses the
@@ -69,20 +68,21 @@ can parallelize.
   blobless tree and deepens to the merge base instead of full history. Full
   history (`fetch-depth: 0`) is reserved for release version analysis, signed
   writeback, and history scans.
-- A job whose real work runs under about half a minute does not earn its own
-  runner start, checkout, and install. Fold it into a sibling job on the same
-  runner and trust level, running the tasks concurrently. Keep separate jobs
-  for different runners, trust boundaries, or multi-minute work.
+- A job with under about half a minute of real work merges into a sibling
+  job on the same runner and trust level, with the tasks run concurrently;
+  a separate runner start, checkout, and install cost more than the work.
+  Keep separate jobs for different runners, trust boundaries, or multi-minute
+  work.
 - Measure caches before keeping them. Record install and setup duration in
   the step summary; a dependency cache stays only when restore beats a cold
   install on the same runner for the same lockfile churn. A filtered install
   of the affected packages often wins over restoring everything.
-- Shard count is bounded by per-shard setup. State the measured setup time
-  before proposing shards; doubling shards doubles setup, so shards pay off
-  only when setup is a small fraction of test time.
+- Per-shard setup bounds the shard count. State the measured setup time
+  before proposing shards: doubling shards doubles setup, so shards help only
+  when setup is a small fraction of test time.
 - Work that gates nothing (cache markers, coverage upload, summaries,
   notifications) runs in a job after the required check, never inside it.
-- Optimizations that trade test isolation for speed (shared module state,
-  reused containers, skipped teardown) are opt-in per file with explicit
-  eligibility rules, and the guidance that generates tests encodes those
-  rules so new tests follow them by default.
+- Speedups that reduce test isolation (shared module state, reused
+  containers, skipped teardown) are opt-in per file with written eligibility
+  rules, and the test-writing guidance carries those rules so new tests
+  comply by default.
