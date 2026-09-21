@@ -13,7 +13,7 @@
     { "name": "Current cask publisher", "max_score": 8, "description": ".goreleaser.yaml uses homebrew_casks rather than deprecated brews and targets the tap repository." },
     { "name": "Native signed tap commit", "max_score": 12, "description": "The cask sets commit_author.use_github_app_token: true and does not set custom author/committer identity fields." },
     { "name": "No extra tap commit job", "max_score": 6, "description": "GoReleaser owns the cask update; there is no second OS job, formula renderer, local git push, or generic commit action." },
-    { "name": "Full history", "max_score": 4, "description": "Verify and release checkouts use fetch-depth: 0." },
+    { "name": "Full history", "max_score": 4, "description": "The release checkout uses fetch-depth: 0; the verify checkout keeps the default depth." },
     { "name": "Release concurrency", "max_score": 4, "description": "Release has a job-level non-cancellable concurrency group." },
     { "name": "Step-scoped tokens", "max_score": 4, "description": "At GoReleaser step scope, the source workflow token is GITHUB_TOKEN and the tap-only App token is HOMEBREW_TAP_TOKEN." },
     { "name": "Setup contract", "max_score": 2, "description": "Root SETUP.md documents RELEASE_APP_CLIENT_ID, RELEASE_APP_PRIVATE_KEY, tap-only repository scope, and Contents write for the minted App token." },

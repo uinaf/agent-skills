@@ -55,3 +55,64 @@ cost decision; default to the cheapest shape that still proves the contract.
   job when branch protection needs a stable check.
 - Watch failure rates: a workflow that fails half its runs bills full minutes
   for red. Fix or gate flaky jobs instead of rerunning them.
+
+## Critical Path
+
+The slowest chain of required jobs sets the wait, and small gating jobs sit
+ahead of every shard. Setup cost, not test volume, limits parallelism.
+
+- Fetch only what the job reads. Verification, lint, and build jobs use the
+  default checkout depth. A paths filter on `pull_request` events lists files
+  through the API, so the job needs `pull-requests: read` and no checkout
+  step; on `push` events the filter fetches the missing base commit by SHA
+  itself, so a default-depth checkout suffices where that fetch can
+  authenticate; a private repository whose checkout persists no credentials
+  keeps `fetch-depth: 0` on push. The API path lists at most 3,000 changed
+  files and the action does not report truncation, so a job that skips lanes
+  compares the listed count with the pull request's `changed_files` and runs
+  everything when they differ. `merge_group` events take the git path: keep
+  a checkout there; the action reads the base and head SHAs from the event. Affected-package detection checks
+  out with `filter: blob:none` and a small `fetch-depth`, then runs
+  `git fetch --deepen` until the merge base resolves; `fetch-depth: 2` is not
+  enough in the general case. Full history is reserved for release
+  version analysis, signed writeback, and history scans.
+- A job with under about half a minute of real work is a candidate to merge
+  into a sibling job on the same runner and trust level, with the tasks run
+  concurrently; a separate runner start, checkout, and install usually cost
+  more than the work. Concurrent tasks share one runner's cores and memory,
+  so measure the batched job against the parallel jobs on the consumer's
+  runner shape before keeping it. Keep separate jobs for different runners,
+  trust boundaries, or multi-minute work, and say whether latency or runner
+  minutes is the target.
+- Measure caches before keeping them. Record install and setup duration in
+  the step summary; a dependency cache stays only when its expected cost,
+  from measured hit rate, hit restore time, and miss install plus save time,
+  beats always installing cold on the same runner. Cache the package-manager
+  store by default; keep a `node_modules` cache only where that arithmetic
+  favours it, and expect a filtered install of the affected packages to beat
+  restoring everything.
+- Per-shard setup bounds sharding. Wall time cannot drop below one setup
+  plus the largest shard, and every added shard bills one more setup. State
+  the measured setup time and both figures before proposing shards, and cut
+  setup first when it dominates.
+- Work that gates nothing (cache markers, coverage upload, summaries,
+  notifications) runs in a job after the required check, never inside it.
+- Speedups that reduce test isolation (shared module state, reused
+  containers, skipped teardown) are opt-in per file with written eligibility
+  rules, and the test-writing guidance carries those rules so new tests
+  comply by default.
+
+## Merge Queue
+
+- Batch entries and bisect failures; batching relaxes per-commit correctness,
+  so enable it only where a broken intermediate commit is acceptable.
+- Size batches from arrival rate, with a minimum and maximum, not a constant.
+- Tier the checks: lint, type check, and affected unit tests before the queue;
+  deterministic integration in the queue. Move end-to-end and performance
+  suites after merge, with a fast revert path, only when the owner accepts
+  post-merge detection for them; required pre-merge coverage stays by default.
+- Quarantine flaky tests instead of retrying entries; cascade rate follows
+  flake rate. Give automated authors a retry budget set from the measured
+  queue capacity and the owner's failure policy.
+- Queue-required workflows never use workflow-level `paths` filters; skip
+  inside the job so the required check still reports on the queue branch.

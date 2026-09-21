@@ -13,9 +13,9 @@
       "description": "The paths-filter includes the package lockfile (package-lock.json, pnpm-lock.yaml, yarn.lock, or similar) in at least one lane's filter rules"
     },
     {
-      "name": "fetch-depth 0 on changes job",
+      "name": "Checkout-free detection",
       "max_score": 9,
-      "description": "The changes/detect job's checkout step includes `fetch-depth: 0`"
+      "description": "The changes/detect job has no checkout step on pull_request events and grants `pull-requests: read` (alongside `contents: read` when the map is job-scoped) so the filter can read the PR API; push events, which the filter detects through git, have a checkout conditioned on non-PR events at the default depth, and no job sets `fetch-depth: 0`"
     },
     {
       "name": "Lane conditional build",

@@ -11,7 +11,12 @@ same-named scripts.
 
 Prefer installed built-ins for development, checks, tests, build, preview, and
 pack. Use the combined check as the default guardrail and narrower lint, format,
-or type-check modes only when the workflow needs them.
+or type-check modes only when the workflow needs them. With
+`lint.options.typeCheck` enabled the combined check reports type errors, so do
+not add a separate `tsc --noEmit` script or CI step beside it. Keep
+a standalone type-check step only for a program the check cannot cover, such as
+a framework's own checker, and prefer the native TypeScript compiler to `tsc`
+for it.
 
 Use `vp run` when Vite+ owns dependency ordering, filtering, or caching. Keep a
 package-manager runner only for a proven task Vite+ does not cover. Define
