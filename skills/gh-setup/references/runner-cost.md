@@ -76,18 +76,21 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   `git fetch --deepen` until the merge base resolves; `fetch-depth: 2` is not
   enough in the general case. Full history is reserved for release
   version analysis, signed writeback, and history scans.
-- A job with under about half a minute of real work merges into a sibling
-  job on the same runner and trust level, with the tasks run concurrently so
-  no parallelism is lost; a separate runner start, checkout, and install
-  cost more than the work. Keep separate jobs for different runners, trust
-  boundaries, or multi-minute work, and say whether latency or runner
+- A job with under about half a minute of real work is a candidate to merge
+  into a sibling job on the same runner and trust level, with the tasks run
+  concurrently; a separate runner start, checkout, and install usually cost
+  more than the work. Concurrent tasks share one runner's cores and memory,
+  so measure the batched job against the parallel jobs on the consumer's
+  runner shape before keeping it. Keep separate jobs for different runners,
+  trust boundaries, or multi-minute work, and say whether latency or runner
   minutes is the target.
 - Measure caches before keeping them. Record install and setup duration in
-  the step summary; a dependency cache stays only when restore beats a cold
-  install on the same runner for the same lockfile churn. Cache the
-  package-manager store by default; keep a `node_modules` cache only where
-  its measured miss cost exceeds its restore cost, and expect a filtered
-  install of the affected packages to beat restoring everything.
+  the step summary; a dependency cache stays only when its expected cost,
+  from measured hit rate, hit restore time, and miss install plus save time,
+  beats always installing cold on the same runner. Cache the package-manager
+  store by default; keep a `node_modules` cache only where that arithmetic
+  favours it, and expect a filtered install of the affected packages to beat
+  restoring everything.
 - Per-shard setup bounds sharding. Wall time cannot drop below one setup
   plus the largest shard, and every added shard bills one more setup. State
   the measured setup time and both figures before proposing shards, and cut
@@ -105,8 +108,9 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   so enable it only where a broken intermediate commit is acceptable.
 - Size batches from arrival rate, with a minimum and maximum, not a constant.
 - Tier the checks: lint, type check, and affected unit tests before the queue;
-  deterministic integration in the queue; end-to-end and performance after
-  merge with a fast revert path.
+  deterministic integration in the queue. Move end-to-end and performance
+  suites after merge, with a fast revert path, only when the owner accepts
+  post-merge detection for them; required pre-merge coverage stays by default.
 - Quarantine flaky tests instead of retrying entries; cascade rate follows
   flake rate. Give automated authors a retry budget set from the measured
   queue capacity and the owner's failure policy.

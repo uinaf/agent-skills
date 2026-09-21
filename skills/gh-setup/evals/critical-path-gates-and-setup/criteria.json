@@ -5,7 +5,7 @@
     {
       "name": "Checkout-free change detection",
       "max_score": 10,
-      "description": "The changes job has no checkout step on pull_request events and grants `pull-requests: read` at job or workflow scope so the filter can list files through the API; because the workflow also runs on push to main, a checkout conditioned on non-PR events (for example `if: github.event_name != 'pull_request'`) remains at the default depth, and no job in the workflow sets `fetch-depth: 0`."
+      "description": "The changes job has no checkout step on pull_request events and grants `pull-requests: read` at job or workflow scope so the filter can list files through the API; because the workflow also runs on push to main, a checkout conditioned on non-PR events (for example `if: github.event_name != 'pull_request'`) remains at the default depth, and no job in the workflow sets `fetch-depth: 0`. The job compares the number of files the filter listed with the pull request's `changed_files` and runs every lane when they differ."
     },
     {
       "name": "Default depth on verification jobs",
@@ -35,7 +35,7 @@
     {
       "name": "Non-gating work after the gate",
       "max_score": 10,
-      "description": "coverage:upload and test:cache-marker, which the task states are reporting-only, no longer run inside api-test; each shard uploads its coverage output as an artifact, a job that the verify gate does not depend on downloads and merges those artifacts before uploading, and the plan names the steps as non-gating."
+      "description": "coverage:upload and test:cache-marker, which the task states are reporting-only, no longer run inside api-test; each shard uploads its coverage output as an artifact, a job that the verify gate does not depend on downloads and merges those artifacts before uploading and runs `test:cache-marker write` only after every shard succeeded, and the plan names the steps as non-gating."
     },
     {
       "name": "Shard decision bounded by setup",
@@ -55,7 +55,7 @@
     {
       "name": "Contract preserved",
       "max_score": 6,
-      "description": "Workflow-level concurrency with cancel-in-progress on pull_request, `permissions: contents: read`, and the `verify` job name are unchanged."
+      "description": "Workflow-level concurrency with cancel-in-progress on pull_request, `permissions: contents: read`, and the `verify` job name are unchanged, and every action is pinned to a full commit SHA with a version comment rather than a `<sha>` placeholder."
     },
     {
       "name": "No coverage removed for speed",

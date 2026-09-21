@@ -108,7 +108,9 @@ teammate has proposed going to eight shards.
 
 Produce:
 
-- `.github/workflows/verify.yml`: the reworked workflow. Keep every check,
+- `.github/workflows/verify.yml`: the reworked workflow with every action
+  pinned to a full commit SHA and a version comment in place of the `<sha>`
+  placeholders. Keep every check,
   the `verify` required-check name, the concurrency contract, read-only
   permissions, and the lane condition for `api-test` and `schema-check`.
 - `ci-plan.md`: for each change, the measurement that justifies it, what
