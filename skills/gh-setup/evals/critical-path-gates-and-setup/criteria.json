@@ -5,7 +5,7 @@
     {
       "name": "Checkout-free change detection",
       "max_score": 10,
-      "description": "The changes job has no checkout step on pull_request events and grants `pull-requests: read` at job or workflow scope so the filter can list files through the API; if a push-event checkout remains it uses the default depth, and no job in the workflow sets `fetch-depth: 0`."
+      "description": "The changes job has no checkout step on pull_request events and grants `pull-requests: read` at job or workflow scope so the filter can list files through the API; because the workflow also runs on push to main, a checkout conditioned on non-PR events (for example `if: github.event_name != 'pull_request'`) remains at the default depth, and no job in the workflow sets `fetch-depth: 0`."
     },
     {
       "name": "Default depth on verification jobs",
@@ -15,7 +15,7 @@
     {
       "name": "Short jobs batched",
       "max_score": 12,
-      "description": "lint, typecheck, format, and licenses no longer each start a runner; they run inside at most two jobs that install once and run the tasks concurrently, and the plan says why they were batched."
+      "description": "lint, typecheck, format, and licenses no longer each start a runner; they run inside at most two jobs that install once and run the tasks concurrently through a runner with aggregate or fail-fast semantics or explicit per-process status collection, so any single failure fails the job (a bare `wait` after backgrounded commands does not qualify), and the plan says why they were batched."
     },
     {
       "name": "Cache dropped with evidence",
@@ -35,7 +35,7 @@
     {
       "name": "Non-gating work after the gate",
       "max_score": 10,
-      "description": "coverage:upload and test:cache-marker, which the task states are reporting-only, no longer run inside api-test; they run in a job that the verify gate does not depend on, and the plan names them as non-gating."
+      "description": "coverage:upload and test:cache-marker, which the task states are reporting-only, no longer run inside api-test; each shard uploads its coverage output as an artifact, a job that the verify gate does not depend on downloads and merges those artifacts before uploading, and the plan names the steps as non-gating."
     },
     {
       "name": "Shard decision bounded by setup",

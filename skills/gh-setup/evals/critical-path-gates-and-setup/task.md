@@ -87,6 +87,7 @@ jobs:
     needs: [changes, lint, typecheck, format, licenses, schema-check, api-test]
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@<sha> # v5
       - run: node scripts/check-results.mjs '${{ toJSON(needs) }}'
 ```
 
