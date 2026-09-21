@@ -5,7 +5,7 @@
     {
       "name": "Checkout-free change detection",
       "max_score": 10,
-      "description": "The changes job has no checkout step on pull_request events and grants `pull-requests: read` at job or workflow scope so the filter can list files through the API; because the workflow also runs on push to main, a checkout conditioned on non-PR events (for example `if: github.event_name != 'pull_request'`) remains at the default depth, and no job in the workflow sets `fetch-depth: 0`. The job compares the number of files the filter listed with the pull request's `changed_files` and runs every lane when they differ."
+      "description": "The changes job has no checkout step on pull_request events and grants `pull-requests: read` at workflow scope or, in a job-scoped map, together with `contents: read` so the push-side checkout keeps repository access so the filter can list files through the API; because the workflow also runs on push to main, a checkout conditioned on non-PR events (for example `if: github.event_name != 'pull_request'`) remains at the default depth, and no job in the workflow sets `fetch-depth: 0`. The job compares the number of files the filter listed with the pull request's `changed_files` and runs every lane when they differ."
     },
     {
       "name": "Default depth on verification jobs",
