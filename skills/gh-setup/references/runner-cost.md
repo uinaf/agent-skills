@@ -67,10 +67,15 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   step; on `push` events the filter fetches the missing base commit by SHA
   itself, so a default-depth checkout suffices where that fetch can
   authenticate; a private repository whose checkout persists no credentials
-  keeps `fetch-depth: 0` on push. Affected-package detection checks out with
-  `filter: blob:none` and a small `fetch-depth`, then runs
-  `git fetch --deepen` until the merge base resolves. Full history is
-  reserved for release version analysis, signed writeback, and history scans.
+  keeps `fetch-depth: 0` on push. The API path lists at most 3,000 changed
+  files and the action does not report truncation, so a job that skips lanes
+  compares the listed count with the pull request's `changed_files` and runs
+  everything when they differ. `merge_group` events take the git path: keep
+  a checkout and an explicit `base` there. Affected-package detection checks
+  out with `filter: blob:none` and a small `fetch-depth`, then runs
+  `git fetch --deepen` until the merge base resolves; `fetch-depth: 2` never
+  reaches a pull request's merge base. Full history is reserved for release
+  version analysis, signed writeback, and history scans.
 - A job with under about half a minute of real work merges into a sibling
   job on the same runner and trust level, with the tasks run concurrently;
   a separate runner start, checkout, and install cost more than the work.
@@ -78,8 +83,10 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   work.
 - Measure caches before keeping them. Record install and setup duration in
   the step summary; a dependency cache stays only when restore beats a cold
-  install on the same runner for the same lockfile churn. A filtered install
-  of the affected packages often wins over restoring everything.
+  install on the same runner for the same lockfile churn. GitHub-hosted
+  cache restores run at roughly 30 to 90 MB/s, so cache the package-manager
+  store, never `node_modules`, and expect a filtered install of the affected
+  packages to beat restoring everything.
 - Per-shard setup bounds sharding. Wall time cannot drop below one setup
   plus the largest shard, and every added shard bills one more setup. State
   the measured setup time and both figures before proposing shards, and cut
@@ -90,3 +97,16 @@ ahead of every shard. Setup cost, not test volume, limits parallelism.
   containers, skipped teardown) are opt-in per file with written eligibility
   rules, and the test-writing guidance carries those rules so new tests
   comply by default.
+
+## Merge Queue
+
+- Batch entries and bisect failures; batching relaxes per-commit correctness,
+  so enable it only where a broken intermediate commit is acceptable.
+- Size batches from arrival rate, with a minimum and maximum, not a constant.
+- Tier the checks: lint, type check, and affected unit tests before the queue;
+  deterministic integration in the queue; end-to-end and performance after
+  merge with a fast revert path.
+- Quarantine flaky tests instead of retrying entries; cascade rate follows
+  flake rate. Give automated authors a retry budget of two queue entries.
+- Queue-required workflows never use workflow-level `paths` filters; skip
+  inside the job so the required check still reports on the queue branch.
