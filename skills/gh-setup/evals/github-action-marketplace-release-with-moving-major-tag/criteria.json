@@ -13,7 +13,7 @@
     { "name": "App-signed boundary", "max_score": 8, "description": "The App token is scoped to release writeback, no custom identity is supplied, and checkout persists no credentials. Preflight and Actions concurrency alone do not qualify as a lock; plugin v1.0.1 additionally requires immediate if: always() origin cleanup." },
     { "name": "skip ci guards", "max_score": 6, "description": "Verify and release both skip [skip ci] writeback commits." },
     { "name": "Release concurrency", "max_score": 4, "description": "Release has a job-level non-cancellable concurrency group." },
-    { "name": "Full history", "max_score": 4, "description": "Verify and release checkouts use fetch-depth: 0." },
+    { "name": "Full history", "max_score": 4, "description": "The release checkout uses fetch-depth: 0; the verify checkout keeps the default depth." },
     { "name": "Pinned release action", "max_score": 6, "description": "cycjimmy/semantic-release-action is pinned to a full commit SHA with an exact version comment." },
     { "name": "Immutable completion proof", "max_score": 10, "description": "The workflow reads back immutable: true, runs gh release verify, proves the exact release tag, verified writeback, bundled runtime, and moving major tag agree, and implements exact-tag backfill plus parity reread for a missing metadata-only Release without another bump or published-release mutation." }
   ]

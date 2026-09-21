@@ -9,7 +9,7 @@ An example does not authorize adopting its owner's policy or credentials.
 | Contract | Code to inspect |
 | --- | --- |
 | Pull-request verification plus npm trusted publishing, App-signed version writeback, and immutable release readback | [`uinaf/workspace-kit` verify](https://github.com/uinaf/workspace-kit/blob/main/.github/workflows/verify.yml), [release](https://github.com/uinaf/workspace-kit/blob/main/.github/workflows/release.yml), and [semantic-release config](https://github.com/uinaf/workspace-kit/blob/main/.releaserc.json) |
-| Monorepo verification and a non-cancellable Environment-scoped Cloudflare deploy, separate from package release | [`uinaf/attach` main](https://github.com/uinaf/attach/blob/main/.github/workflows/main.yml), [release](https://github.com/uinaf/attach/blob/main/.github/workflows/release.yml), and [task graph](https://github.com/uinaf/attach/blob/main/package.json) |
+| Verification that builds and smoke-tests the container image on the same runner before any registry or deploy boundary | [`uinaf/gatewai-console` verify](https://github.com/uinaf/gatewai-console/blob/main/.github/workflows/verify.yml) |
 | Draft-first binary release, checksums, provenance attestations, immutable publication, and downstream Homebrew update | [`uinaf/tccutil-rs` CI/release](https://github.com/uinaf/tccutil-rs/blob/main/.github/workflows/ci.yml) and [semantic-release config](https://github.com/uinaf/tccutil-rs/blob/main/.releaserc.json) |
 | Organization-level collaboration defaults | [`uinaf/.github`](https://github.com/uinaf/.github) |
 

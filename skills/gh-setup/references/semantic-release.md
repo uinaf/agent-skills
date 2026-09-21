@@ -11,7 +11,8 @@ versions before changing configuration.
 - Analyzer and notes generator must use the same preset and release rules.
 - Squash-merge repositories should validate PR titles; direct-push paths should
   validate commit subjects. Local hooks are feedback, not enforcement.
-- Fetch full tag history in verification and release jobs.
+- Fetch full tag history in release jobs and in any verification job that
+  runs the release dry-run; plain verification keeps the default depth.
 
 Dry-run from the intended release branch before the first real publication and
 inspect both the computed version and notes. Preserve the repository-owned

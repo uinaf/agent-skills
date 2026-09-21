@@ -2,7 +2,7 @@
   "context": "Tests an npm semantic-release workflow with OIDC publishing, GitHub App-signed source writeback, bounded credentials, and race-safe verification/release structure.",
   "type": "weighted_checklist",
   "checklist": [
-    { "name": "fetch-depth verify", "max_score": 4, "description": "The verify checkout uses fetch-depth: 0." },
+    { "name": "fetch-depth verify", "max_score": 4, "description": "The verify checkout keeps the default depth and does not set fetch-depth: 0." },
     { "name": "fetch-depth release", "max_score": 4, "description": "The release checkout uses fetch-depth: 0." },
     { "name": "Verify concurrency", "max_score": 5, "description": "Verification has a cancellable concurrency group." },
     { "name": "Release concurrency", "max_score": 5, "description": "Release has a job-level non-cancellable concurrency group." },

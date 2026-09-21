@@ -50,7 +50,8 @@ Read [Actions security](references/actions-security.md) when adding workflows or
 changing code execution, credential, publication, signing, or deploy boundaries.
 
 Read [runner cost](references/runner-cost.md) when configuring triggers, runners,
-scan cadence, concurrency, or expensive job selection.
+scan cadence, concurrency, expensive job selection, or the wall time of a
+required check.
 For new release or deploy machinery, start from the closest [maintained
 implementation](references/implementations.md). For local corrections, consult
 an example only when repository code leaves an implementation question unresolved.
