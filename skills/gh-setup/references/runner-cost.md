@@ -19,8 +19,9 @@ the cheapest shape that still proves the contract.
   [Blacksmith](https://docs.blacksmith.sh/blacksmith-runners/overview)). Runner changes preserve required proof, scan coverage,
   triggers, permissions, and Environments.
 - Public repositories stay on standard GitHub-hosted runners, where minutes are
-  free. Private repositories draw on the owner's included minutes, and usage
-  stops once that quota is spent without a payment method
+  free. Private repositories draw on the owner's included minutes, and GitHub
+  refuses to dispatch their GitHub-hosted jobs once that quota is spent or a
+  payment fails
   ([billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions));
   the owner's runner policy says whether they move to a third-party runner. A
   repository declaring a non-GitHub runner label lists it under
@@ -93,7 +94,9 @@ choosing a technique below.
   `merge_group` events it needs a checkout and reads the event SHAs
   ([paths-filter](https://github.com/dorny/paths-filter/blob/ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d/README.md)).
   That fetch runs without credentials when the checkout persists none, so a
-  private repository in that state keeps `fetch-depth: 0` on push. The API
+  private repository in that state keeps `fetch-depth: 0` on every non-PR
+  event. The [uinaf changes action](https://github.com/uinaf/.github/blob/main/.github/actions/changes/action.yml)
+  packages these rules behind a `full-history` input. The API
   returns at most 3,000 files and the action reports no truncation
   ([REST](https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28)),
   so a job that skips lanes adds a catch-all `'**'` filter, compares its

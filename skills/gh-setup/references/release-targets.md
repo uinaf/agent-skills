@@ -22,8 +22,9 @@ artifact.
 ## npm
 
 Use GitHub-hosted Actions for npm trusted publishing, including private
-repositories: [npm does not support self-hosted runners for trusted
-publishing](https://docs.npmjs.com/trusted-publishers/). Configure the package
+repositories: [npm trusted publishing accepts cloud-hosted runners
+only](https://docs.npmjs.com/trusted-publishers/), which excludes third-party
+runners such as Blacksmith. Configure the package
 for the exact repository, workflow file, and Environment; grant
 `id-token: write`; remove `NPM_TOKEN`. Use a granular package-scoped token on
 the release Environment only when trusted publishing is unavailable.
