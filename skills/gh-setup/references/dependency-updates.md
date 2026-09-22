@@ -32,6 +32,10 @@ script pins with checksums stay manual, or let the target fetch the upstream
   once. The preset repository must be public: the hosted app reads public
   repositories with a token that cannot see private presets, and the failure is a
   "Cannot find preset's package" issue on every public consumer.
+- The [uinaf preset](https://github.com/uinaf/renovate-config) runs daily with
+  a seven-day `minimumReleaseAge`, one day for `github-actions` and `docker`,
+  and none for `uinaf/.github`; patch and minor updates group per manager and
+  majors stay separate.
 - Use [GitHub-native automerge](#faster-github-automerge) when enforceable
   required checks are ready. Keep `platformAutomerge: false` for repositories
   without those gates; Renovate then waits for visible checks on a later run.
@@ -118,8 +122,7 @@ changing the config alone does not cancel GitHub's queued merges.
 ## Dependabot
 
 - Configure only ecosystems and manifests that exist.
-- Use monthly or weekly schedules with a cooldown, group patch and minor
-  updates, and separate majors.
+- Group patch and minor updates and separate majors.
 - Prefix commits per ecosystem (`ci` for Actions, `deps` otherwise) so
   release tooling classifies them.
 - Preserve compatibility constraints with `ignore` rules rather than closing

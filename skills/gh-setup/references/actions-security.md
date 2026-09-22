@@ -31,7 +31,9 @@ requires it.
   update path. Repository-level SHA enforcement is useful only after the
   current allowlist and updater contract are understood.
 - Run `actionlint`, `zizmor`, and appropriate secret scanners. Use supported
-  configuration instead of shell glue that merely silences them.
+  configuration instead of shell glue that merely silences them. Keep zizmor
+  at 1.28.0 or newer: 1.27.0 logs its parsed config, `GH_TOKEN` included,
+  under verbose output (GHSA-f42p-wjw5-97qh).
 - When the owner maintains many repositories, define the scan baseline once as
   a reusable workflow in the owner's `.github` repository
   (`on: workflow_call`, every image and Action digest-pinned there).
@@ -58,6 +60,9 @@ requires it.
   unavoidable, use a tested typed module or local action with explicit inputs
   and outputs. Do not grow inline shell or move the same spaghetti into a new
   `.sh` file; shell may only dispatch a few already-defined commands.
+- Workflow files carry only pin annotations (`# v1.2.3`) and scanner
+  suppressions (`# zizmor: ignore[...]`, `# shellcheck disable=...`).
+  Rationale lives in the README or the owning doc.
 
 ## Payloads and Artifacts
 
