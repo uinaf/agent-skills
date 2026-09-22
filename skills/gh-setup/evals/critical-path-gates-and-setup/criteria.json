@@ -15,12 +15,12 @@
     {
       "name": "Short jobs batched",
       "max_score": 12,
-      "description": "lint, typecheck, format, and licenses no longer each start a runner; they run inside at most two jobs that install once and run the tasks concurrently through a runner with aggregate or fail-fast semantics or explicit per-process status collection, so any single failure fails the job (a bare `wait` after backgrounded commands does not qualify), and the plan says why they were batched."
+      "description": "lint, typecheck, format, and licenses no longer each start a runner; they run inside at most two jobs that install once and run the tasks concurrently through a runner with aggregate or fail-fast semantics or explicit per-process status collection, so any single failure fails the job (a bare `wait` after backgrounded commands does not qualify), and the plan justifies the fold with the measured 55 to 70 seconds of per-job overhead against 5 to 20 seconds of work rather than a fixed threshold."
     },
     {
       "name": "Cache dropped with evidence",
       "max_score": 10,
-      "description": "The node_modules actions/cache is removed and ci-plan.md cites the 28-second restore versus the 19-second cold install as the reason; it does not replace it with another unmeasured cache."
+      "description": "The node_modules actions/cache is removed and ci-plan.md cites the 28-second restore versus the 19-second cold install; if a package-manager store cache is proposed instead, the plan says it stays only after hit rate, restore, install, and save seconds are recorded, not by default."
     },
     {
       "name": "Filtered install on api shards",
