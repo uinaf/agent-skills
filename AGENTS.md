@@ -40,6 +40,7 @@ Contributor guidance for this reusable skill catalog.
   libraries, framework plugins, schemas, task graph, and primary typed language.
   Add shell only for small linear orchestration of existing commands, never as
   a parser, policy engine, state machine, retry loop, or duplicate test runner.
+- `verify.yml` skips the setup-node cache: a cold install of this lockfile is cheaper than cache restore plus save. `.gitleaks.toml` allowlists the one quoted literal the autoreview hardening test asserts is redacted; the regex matches the finding, not the line, so a real credential on the same line is still reported.
 - Run `pnpm run verify` before handoff; pull-request CI runs the same keyless
   gate: workflow lint plus `skillcheck lint`.
 - Skill eval scenarios live in `skills/<name>/evals/<scenario>/` as `task.md`

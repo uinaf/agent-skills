@@ -30,9 +30,6 @@ jobs:
         with:
           node-version-file: ".node-version"
 
-      # Measured over 25 runs before this change: cache restore 6s inside
-      # setup-node, cache save 8s in its post step, install 9s with a warm
-      # store. A cold install of this lockfile is cheaper than restore + save.
       - name: Install dependencies
         run: |
           start=$(date +%s)
