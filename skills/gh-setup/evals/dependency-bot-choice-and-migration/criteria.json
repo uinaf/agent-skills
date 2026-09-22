@@ -13,7 +13,7 @@
       "description": "Adds renovate.json and deletes dependabot.yml in the same commit so both bots never run together"
     },
     {
-      "name": "Security updates preserved",
+      "name": "Alerts on, security updates off",
       "max_score": 6,
       "description": "States that Dependabot alerts stay on and that Dependabot security updates stay off under Renovate"
     },

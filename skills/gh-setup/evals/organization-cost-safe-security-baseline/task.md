@@ -7,7 +7,8 @@ current organization security configuration enables `advanced_security` and
 CodeQL by default for public repositories only. One public repository may soon
 become private, and the organization owner wants to avoid surprise
 per-active-committer Advanced Security charges while retaining the useful free
-dependency protections available across the fleet.
+dependency protections available across the fleet. Renovate owns version and
+vulnerability pull requests fleet-wide.
 
 Design the recommended organization-level default for all current and future
 repositories. Distinguish paid Secret Protection and Code Security features
