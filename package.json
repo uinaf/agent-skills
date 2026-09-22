@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=24.18.0"
   },
-  "packageManager": "pnpm@12.4.1",
+  "packageManager": "pnpm@12.4.2",
   "scripts": {
     "audit": "pnpm audit --audit-level high",
     "lint:actions": "github-actionlint .github/workflows/*.yml",
