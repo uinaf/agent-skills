@@ -37,12 +37,17 @@ requires it.
   (`on: workflow_call`, every image and Action digest-pinned there).
   - Give each repository a thin caller job that owns its triggers. Match the
     owner's effective Actions policy before choosing the reusable workflow ref.
-  - Where full-SHA pins are enforced, pin the reusable-workflow reference in
-    each caller and enable its updater in each consuming repository. Check
-    inherited presets for exclusions; retain hash-pin enforcement in local scanners.
-  - Where the owner deliberately allows trusted first-party branch refs, callers
-    may track `@main` so baseline updates reach every adopter. Scope any local
-    `zizmor` exception to those workflows
+  - Where full-SHA pins are enforced, tag releases in the `.github`
+    repository and pin each caller to the release commit with the tag as the
+    version comment (`@<sha> # v1.2.0`), so the updater moves the pin like
+    any other Action. Check inherited presets for exclusions. A branch
+    annotation such as `# main` fails zizmor's `ref-version-mismatch` audit
+    once the branch moves, and a bare `@main` reference gives an updater no
+    version to track. [uinaf/.github](https://github.com/uinaf/.github#pinning)
+    is one owner's arrangement, not a default.
+  - Where the owner deliberately allows trusted first-party branch refs,
+    callers may track `@main` so baseline updates reach every adopter. Scope
+    any local `zizmor` exception to those workflows
     (`"<owner>/.github/*": ref-pin`), keeping `"*": hash-pin` for other Actions.
   - A repository with bespoke scanner needs keeps its own copy deliberately.
 - Never share package caches from untrusted pull requests with privileged
