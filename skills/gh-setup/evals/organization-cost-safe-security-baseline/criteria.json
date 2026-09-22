@@ -35,7 +35,7 @@
     {
       "name": "Free dependency protections retained",
       "max_score": 12,
-      "description": "Enables the dependency graph, Dependabot alerts, and Dependabot security updates"
+      "description": "Enables the dependency graph and Dependabot alerts and leaves Dependabot security updates off"
     },
     {
       "name": "Public capability distinction",

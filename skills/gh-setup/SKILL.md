@@ -89,8 +89,9 @@ defaults.
 - Public security guidance needs a working private reporting route. Private
   repos use an existing private maintainer channel.
 - Read [dependency updates](references/dependency-updates.md) before adding
-  or migrating Dependabot or Renovate. Run one bot per repository; keep
-  security updates on under either.
+  or migrating Dependabot or Renovate. Run one bot per repository. Keep
+  Dependabot alerts on; leave Dependabot security updates off under Renovate,
+  which raises its own vulnerability pull requests.
 
 ## Release and Deploy Routes
 

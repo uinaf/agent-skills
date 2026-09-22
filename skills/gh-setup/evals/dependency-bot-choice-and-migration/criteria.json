@@ -15,7 +15,7 @@
     {
       "name": "Security updates preserved",
       "max_score": 6,
-      "description": "States that Dependabot security alerts and security updates remain independent of the choice"
+      "description": "States that Dependabot alerts stay on and that Dependabot security updates stay off under Renovate"
     },
     {
       "name": "Preset and repository split",

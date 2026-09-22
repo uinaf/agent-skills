@@ -1,8 +1,9 @@
 # Dependency Updates
 
 Choose one update bot per repository. Running both opens duplicate pull
-requests. Dependabot security alerts and security updates are a separate
-GitHub feature and stay on under either choice.
+requests. Dependabot alerts are a separate GitHub feature and stay on under
+either choice. Dependabot security updates stay off under Renovate, which
+raises its own vulnerability pull requests; under Dependabot they may stay on.
 
 ## Choose
 
