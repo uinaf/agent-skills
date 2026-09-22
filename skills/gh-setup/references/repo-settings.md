@@ -10,6 +10,10 @@ merge queue, conversation resolution, signed-commit and tag rules, allowed
 writers, Actions policy, Environments, visibility, security features, and
 repository metadata. Preserve current policy unless the request owns it.
 
+When rulesets or settings are managed as code (OpenTofu, Terraform, or a
+settings app), change that source and apply through its reviewed plan. A live
+API edit becomes drift the next plan reverts.
+
 Before requiring pull requests or checks, inventory every default-branch
 writer from its owning workflow or runbook: maintainers, release and dependency
 bots, content publishers, generated-data jobs, and deploy writebacks. Record the
