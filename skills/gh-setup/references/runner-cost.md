@@ -19,9 +19,9 @@ the cheapest shape that still proves the contract.
   [Blacksmith](https://docs.blacksmith.sh/blacksmith-runners/overview)). Runner changes preserve required proof, scan coverage,
   triggers, permissions, and Environments.
 - Public repositories stay on standard GitHub-hosted runners, where minutes are
-  free. Private repositories draw on the owner's included minutes, and GitHub
-  refuses to dispatch their GitHub-hosted jobs once that quota is spent or a
-  payment fails.
+  free. Private repositories draw on the owner's included minutes; once those
+  are spent, GitHub-hosted jobs run as paid usage, and GitHub refuses to
+  dispatch them when no budget covers the overage or a payment has failed.
   ([billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions));
   the owner's runner policy says whether they move to a third-party runner. A
   repository declaring a non-GitHub runner label lists it under
