@@ -36,6 +36,32 @@ run the target migrator to repair affected projects and inspect the catalog owne
 
 Run formatting before the final checks and review the diff.
 
+## 1.0 Upgrades
+
+[1.0.0-rc.0](https://github.com/voidzero-dev/vite-plus/releases/tag/v1.0.0-rc.0)
+moves `vp test` to Vitest 5. Follow the
+[Vitest 5 guide](https://viteplus.dev/guide/vitest-v5):
+
+- Run the target migrator before any manual dependency edit, with the original
+  lockfile and install in place; it detects the source Vitest from them. Move
+  projects below Vitest 4 to a 0.x release first. Save the per-file review
+  report before reinstalling.
+- `BLOCK` stops dependency updates: fix it and rerun. `REVIEW` still exits
+  successfully; resolve every item before committing.
+- Node becomes `^22.18.0 || ^24.11.0 || >=26.0.0`. The migrator bumps version
+  files and manifest runtime fields, but not CI images, containers, or the
+  published `engines.node`; update those at their owner.
+- `vite-plus/test/runners` and `vite-plus/test/suite` are gone; the bundled
+  WebdriverIO provider moves to the community `@vitest/browser-webdriverio`.
+- Editor and script integrations use `vp lint --lsp`, `vp fmt --lsp`, and
+  `vp fmt --stdin-filepath`; the package no longer ships `oxlint` or `oxfmt`
+  binaries.
+- `vp staged` needs Node `^22.22.1 || ^24.11.0 || >=26.0.0` and Git 2.32+ on
+  every machine and CI job that runs the hook.
+
+Keep a project on its 0.x pin until its runtime and test types pass on the
+target.
+
 ## pnpm 12+ Upgrades
 
 Read the selected release's [pnpm notes](https://github.com/pnpm/pnpm/releases).

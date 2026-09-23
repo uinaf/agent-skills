@@ -1,6 +1,6 @@
-# Known Issues (beta)
+# Known Issues
 
-Vite+ is in beta and still moving quickly. Carry a caveat only when its failure reproduces on the installed release. Inspect the upstream issue or release notes to identify the first fixed version and preferred upgrade path; a closed report can still describe a bug in an older pinned release. Document the exact affected version and reproduction, then re-check the exception when upgrading.
+Vite+ is pre-1.0 and still moving quickly. Carry a caveat only when its failure reproduces on the installed release. Inspect the upstream issue or release notes to identify the first fixed version and preferred upgrade path; a closed report can still describe a bug in an older pinned release. Document the exact affected version and reproduction, then re-check the exception when upgrading.
 
 ## TanStack Start / SSR `instanceof` failures
 
@@ -16,3 +16,14 @@ Vite+ 0.2.x removed `@voidzero-dev/vite-plus-test` and runs upstream Vitest dire
 - On 0.1.x to 0.2.x upgrades, delete the wrapper from package manifests, lockfiles, catalogs, overrides, resolutions, and peer-tweak rules.
 - Plain node-mode tests should not add a direct `vitest` dependency; direct Vitest users and browser-mode projects may still need pinned upstream Vitest packages that match the bundled version.
 - If browser tests fail with `vitest/internal/browser` resolution errors under pnpm, add direct `vitest` in the package that runs browser tests at the bundled version, then reinstall cleanly if stale peer variants remain.
+
+## Vitest 5 jest-dom matcher types
+
+On [1.0.0-rc.0](https://github.com/voidzero-dev/vite-plus/releases/tag/v1.0.0-rc.0),
+loading browser declarations first can reject valid Node jest-dom assertions
+(jest-dom 6.9.1 and 7.0.1).
+
+- Load `@testing-library/jest-dom/vitest` through `compilerOptions.types` or an
+  included setup file, then type-check Node and browser matchers separately.
+- If either still fails, keep the project on its 0.x pin
+  ([Vitest 5 guide](https://viteplus.dev/guide/vitest-v5)).
