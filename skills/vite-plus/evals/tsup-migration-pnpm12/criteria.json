@@ -1,5 +1,5 @@
 {
-  "context": "Checks the Vite+ 0.3.0 tsup migration boundary, pnpm 12 strict workspace settings, and catalog preservation without a global CLI.",
+  "context": "Checks the Vite+ 1.0.0-rc.0 tsup conversion on an existing Vite+ project, pnpm 12 strict workspace settings, and catalog preservation without a global CLI.",
   "type": "weighted_checklist",
   "checklist": [
     {
@@ -10,12 +10,12 @@
     {
       "name": "Exact migrator and local CLI",
       "max_score": 20,
-      "description": "Runs pnpm --package=vite-plus@0.3.0 dlx vp migrate before manual conversion, reinstalls changed metadata, then uses pnpm exec vp; does not use standalone upgrade or implode."
+      "description": "Runs pnpm --package=vite-plus@1.0.0-rc.0 dlx vp migrate with --full, because the project already uses Vite+ and plain migration skips tsup conversion, before manual conversion; reinstalls changed metadata, then uses pnpm exec vp; does not use standalone upgrade or implode."
     },
     {
       "name": "Generated packaging config reconciled",
       "max_score": 25,
-      "description": "Recognizes the migrator's tsdown.config.ts importing vite-plus/pack as intermediate output, consolidates supported packaging settings into vite.config.ts, removes redundant config and tsup wiring, and preserves entry, both formats, declarations, clean output, and source maps."
+      "description": "Recognizes the migrator's tsdown.config.ts, its import from vite.config.ts, the direct tsdown dependency, and the raw tsdown build script as intermediate output; consolidates supported packaging settings into the vite.config.ts pack block, switches the script to vp pack, removes tsdown.config.ts, the direct tsdown dependency, and tsup wiring, and preserves entry, both formats, declarations, clean output, and source maps."
     },
     {
       "name": "Catalog ownership preserved",

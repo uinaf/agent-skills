@@ -1,61 +1,51 @@
 {
-  "context": "Tests whether the agent correctly handles an exact-target Vite+ 0.3.0 upgrade without a global CLI or custom migration wrapper, using the maintained target-pinned migrator before returning to the project CLI, removing the obsolete test wrapper, classifying direct Vitest usage, and performing the correct end-to-end validation sequence.",
+  "context": "Tests whether the agent runs a Vite+ 0.3.x to 1.0.0-rc.0 upgrade across the Vitest 5 boundary: target-pinned migrator before any manual dependency edit, migrator findings triaged, runtime owners the migrator skips updated, public engine contract left to the team, removed binaries repointed, and local-CLI verification.",
   "type": "weighted_checklist",
   "checklist": [
     {
-      "name": "No global CLI dependency",
-      "max_score": 12,
-      "description": "The upgrade procedure does not install, inspect, or upgrade a global `vp`, and does not add a custom migration shell script; only the exact target migration uses `pnpm --package=vite-plus@0.3.0 dlx vp`, and all post-install Vite+ operations resolve the repository-local CLI through `pnpm exec vp`"
-    },
-    {
-      "name": "Pinned package manager bootstrap",
-      "max_score": 8,
-      "description": "The procedure starts by honoring package.json#packageManager and installing the current lockfile with `pnpm install --frozen-lockfile` before invoking Vite+"
-    },
-    {
-      "name": "Exact target migrator",
-      "max_score": 10,
-      "description": "The upgrade runs `pnpm --package=vite-plus@0.3.0 dlx vp migrate` from the project root so the approved target CLI updates local `vite-plus` and its related toolchain pins together; it names the `vp` binary explicitly and does not ask the installed 0.1.24 CLI to select a newer release"
-    },
-    {
-      "name": "Core and Vitest pins verified",
+      "name": "Migrator runs first on the original install",
       "max_score": 15,
-      "description": "The procedure verifies that migration updated the `vite` -> `npm:@voidzero-dev/vite-plus-core@0.3.0` alias and exact bundled upstream Vitest pin in the manifest, catalog, override or resolution as applicable, and confirms the resulting lockfile importer before calling the upgrade done"
+      "description": "The runbook installs the existing 0.3.3 lockfile, then runs `pnpm --package=vite-plus@1.0.0-rc.0 dlx vp migrate` from the project root before any `pnpm update`, `pnpm add`, or hand-edited version, and explains that the migrator reads the original lockfile and install to detect the source Vitest version"
     },
     {
-      "name": "Removed obsolete test wrapper",
-      "max_score": 15,
-      "description": "The procedure removes `@voidzero-dev/vite-plus-test` from dependencies, overrides/catalogs/resolutions, source references, and lockfile state instead of updating the removed wrapper"
-    },
-    {
-      "name": "Machine-readable target verification",
+      "name": "No global CLI or wrapper",
       "max_score": 10,
-      "description": "The procedure uses `pnpm exec vp toolchain --json` to confirm the local report identifies vite-plus 0.3.0 and the expected bundled relationships, selects tool nodes by ID rather than position, and does not treat `vp outdated` as proof of an intentionally selected target"
+      "description": "Does not install, inspect, or upgrade a global `vp`, does not use `vp upgrade` or `vp implode`, and does not add a custom migration shell script; post-install commands use `pnpm exec vp` or package scripts"
     },
     {
-      "name": "Direct Vitest usage classified",
-      "max_score": 8,
-      "description": "The upgrade distinguishes node-mode-only projects from projects that directly use `vitest`, `@vitest/*`, coverage/UI packages, or browser providers, and only keeps direct upstream Vitest dependencies for the latter"
+      "name": "Findings triaged",
+      "max_score": 15,
+      "description": "The runbook says to save the migrator's review report before reinstalling, fix `BLOCK` items and rerun the migrator, and resolve every `REVIEW` item before committing even though the command exits successfully"
     },
     {
-      "name": "Local CLI version in validation",
-      "max_score": 6,
-      "description": "The end-to-end validation sequence verifies the upgraded repository-local CLI with `pnpm exec vp --version` and inspects its 0.3.0 toolchain with `pnpm exec vp toolchain --json`; it does not use the standalone-only `vp env` surface"
+      "name": "Runtime owners the migrator skips",
+      "max_score": 15,
+      "description": "Keeps the migrated `.nvmrc` on a supported Node and removes Node 20 from the CI matrix (every entry satisfies `^22.18.0 || ^24.11.0 || >=26.0.0`), rather than restoring `.nvmrc` or leaving CI on 20.19.0"
     },
     {
-      "name": "Full validation sequence",
-      "max_score": 9,
-      "description": "The validation sequence includes all of: `pnpm install --frozen-lockfile`, `pnpm exec vp check`, and `pnpm exec vp test`"
+      "name": "Public engine contract left to the team",
+      "max_score": 10,
+      "description": "Does not silently change `engines.node`; it keeps `>=20.19.0` and flags the undecided public-contract change for the team, separating it from the test and CI runtime"
     },
     {
-      "name": "Build validation included",
-      "max_score": 4,
-      "description": "The validation sequence includes `vp build` or `vp pack` (as appropriate for the project type) to verify build artifacts after the upgrade"
+      "name": "Editor integration repointed",
+      "max_score": 10,
+      "description": "Updates `.vscode/settings.json` so it no longer points at the removed `node_modules/.bin/oxlint` and `node_modules/.bin/oxfmt` binaries, using the `vp lint --lsp` and `vp fmt --lsp` integrations or the migrator's editor setup"
     },
     {
-      "name": "No direct package manager for local Vite+ stack",
-      "max_score": 3,
-      "description": "The upgrade does NOT use `npm install`, `pnpm update`, `yarn upgrade`, or other direct package-manager commands to select Vite+ package versions; the local Vite+ stack moves through the exact target `pnpm --package=vite-plus@0.3.0 dlx vp migrate` invocation"
+      "name": "Compatibility settings kept deliberately",
+      "max_score": 5,
+      "description": "Treats `test.clearMocks: false` and `pack.deps.resolveDepSubpath` as migrator compatibility settings with removal conditions; keeps them or removes them with a stated reason and proof, not silently"
+    },
+    {
+      "name": "Local toolchain and full verification",
+      "max_score": 15,
+      "description": "Verifies with `pnpm install --frozen-lockfile`, `pnpm exec vp --version` or `pnpm exec vp toolchain --json` showing vite-plus 1.0.0-rc.0 with Vitest 5.0.1, then format, `vp check`, `vp test` with coverage, and `vp pack`"
+    },
+    {
+      "name": "Hold condition",
+      "max_score": 5,
+      "description": "The runbook says to keep the 0.3.3 pin when runtime or test types cannot pass on the target, rather than forcing the upgrade"
     }
   ]
 }

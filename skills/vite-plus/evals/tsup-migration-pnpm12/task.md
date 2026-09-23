@@ -1,6 +1,6 @@
 # Migrate a tsup Library on pnpm 12
 
-Migrate this library to the approved `vite-plus@0.3.0` target. Keep pnpm
+Migrate this library to the approved `vite-plus@1.0.0-rc.0` target. Keep pnpm
 12.0.0, use the repository-local CLI after migration, and preserve the package's
 ESM, CJS, and declaration outputs. The team wants packaging config consolidated
 with its Vite+ configuration. A previous update replaced a `catalog:` reference

@@ -53,9 +53,14 @@ moves `vp test` to Vitest 5. Follow the
   published `engines.node`; update those at their owner.
 - `vite-plus/test/runners` and `vite-plus/test/suite` are gone; the bundled
   WebdriverIO provider moves to the community `@vitest/browser-webdriverio`.
-- Editor and script integrations use `vp lint --lsp`, `vp fmt --lsp`, and
-  `vp fmt --stdin-filepath`; the package no longer ships `oxlint` or `oxfmt`
-  binaries.
+- The migrator moves toolchain pins into catalog entries and adds
+  compatibility settings, such as `test.clearMocks: false` and
+  `pack.deps.resolveDepSubpath`, each with a removal comment. Keep one only
+  while its stated condition holds.
+- The package no longer ships `oxlint` or `oxfmt` binaries. Repoint editor and
+  script integrations to `vp lint --lsp`, `vp fmt --lsp`, and
+  `vp fmt --stdin-filepath`; the migrator leaves editor settings alone unless
+  its editor setup runs.
 - `vp staged` needs Node `^22.22.1 || ^24.11.0 || >=26.0.0` and Git 2.32+ on
   every machine and CI job that runs the hook.
 
