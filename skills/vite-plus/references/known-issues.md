@@ -27,3 +27,18 @@ loading browser declarations first can reject valid Node jest-dom assertions
   included setup file, then type-check Node and browser matchers separately.
 - If either still fails, keep the project on its 0.x pin
   ([Vitest 5 guide](https://viteplus.dev/guide/vitest-v5)).
+
+## Cloudflare Workers test pool on Vitest 5
+
+`@cloudflare/vitest-pool-workers` 0.22.0 peers on Vitest 4. After a
+1.0.0-rc.0 migration every Worker test file fails to start (`Failed to start
+cloudflare-pool worker`). Keep Worker-tested projects on their 0.x pin until
+[workers-sdk#15618](https://github.com/cloudflare/workers-sdk/issues/15618)
+ships.
+
+## Oxc VS Code extension and `vp fmt --lsp`
+
+The released Oxc extension cannot launch `vp fmt --lsp` until
+[oxc-vscode#384](https://github.com/oxc-project/oxc-vscode/pull/384) ships, so
+format-on-save stops after 1.0 removes the `oxfmt` binary. `vp fmt` and staged
+hooks still format.
