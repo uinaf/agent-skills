@@ -50,7 +50,9 @@ moves `vp test` to Vitest 5. Follow the
   successfully; resolve every item before committing.
 - Node becomes `^22.18.0 || ^24.11.0 || >=26.0.0`. The migrator bumps version
   files and manifest runtime fields, but not CI images, containers, or the
-  published `engines.node`; update those at their owner.
+  published `engines.node`; update those at their owner. When a published
+  range must keep admitting Node 20 or 25, constrain contributors with
+  `devEngines.runtime` instead.
 - `vite-plus/test/runners` and `vite-plus/test/suite` are gone; the bundled
   WebdriverIO provider moves to the community `@vitest/browser-webdriverio`.
 - The migrator moves toolchain pins into catalog entries and adds

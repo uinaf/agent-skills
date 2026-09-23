@@ -13,7 +13,8 @@ Use when migrating tests, coverage, or browser mode.
   Vite+ imports resolve.
 - Keep direct upstream Vitest packages only for APIs, coverage/UI modules, or
   browser providers the repository uses directly, pinned compatibly with the
-  installed toolchain.
+  installed toolchain. The same rule applies to a direct `vitest` the migrator
+  adds.
 
 Verify the default suite, every configured coverage or browser path, and the
 real consumer or runtime surface affected by the migration.
