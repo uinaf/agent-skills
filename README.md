@@ -34,7 +34,6 @@ repository-local installation.
 ## Contributing
 
 ```bash
-corepack enable pnpm
 pnpm install --frozen-lockfile
 pnpm run verify
 ```
