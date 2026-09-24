@@ -12,7 +12,6 @@ they serve.
 | `uinaf/design` | `skills/uinaf-design` |
 | `uinaf/ffss` | `skills/*` |
 | `uinaf/healthd` | `skills/healthd-operator` |
-| `uinaf/intake` | `skills/uinaf-intake` |
 
 Do not treat harness-local copies under `~/.agents` or consumer
 `.agents/skills/` as sources of truth. Edit skills in the owner repo.
