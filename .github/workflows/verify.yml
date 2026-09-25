@@ -1,7 +1,10 @@
 name: Verify
 
 on:
+  push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -38,3 +41,7 @@ jobs:
 
       - name: Run repository verification
         run: pnpm run verify
+
+      - name: Scan
+        if: ${{ !cancelled() }}
+        uses: uinaf/.github/.github/actions/scan@7bc3f9ea25b5494f4026dfdb64fb866a520afcd0 # v3.0.0
