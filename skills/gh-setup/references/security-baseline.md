@@ -39,6 +39,9 @@ its weekly minute cost.
   Merges land as pushes, and new advisories arrive as Dependabot alerts and
   Renovate pull requests. Dispatch a full-history scan after a scanner-rule
   upgrade.
+- Push runs of `verify` never cancel each other: concurrency cancels
+  superseded pull-request runs only, or a cancelled push leaves its range
+  unscanned.
 - A finding fails the pushed commit's `verify` run; GitHub's failed-run email
   is the notification. No local git hooks, no extra channels.
 
