@@ -43,6 +43,11 @@
       "description": "Explains that disabling paid bundles does not prove every overlapping public-repository security capability is disabled"
     },
     {
+      "name": "Public push protection kept",
+      "max_score": 6,
+      "description": "Keeps free secret scanning and push protection on public repositories through a separate public configuration, detached before a repository becomes private"
+    },
+    {
       "name": "Visibility transition preflight",
       "max_score": 12,
       "description": "Checks attached configuration, effective paid features, active-committer usage, and projected billing before and after a public-to-private change"

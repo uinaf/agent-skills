@@ -32,38 +32,24 @@ the cheapest shape that still proves the contract.
   ([npm](https://docs.npmjs.com/trusted-publishers)), so a repository on
   third-party runners keeps that job GitHub-hosted. Use the
   [npm publish contract](release-targets.md#npm).
-- Secret and history scans trigger on `pull_request`, a weekly `schedule`, and
-  `workflow_dispatch`, never on `push`, which would repeat the pull-request run. On PRs, scan only commits introduced
-  by the PR when the scanner supports a complete revision range; include secrets
-  added and removed between commits. Check range semantics against the selected
-  scanner version's upstream source and verify diverged branches and merges
-  before narrowing it. Keep a full scan where complete range coverage is
-  unproven; the [maintained shared workflow](https://github.com/uinaf/.github/blob/main/.github/workflows/scan.yml)
-  records the current TruffleHog constraint. Otherwise reserve full-history
-  scans for weekly/manual runs. A shallow
-  checkout or missing base must not silently turn the PR scan into an empty
-  success. Reuse the target owner’s shared scanning workflow when available;
-  keep its reference consistent with the repository’s pinning policy. Avoid
-  copying scanner jobs or building scanner images per run.
-- Gate Actionlint and Zizmor jobs on changes to workflows, local actions, and
-  their configuration; keep weekly/manual runs unconditional. Reuse changed-file
-  detection in an already-required job instead of paying for a filter-only
-  runner. Detect renames and deletions too; unknown or incomplete file lists must
-  run the checks or fail visibly. Gate at job level so unrelated PRs allocate no
-  linter runner. Preserve required-check names and successful skipped-job
-  behavior; workflow-level path filters can leave required checks pending.
+- Scans follow the [security baseline](security-baseline.md): steps at the end
+  of the existing `verify` job on push, never a separate scan job, pull-request
+  run, or schedule. Keep required-check names stable; a job skipped by `if:`
+  reports success, while a workflow skipped by path filters leaves a required
+  check pending.
 - Every verification workflow declares workflow-level concurrency:
   `group: ${{ github.workflow }}-${{ github.ref }}`,
   `cancel-in-progress: ${{ github.event_name == 'pull_request' }}`. Release,
   publish, and deploy critical sections keep their own non-cancellable keys.
 - A workflow triggered on both `push: [main]` and `pull_request` pays twice per
-  merged change. Keep push-to-main lanes for release/deploy work and for repos
-  whose policy allows direct pushes; do not add a push trigger to re-verify a
-  tree a required PR check already verified.
+  merged change. Where direct pushes are allowed, `verify` runs on both, since
+  the push run is the only check a direct push gets and carries the scan. Keep
+  every other job on one trigger, and let a push-triggered release that calls
+  `verify` through `workflow_call` stand in for a separate push trigger.
 - Jitter cron minutes away from the top of the hour, where GitHub drops queued
   scheduled jobs under load
-  ([schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows));
-  weekly is the default scan cadence.
+  ([schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)).
+  A schedule names its threat and weekly minute cost.
 - Expensive-per-run jobs (simulators, cross-compiles, e2e) sit behind
   `dorny/paths-filter` lanes or `workflow_dispatch`, with an `always()` result
   job that fails on any result other than success or an expected skip when
@@ -85,8 +71,8 @@ choosing a technique below.
 - Fetch only what the job reads. Verification, lint, and build jobs keep the
   default depth of one
   ([actions/checkout](https://github.com/actions/checkout/blob/main/README.md));
-  full history is for release version analysis, signed writeback, and history
-  scans. The saving is proportional to history size, so on a small repository
+  full history is for release version analysis, signed writeback, and manual
+  history scans. The saving is proportional to history size, so on a small repository
   it is seconds.
 - A paths filter on `pull_request` events lists files through the API, so the
   job needs `pull-requests: read` and no checkout step; on `push` events it

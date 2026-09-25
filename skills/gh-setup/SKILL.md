@@ -46,11 +46,14 @@ prerequisite instead of hiding it in workflow YAML.
 - Live settings and downstream state changed by the task must be read back;
   a green workflow alone does not prove those changes.
 
+Read [security baseline](references/security-baseline.md) when adding or
+changing scans, required checks, schedules, or repository security features.
+
 Read [Actions security](references/actions-security.md) when adding workflows or
 changing code execution, credential, publication, signing, or deploy boundaries.
 
 Read [runner cost](references/runner-cost.md) when configuring triggers, runners,
-scan cadence, concurrency, expensive job selection, or the wall time of a
+concurrency, expensive job selection, or the wall time of a
 required check.
 For new release or deploy machinery, start from the closest [maintained
 implementation](references/implementations.md). For local corrections, consult

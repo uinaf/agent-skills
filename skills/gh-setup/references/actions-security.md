@@ -38,24 +38,14 @@ requires it.
   configuration instead of shell glue that merely silences them. Keep zizmor
   at 1.28.0 or newer: 1.27.0 logs its parsed config, `GH_TOKEN` included,
   under verbose output (GHSA-f42p-wjw5-97qh).
-- When the owner maintains many repositories, define the scan baseline once as
-  a reusable workflow in the owner's `.github` repository
-  (`on: workflow_call`, every image and Action digest-pinned there).
-  - Give each repository a thin caller job that owns its triggers. Match the
-    owner's effective Actions policy before choosing the reusable workflow ref.
-  - Where full-SHA pins are enforced, tag releases in the `.github`
-    repository and pin each caller to the release commit with the tag as the
-    version comment (`@<sha> # v1.2.0`), so the updater moves the pin like
-    any other Action. Check inherited presets for exclusions. A branch
-    annotation such as `# main` fails zizmor's `ref-version-mismatch` audit
-    once the branch moves, and a bare `@main` reference gives an updater no
-    version to track. [uinaf/.github](https://github.com/uinaf/.github#pinning)
-    is one owner's arrangement, not a default.
-  - Where the owner deliberately allows trusted first-party branch refs,
-    callers may track `@main` so baseline updates reach every adopter. Scope
-    any local `zizmor` exception to those workflows
-    (`"<owner>/.github/*": ref-pin`), keeping `"*": hash-pin` for other Actions.
-  - A repository with bespoke scanner needs keeps its own copy deliberately.
+- When the owner maintains many repositories, ship the scan once as a
+  composite action in the owner's `.github` repository, with every image and
+  Action digest-pinned there, and call it as the last step of each
+  repository's `verify` job ([security baseline](security-baseline.md)).
+  Where full-SHA pins are enforced, tag releases there and pin callers to the
+  release commit with the tag as the version comment (`@<sha> # v1.2.0`); a
+  branch annotation such as `# main` fails zizmor's `ref-version-mismatch`
+  audit once the branch moves.
 - Never share package caches from untrusted pull requests with privileged
   publish, signing, release, or deploy jobs.
 - Keep workflow YAML orchestration-thin. Prefer maintained Actions and the
