@@ -30,6 +30,10 @@ requires it.
 - Pin high-trust remote Actions to reviewed full SHAs and keep an automated
   update path. Repository-level SHA enforcement is useful only after the
   current allowlist and updater contract are understood.
+- Never write a SHA you have not read from the source. Without network access,
+  leave an explicit placeholder such as `owner/action@<sha> # v4.2.1` naming the
+  exact version, and list resolving it as a required follow-up
+  (`gh api repos/<owner>/<action>/commits/<tag> --jq .sha`).
 - Run `actionlint`, `zizmor`, and appropriate secret scanners. Use supported
   configuration instead of shell glue that merely silences them. Keep zizmor
   at 1.28.0 or newer: 1.27.0 logs its parsed config, `GH_TOKEN` included,

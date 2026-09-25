@@ -5,7 +5,7 @@
     {
       "name": "paths-filter for detection",
       "max_score": 8,
-      "description": "Uses dorny/paths-filter pinned to a full commit SHA with the current v4.0.3 version comment (not v2 or v3) to detect which lane changed"
+      "description": "Detects which lane changed with a maintained paths filter at a current major (dorny/paths-filter v4 or later, or the uinaf changes action), pinned to a full SHA with an exact version comment. Pins: when the task supplies no SHA, an explicit placeholder that names the exact version and is listed as a required follow-up satisfies a full-SHA pin; an invented SHA does not."
     },
     {
       "name": "Lockfile in filter",
