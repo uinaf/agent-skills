@@ -4,10 +4,11 @@ The verification job still runs on draft pull requests. Fix its job condition so
 it runs when a pull request is ready, including after marking a draft ready.
 Complete the local correction and available checks. Do not publish anything.
 
-This is an offline checkout: live GitHub settings and authentication are
-unavailable. Existing repository guidance allows local workflow edits and names
-`pnpm run verify` as the keyless workflow lint gate. Dependencies are installed.
-The runner, action pins, permissions, and concurrency are established policy.
+This checkout has no GitHub remote; leave live GitHub settings and
+authentication alone. Existing repository guidance allows local workflow edits
+and names `pnpm run verify` as the keyless workflow lint gate. Dependencies are
+installed. The runner, action pins, permissions, and concurrency are established
+policy.
 
 ## Input Files
 

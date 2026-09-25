@@ -171,8 +171,8 @@ importers:
   .:
     devDependencies:
       '@uinaf/skillcheck':
-        specifier: ^1.3.0
-        version: 1.3.0
+        specifier: ^1.4.0
+        version: 1.4.0
       github-actionlint:
         specifier: 1.7.12
         version: 1.7.12
@@ -183,8 +183,8 @@ packages:
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
 
-  '@uinaf/skillcheck@1.3.0':
-    resolution: {integrity: sha512-bAUnqaALCDr9FlXu6yLYmkhSVYEaAz1VQaR6q+698cBqTbZ3pOgJWhYnyo+DVsDYHC8kTGZSlx6RwWg5IbqbTw==}
+  '@uinaf/skillcheck@1.4.0':
+    resolution: {integrity: sha512-xviPQRstkM6RSm+hNhl0lJ+z4VTkE5VuRnTGAjzWqJLBWKF5dOJegMt08EHH5AEDnM5b4tbhd9zJm4N7vc4/0g==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
@@ -234,7 +234,7 @@ snapshots:
     dependencies:
       minipass: 7.1.3
 
-  '@uinaf/skillcheck@1.3.0': {}
+  '@uinaf/skillcheck@1.4.0': {}
 
   adm-zip@0.6.1: {}
 
