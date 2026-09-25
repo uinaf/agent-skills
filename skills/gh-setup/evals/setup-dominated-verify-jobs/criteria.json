@@ -40,7 +40,7 @@
     {
       "name": "Checks and contract preserved",
       "max_score": 12,
-      "description": "Lint, typecheck, test, and audit all still run on pull requests and pushes to main; the required check is still named `verify`; workflow-level concurrency with cancel-in-progress on pull_request and `permissions: contents: read` are unchanged; every action is pinned to a full commit SHA with a version comment."
+      "description": "Lint, typecheck, test, and audit all still run on pull requests and pushes to main; the required check is still named `verify`; workflow-level concurrency with cancel-in-progress on pull_request and `permissions: contents: read` are unchanged; every action is pinned to a full commit SHA with a version comment. Pins: when the task supplies no SHA, an explicit placeholder that names the exact version and is listed as a required follow-up satisfies a full-SHA pin; an invented SHA does not."
     },
     {
       "name": "No coverage removed for speed",

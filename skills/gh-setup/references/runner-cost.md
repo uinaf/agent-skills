@@ -114,8 +114,13 @@ choosing a technique below.
   ([Depot](https://depot.dev/blog/reducing-queue-time-with-cached-schemas),
   runner init p99 39s). Concurrent tasks share one runner's cores and memory,
   so compare the batched job with the parallel jobs before keeping it, and
-  say whether latency or runner minutes is the target. Keep separate jobs for
+  say whether latency or runner minutes is the target. Run the batched tasks
+  concurrently through a runner that collects every exit status (the package
+  manager's parallel run, or a tested repository script), not as sequential
+  steps and not as backgrounded commands joined by a bare `wait`. Keep separate jobs for
   different runners, trust boundaries, or multi-minute work.
+- Write setup and install seconds to `$GITHUB_STEP_SUMMARY` on every required
+  job, so cache, batching, and shard decisions rest on recorded numbers.
 - Measure caches before keeping them. Record hit or miss, restore, install,
   and save seconds in the step summary; a dependency cache stays only when its
   expected cost from those numbers beats always installing cold. Published

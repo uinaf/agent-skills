@@ -34,6 +34,18 @@ workflow. Detect no-op lanes inside the workflow and end with one stable result
 job that runs under `always()`, fails closed on unexpected skips, and reports
 why a lane ran or did not run.
 
+Detect lanes with a pinned maintained filter. On `pull_request` events it lists
+files through the API, so the detect job needs `pull-requests: read` and no
+checkout; [runner cost](runner-cost.md#critical-path) covers push and merge
+queue events and the file-count limit.
+
+A deploy job downstream of conditional lanes needs an explicit status function,
+or GitHub ANDs the implicit `success()` and a skipped lane suppresses it. Gate on
+`!cancelled() && needs.<job>.result == 'success'` for each upstream it ships
+from. An `always()` job's own result is what downstream jobs read, so an
+aggregator fails whenever an underlying result is neither success nor an
+expected skip.
+
 ## Verified Payload
 
 The same payload crosses build, e2e, and deploy:

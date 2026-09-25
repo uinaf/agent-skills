@@ -20,12 +20,12 @@
     {
       "name": "Catalog ownership preserved",
       "max_score": 15,
-      "description": "Restores vite to catalog: in the manifest, updates its catalog alias to the selected core release, and verifies the resulting lockfile and local toolchain rather than leaving independent literal pins."
+      "description": "Restores vite to `catalog:` in the manifest, updates its catalog alias to the selected core release rather than leaving independent literal pins, and names lockfile and local toolchain verification as required proof, run or reported as unrun."
     },
     {
       "name": "Artifact and install proof",
       "max_score": 20,
-      "description": "Generates and verifies a frozen lockfile, runs the local check and pack commands, and exercises ESM, CommonJS, and declaration consumers through the exported artifact paths. Reports any unavailable checks accurately rather than assuming tsup-to-tsdown output names match."
+      "description": "Names the frozen-lockfile install, the local check and pack commands, and ESM, CommonJS, and declaration consumer checks through the exported artifact paths as required proof, with exact commands. It runs them when it can; otherwise it reports each as unrun rather than claiming it, and does not assume tsup-to-tsdown output names match."
     }
   ]
 }

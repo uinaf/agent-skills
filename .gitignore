@@ -1,7 +1,6 @@
 .claude/
 node_modules/
 .skillcheck/results/
-.skillcheck/scratch/
 
 # Python
 __pycache__/
