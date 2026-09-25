@@ -32,11 +32,10 @@ the cheapest shape that still proves the contract.
   ([npm](https://docs.npmjs.com/trusted-publishers)), so a repository on
   third-party runners keeps that job GitHub-hosted. Use the
   [npm publish contract](release-targets.md#npm).
-- Scans follow the [security baseline](security-baseline.md): steps at the end
-  of the existing `verify` job on push, never a separate scan job, pull-request
-  run, or schedule. Keep required-check names stable; a job skipped by `if:`
-  reports success, while a workflow skipped by path filters leaves a required
-  check pending.
+- Scans follow the [security baseline](security-baseline.md): steps at the
+  end of the existing `verify` job on push. Keep required-check names stable;
+  a job skipped by `if:` reports success, while a workflow skipped by path
+  filters leaves a required check pending.
 - Every verification workflow declares workflow-level concurrency:
   `group: ${{ github.workflow }}-${{ github.ref }}`,
   `cancel-in-progress: ${{ github.event_name == 'pull_request' }}`. Release,
