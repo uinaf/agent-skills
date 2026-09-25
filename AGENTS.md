@@ -17,7 +17,7 @@ Contributor guidance for this reusable skill catalog.
   validation dependencies on external setup or workspace repositories.
   Composition belongs to the consumer. The owner's `.github` repository is the
   one sanctioned exception: inherited community files and the shared scan
-  workflow are org trust-root defaults, not workspace coupling.
+  action are org trust-root defaults, not workspace coupling.
 - Check reality before editing docs or examples; keep commands and paths repo-valid.
 - Optimize runtime Markdown for decision value per token. Measure the common
   reference path for a realistic request, not only package totals or line count.
