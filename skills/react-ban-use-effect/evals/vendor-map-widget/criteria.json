@@ -1,0 +1,31 @@
+{
+  "context": "Integrating an imperative third-party map SDK into a React page. This is a legitimate external-system effect; graded on containing it in a reviewed domain hook with honest dependencies instead of direct effects in the component.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Effects confined to a named map hook",
+      "max_score": 30,
+      "description": "All `useEffect` code lives in one domain-specific hook named for the map integration (for example `useAcmeMap`) in its own file; the `StoreMap` component itself neither imports nor calls `useEffect` or `React.useEffect`. A component that calls `useEffect` directly scores 0."
+    },
+    {
+      "name": "Hook exposes reactive inputs honestly",
+      "max_score": 20,
+      "description": "The hook takes the container ref and the map inputs (center, zoom, and the move-end callback or an equivalent) as explicit parameters, lists every value its setup and cleanup read in the dependency arrays, and contains no `eslint-disable` for `react-hooks/exhaustive-deps`."
+    },
+    {
+      "name": "No generic effect wrapper",
+      "max_score": 15,
+      "description": "The solution does not add a generic helper that accepts a callback plus a caller-provided dependency array (such as `useMountEffect(fn)`, `useUpdateEffect(fn, deps)`, or `useAsyncEffect`)."
+    },
+    {
+      "name": "Lifecycle correct",
+      "max_score": 20,
+      "description": "The map is created once per container, follows `center` and `zoom` changes with `setCenter`/`setZoom` without recreating it, subscribes to `moveend` and unsubscribes, calls `onMoveEnd` with `getCenter()`, and calls `destroy()` on unmount."
+    },
+    {
+      "name": "Notes and checks",
+      "max_score": 15,
+      "description": "`NOTES.md` explains that the map is an external system synchronized through the hook, and reports the lint, type, or component checks actually run (or states they could not run) without inventing results."
+    }
+  ]
+}
