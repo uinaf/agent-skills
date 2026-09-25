@@ -62,8 +62,7 @@ is 400 commits; a full-history checkout of it takes 2s.
 Produce:
 
 - `.github/workflows/verify.yml`: the reworked workflow with every action
-  pinned to a full commit SHA and a version comment in place of the `<sha>`
-  placeholders. Keep every check, the `verify` required-check name, the
+  pinned to a full commit SHA and a version comment. Keep every check, the `verify` required-check name, the
   concurrency contract, and read-only permissions.
 - `ci-plan.md`: for each change, the measurement that justifies it and what
   it removes from the required path; state explicitly which Linear-style

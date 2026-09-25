@@ -39,9 +39,12 @@ files through the API, so the detect job needs `pull-requests: read` and no
 checkout; [runner cost](runner-cost.md#critical-path) covers push and merge
 queue events and the file-count limit.
 
-A deploy job downstream of conditional lanes gates on each upstream it ships
-from with `needs.<job>.result == 'success'`, not the implicit `success()`, so a
-skipped, cancelled, or `always()`-forced upstream never reads as green.
+A deploy job downstream of conditional lanes needs an explicit status function,
+or GitHub ANDs the implicit `success()` and a skipped lane suppresses it. Gate on
+`!cancelled() && needs.<job>.result == 'success'` for each upstream it ships
+from. An `always()` job's own result is what downstream jobs read, so an
+aggregator fails whenever an underlying result is neither success nor an
+expected skip.
 
 ## Verified Payload
 

@@ -20,7 +20,7 @@
     {
       "name": "Catalog ownership preserved",
       "max_score": 15,
-      "description": "Restores vite to catalog: in the manifest and updates its catalog alias to the selected core release rather than leaving independent literal pins, and names lockfile and local toolchain verification as required proof, run or reported as unrun."
+      "description": "Restores vite to `catalog:` in the manifest, updates its catalog alias to the selected core release rather than leaving independent literal pins, and names lockfile and local toolchain verification as required proof, run or reported as unrun."
     },
     {
       "name": "Artifact and install proof",

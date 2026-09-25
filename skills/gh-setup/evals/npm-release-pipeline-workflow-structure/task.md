@@ -39,7 +39,7 @@ Produce the following files in the workspace:
 - `.github/workflows/ci.yml`: the complete GitHub Actions workflow with verify and release jobs
 - `.releaserc.json`: the semantic-release configuration file
 
-Both files should be ready to commit to the repo root as-is (no placeholders left unfilled). You may create a `package.json` stub if needed to illustrate the configuration, but it is not required.
+Both files should be ready to commit to the repo root. You may create a `package.json` stub if needed to illustrate the configuration, but it is not required.
 
 ## Input Files
 
