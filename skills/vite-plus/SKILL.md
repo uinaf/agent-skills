@@ -7,6 +7,7 @@ description: "Migrate a repository onto Vite+ or upgrade it across Vite+ release
 
 Rules for moving a repository onto Vite+ or across its releases that the
 upstream docs leave implicit.
+
 ## Migrate
 
 - Run the target migrator before any `pnpm update` or `pnpm add`, with the
@@ -59,8 +60,8 @@ upstream docs leave implicit.
   off (`setup-vp` `cache` defaults to `false`; don't carry over
   `cache: pnpm`), install fresh, and verify the exact payload before
   credentials are used.
-- Never run `vp implode` to align CI paths; it deletes managed runtimes and
-  global state. The toolchain container is for build tooling, never a
+- `vp implode` deletes managed runtimes and global state, so align CI paths
+  some other way. The toolchain container is for build tooling, not a
   production runtime.
 - Keep package-script caching off in Vite+ task graphs unless every script is
   pure; a global `run.cache: true` also caches deploy, publish, and migration

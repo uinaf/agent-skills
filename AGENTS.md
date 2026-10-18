@@ -2,7 +2,7 @@
 
 `uinaf/agent-skills` holds repository-local stack skills; workflow skills live
 in [uinaf/ffss](https://github.com/uinaf/ffss). Each skill is a package under
-`skills/<name>/` with its eval scenarios in `evals/`.
+`skills/<name>/`; eval scenarios, when a skill has them, live in its `evals/`.
 
 ## Commands
 
