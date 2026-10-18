@@ -1,0 +1,12 @@
+{
+  "name": "skill-evals",
+  "private": true,
+  "description": "npm surface for skillcheck lint (uinaf/skillcheck)",
+  "scripts": {
+    "lint": "skillcheck lint --root ../..",
+    "audit": "npm audit --audit-level=high"
+  },
+  "devDependencies": {
+    "@uinaf/skillcheck": "1.7.7"
+  }
+}

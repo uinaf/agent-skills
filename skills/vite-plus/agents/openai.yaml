@@ -1,0 +1,7 @@
+interface:
+  display_name: "vite-plus"
+  short_description: "Migrate to or upgrade Vite+ without the usual traps"
+  default_prompt: "Use $vite-plus to migrate this repository onto Vite+ or upgrade it to a newer Vite+ release."
+
+policy:
+  allow_implicit_invocation: true
