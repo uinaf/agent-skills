@@ -11,11 +11,9 @@ effect-free.
 
 ## Scope
 
-Effect replacement changes the touched behavior. Repository-wide lint
-enforcement is a separate task: apply it when requested or required by existing
-repository policy. A review request produces findings; an implementation
-request authorizes in-scope replacements and verification without another
-approval checkpoint.
+Replace effects only in the touched or requested surface. Add
+repository-wide lint enforcement only when requested or required by existing
+repository policy.
 
 ## Workflow
 
@@ -70,11 +68,8 @@ dependency-array tuning.
 
 ## Boundaries
 
-- Scope migrations to the touched or requested surface.
 - Leave `useLayoutEffect`, `useInsertionEffect`, framework lifecycle APIs, and
   non-React effect systems alone, including in lint rules, unless requested.
-- Apply performance primitives only for measured behavior or an established
-  repository pattern.
 - Credit: adapted from Tyler Gibbs'
   [`useeffect-ban`](https://github.com/tylergibbs1/useeffectban/tree/69d3252c58e33de3c28b3dae504ee13fc40aa137/skills/useeffect-ban)
   (MIT), not vendored. Add its notice here before copying upstream text or code.
