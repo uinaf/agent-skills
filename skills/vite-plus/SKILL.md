@@ -5,8 +5,7 @@ description: "Migrate a repository onto Vite+ or upgrade it across Vite+ release
 
 # Vite+
 
-Rules for moving a repository onto Vite+ or across its releases that the
-upstream docs leave implicit.
+Rules the upstream docs leave implicit.
 
 ## Migrate
 

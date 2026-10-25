@@ -4,13 +4,12 @@
 in [uinaf/ffss](https://github.com/uinaf/ffss). Each skill is a package under
 `skills/<name>/`; eval scenarios, when a skill has them, live in its `evals/`.
 
-## Commands
+## Gate
 
-| Change | Gate |
-|---|---|
-| `skills/` | `npm ci && npm run lint && npm run audit` in `tools/skill-evals` |
+```sh
+cd tools/skill-evals && npm ci && npm run lint && npm run audit
+```
 
-[Verify](.github/workflows/verify.yml) runs that gate on every pull request.
 Merging to `main` publishes; installs pin the commit SHA.
 
 Add a skill to the README table and to the catalog in ffss
