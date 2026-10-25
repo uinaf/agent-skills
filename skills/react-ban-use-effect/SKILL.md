@@ -75,4 +75,6 @@ dependency-array tuning.
   non-React effect systems alone, including in lint rules, unless requested.
 - Apply performance primitives only for measured behavior or an established
   repository pattern.
-- Upstream attribution: [upstream](references/upstream.md).
+- Credit: adapted from Tyler Gibbs'
+  [`useeffect-ban`](https://github.com/tylergibbs1/useeffectban/tree/69d3252c58e33de3c28b3dae504ee13fc40aa137/skills/useeffect-ban)
+  (MIT), not vendored. Add its notice here before copying upstream text or code.
