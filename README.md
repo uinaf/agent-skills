@@ -1,3 +1,5 @@
+![agent-skills — stack skills for coding agents.](https://uinaf.dev/og/banner/agent-skills.png)
+
 # agent-skills
 
 Stack skills for coding agents, from uinaf. Install the ones a repository
